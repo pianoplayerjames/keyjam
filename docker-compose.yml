@@ -1,0 +1,73 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  # SERVICE 1: NGINX REVERSE PROXY
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - "80:80" # Expose port 80 to the host machine
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - client
+      - backend
+    networks:
+      - rhythm_game_net
+
+  # SERVICE 2: FRONTEND (Vite + React + Three.js)
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    networks:
+      - rhythm_game_net
+    # We don't need to expose ports to the host since Nginx will handle traffic
+
+  # SERVICE 3: BACKEND (Bun + Fastify)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend:/app
+      # Bun's install location is different from npm's
+      - /app/node_modules
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - rhythm_game_net
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/rhythm_game_db
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+
+  # SERVICE 4: MONGODB DATABASE
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017" # Good for connecting with a GUI like Compass during dev
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - rhythm_game_net
+
+  # SERVICE 5: REDIS CACHE
+  redis:
+    image: redis:alpine
+    networks:
+      - rhythm_game_net
+
+# DEFINE VOLUMES & NETWORKS
+volumes:
+  mongodb_data:
+
+networks:
+  rhythm_game_net:
+    driver: bridge
