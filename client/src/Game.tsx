@@ -226,6 +226,7 @@ const ComplexitySpawner = ({
  const lastSpawnTimes = useRef<{ [key: number]: number }>({});
  const randomSpawnTimer = useRef(0);
  const currentMoveSpeed = useRef(4);
+ const continuousSpawnTimer = useRef(0);
 
  useFrame((state, delta) => {
    const now = state.clock.getElapsedTime();
@@ -240,12 +241,21 @@ const ComplexitySpawner = ({
    beatTimer.current += delta;
    patternTimer.current += delta;
    randomSpawnTimer.current += delta;
+   continuousSpawnTimer.current += delta;
+
+   const baseContinuousInterval = complexity <= 20 ? 0.8 : 
+                                 complexity <= 40 ? 1.2 : 
+                                 complexity <= 60 ? 1.8 : 
+                                 2.5;
+   const continuousInterval = baseContinuousInterval / config.speedMultiplier;
 
    if (patternTimer.current > beatInterval * 8 || generatedPattern.current.length === 0) {
      patternTimer.current = 0;
      generatedPattern.current = ComplexityManager.generatePattern(complexity, 2);
      currentPatternIndex.current = 0;
    }
+
+   let spawnedThisFrame = false;
 
    const currentPattern = generatedPattern.current;
    if (currentPatternIndex.current < currentPattern.length) {
@@ -279,6 +289,7 @@ const ComplexitySpawner = ({
              
              newNotes.push(newLetter);
              lastSpawnTimes.current[channelIndex] = now;
+             spawnedThisFrame = true;
            }
          });
          
@@ -287,7 +298,7 @@ const ComplexitySpawner = ({
      }
    }
 
-   const randomSpawnInterval = beatInterval / (1 + config.spawnProbability);
+   const randomSpawnInterval = beatInterval / Math.max(1 + config.spawnProbability, 0.5);
    if (randomSpawnTimer.current >= randomSpawnInterval) {
      randomSpawnTimer.current = 0;
      
@@ -330,9 +341,47 @@ const ComplexitySpawner = ({
              
              newNotes.push(newLetter);
              lastSpawnTimes.current[channelIndex] = now;
+             spawnedThisFrame = true;
            }
 
            return [...prev, ...newNotes];
+         });
+       }
+     }
+   }
+
+   if (!spawnedThisFrame && continuousSpawnTimer.current >= continuousInterval) {
+     continuousSpawnTimer.current = 0;
+     
+     const timeSinceAnySpawn = Math.min(...channelPositions.map((_, i) => now - (lastSpawnTimes.current[i] || 0)));
+     const gapThreshold = complexity <= 20 ? 1.5 : 
+                         complexity <= 40 ? 2.0 : 
+                         complexity <= 60 ? 2.5 : 
+                         3.0;
+     
+     if (timeSinceAnySpawn > gapThreshold) {
+       const availableChannels = channelPositions.map((_, i) => i).filter(i => {
+         const timeSinceLastSpawn = now - (lastSpawnTimes.current[i] || 0);
+         return timeSinceLastSpawn >= 0.5;
+       });
+
+       if (availableChannels.length > 0) {
+         const channelIndex = availableChannels[Math.floor(Math.random() * availableChannels.length)];
+         
+         setFallingLetters((prev) => {
+           const newLetter: Letter = {
+             id: Math.random(),
+             letter: letters[channelIndex],
+             position: [channelPositions[channelIndex], 0.02, -20 * config.fadeInTime],
+             duration: 0,
+             color: channelColors[channelIndex],
+             spawnTime: now,
+             opacity: 1,
+             complexityType: 'continuous'
+           };
+           
+           lastSpawnTimes.current[channelIndex] = now;
+           return [...prev, newLetter];
          });
        }
      }
@@ -376,22 +425,37 @@ const Game = ({ gameConfig, onBackToMenu }: GameProps) => {
    }
  }, [combo, maxCombo]);
 
- // Timer logic for time-based modes
- useEffect(() => {
-   if ((isTimeMode || isCareerMode) && !isEndlessMode && timeLeft > 0 && health > 0 && !gameComplete) {
-     const timer = setInterval(() => {
-       setTimeLeft(prev => {
-         if (prev <= 1) {
-           setGameComplete(true);
-           return 0;
-         }
-         return prev - 1;
-       });
-     }, 1000);
-     
-     return () => clearInterval(timer);
-   }
- }, [isTimeMode, isCareerMode, isEndlessMode, timeLeft, health, gameComplete]);
+// Timer logic for time-based modes
+useEffect(() => {
+  if (isTimeMode && !isEndlessMode && timeLeft > 0 && health > 0 && !gameComplete) {
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          setGameComplete(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }
+  
+  // Separate timer for career mode
+  if (isCareerMode && timeLeft > 0 && health > 0 && !gameComplete) {
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          setGameComplete(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }
+}, [isTimeMode, isCareerMode, isEndlessMode, timeLeft, health, gameComplete]);
 
  // Score target logic
  useEffect(() => {
@@ -399,14 +463,6 @@ const Game = ({ gameConfig, onBackToMenu }: GameProps) => {
      setGameComplete(true);
    }
  }, [isScoreMode, score, targetScore]);
-
- // Career mode progression
- useEffect(() => {
-   if (isCareerMode && timeLeft <= 0 && health > 0) {
-     // Player survived the time limit in career mode
-     setGameComplete(true);
-   }
- }, [isCareerMode, timeLeft, health]);
 
  const removeStamp = (id: number) => {
    setStamps(prev => prev.filter(stamp => stamp.id !== id));
@@ -586,13 +642,13 @@ const Game = ({ gameConfig, onBackToMenu }: GameProps) => {
  const isGameOver = health <= 0 || gameComplete;
 
  // Game completion title logic
- const getGameOverTitle = () => {
-   if (health <= 0) return 'GAME OVER';
-   if (isCareerMode) return 'RANK COMPLETED!';
-   if (isTimeMode && timeLeft <= 0) return 'TIME\'S UP!';
-   if (isScoreMode) return 'TARGET REACHED!';
-   return 'GAME COMPLETE!';
- };
+const getGameOverTitle = () => {
+  if (health <= 0) return 'GAME OVER';
+  if (isCareerMode) return 'RANK COMPLETED!';
+  if (isTimeMode && timeLeft <= 0) return 'TIME COMPLETED!'; // Changed from 'TIME\'S UP!'
+  if (isScoreMode) return 'TARGET REACHED!';
+  return 'GAME COMPLETE!';
+};
 
  // Game stats for completion screen
  const getGameStats = () => {

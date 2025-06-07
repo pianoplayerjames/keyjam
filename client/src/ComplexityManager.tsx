@@ -41,76 +41,67 @@ class ComplexityManager {
     return this.configs[complexity];
   }
 
-  private static generateConfig(complexity: number): ComplexityConfig {
+private static generateConfig(complexity: number): ComplexityConfig {
     const t = (complexity - 1) / 99;
     
-    // Use different curves for different difficulty aspects
     const linear = t;
     const exponential = Math.pow(t, 2);
     const steep = Math.pow(t, 3);
     const inverse = 1 - Math.pow(1 - t, 2);
-    const easeIn = Math.pow(t, 1.5); // Gentler curve for easier progression
+    const easeIn = Math.pow(t, 1.5);
     
-    // Speed curves - very slow at low levels, normal at high levels
-    const speedCurve = complexity <= 20 ? this.lerp(0.3, 0.6, t * 5) : // Very slow for 1-20
-                      complexity <= 40 ? this.lerp(0.6, 0.8, (t - 0.2) * 2.5) : // Slow for 21-40
-                      complexity <= 60 ? this.lerp(0.8, 1.0, (t - 0.4) * 2.5) : // Normal for 41-60
-                      this.lerp(1.0, 2.0, (t - 0.6) * 2.5); // Fast for 61+
+    const speedCurve = complexity <= 20 ? this.lerp(0.3, 0.6, t * 5) : 
+                      complexity <= 40 ? this.lerp(0.6, 0.8, (t - 0.2) * 2.5) : 
+                      complexity <= 60 ? this.lerp(0.8, 1.0, (t - 0.4) * 2.5) : 
+                      this.lerp(1.0, 2.0, (t - 0.6) * 2.5);
     
-    // BPM curve - separate from speed for independent control
-    const bpmCurve = complexity <= 30 ? this.lerp(0.5, 0.7, t * 3.33) : // Much slower BPM for 1-30
-                     complexity <= 60 ? this.lerp(0.7, 1.0, (t - 0.3) * 1.43) : // Normal BPM for 31-60
-                     this.lerp(1.0, 1.5, (t - 0.6) * 2.5); // Faster BPM for 61+
+    const bpmCurve = complexity <= 30 ? this.lerp(0.5, 0.7, t * 3.33) : 
+                     complexity <= 60 ? this.lerp(0.7, 1.0, (t - 0.3) * 1.43) : 
+                     this.lerp(1.0, 1.5, (t - 0.6) * 2.5);
     
     return {
-      // Note spawning - much more sparse at low levels
-      spawnProbability: complexity <= 10 ? this.lerp(0.05, 0.15, t * 10) : // Very sparse for 1-10
-                       complexity <= 30 ? this.lerp(0.15, 0.4, (t - 0.1) * 1.11) : // Sparse for 11-30
-                       this.lerp(0.4, 0.95, (t - 0.3) * 1.43), // Normal to dense for 31+
+      spawnProbability: complexity <= 10 ? this.lerp(0.3, 0.5, t * 10) : 
+                       complexity <= 30 ? this.lerp(0.5, 0.6, (t - 0.1) * 1.11) : 
+                       this.lerp(0.6, 0.95, (t - 0.3) * 1.43),
       
-      maxSimultaneousNotes: complexity <= 20 ? 1 : // Only single notes for 1-20
-                           complexity <= 50 ? Math.floor(this.lerp(1, 2, (t - 0.2) * 3.33)) : // Max 2 for 21-50
-                           Math.floor(this.lerp(2, 5, (t - 0.5) * 2)), // Up to 5 for 51+
+      maxSimultaneousNotes: complexity <= 20 ? 1 : 
+                           complexity <= 50 ? Math.floor(this.lerp(1, 2, (t - 0.2) * 3.33)) : 
+                           Math.floor(this.lerp(2, 5, (t - 0.5) * 2)),
       
-      offBeatProbability: complexity <= 40 ? 0 : // No off-beat for 1-40
-                         this.lerp(0, 0.8, (t - 0.4) * 1.67), // Gradual off-beat for 41+
+      offBeatProbability: complexity <= 40 ? 0 : 
+                         this.lerp(0, 0.8, (t - 0.4) * 1.67),
       
       subdivisions: this.getSubdivisions(complexity),
       subdivisionWeights: [1],
       patternComplexity: Math.floor(this.lerp(1, 10, steep)),
       
-      // Speed control - much slower at low levels
       speedMultiplier: speedCurve,
       bpmMultiplier: bpmCurve,
       
-      // Timing windows - MUCH more generous at low levels
       timingWindows: {
-        perfect: complexity <= 20 ? this.lerp(0.4, 0.25, t * 5) : // Very generous for 1-20
-                complexity <= 50 ? this.lerp(0.25, 0.15, (t - 0.2) * 3.33) : // Generous for 21-50
-                this.lerp(0.15, 0.05, (t - 0.5) * 2), // Tight for 51+
+        perfect: complexity <= 20 ? this.lerp(0.4, 0.25, t * 5) : 
+                complexity <= 50 ? this.lerp(0.25, 0.15, (t - 0.2) * 3.33) : 
+                this.lerp(0.15, 0.05, (t - 0.5) * 2),
         
-        good: complexity <= 20 ? this.lerp(0.8, 0.5, t * 5) : // Very generous for 1-20
-             complexity <= 50 ? this.lerp(0.5, 0.3, (t - 0.2) * 3.33) : // Generous for 21-50
-             this.lerp(0.3, 0.1, (t - 0.5) * 2), // Tight for 51+
+        good: complexity <= 20 ? this.lerp(0.8, 0.5, t * 5) : 
+             complexity <= 50 ? this.lerp(0.5, 0.3, (t - 0.2) * 3.33) : 
+             this.lerp(0.3, 0.1, (t - 0.5) * 2),
         
-        almost: complexity <= 20 ? this.lerp(1.2, 0.8, t * 5) : // Very generous for 1-20
-               complexity <= 50 ? this.lerp(0.8, 0.5, (t - 0.2) * 3.33) : // Generous for 21-50
-               this.lerp(0.5, 0.15, (t - 0.5) * 2) // Tight for 51+
+        almost: complexity <= 20 ? this.lerp(1.2, 0.8, t * 5) : 
+               complexity <= 50 ? this.lerp(0.8, 0.5, (t - 0.2) * 3.33) : 
+               this.lerp(0.5, 0.15, (t - 0.5) * 2)
       },
       
-      // Advanced patterns only at high complexity
       polyrhythmChance: complexity > 80 ? this.lerp(0, 0.4, (complexity - 80) / 20) : 0,
       crossHandPatterns: complexity > 70,
       rapidFireChance: complexity > 60 ? this.lerp(0, 0.3, (complexity - 60) / 40) : 0,
       
-      // Hold notes - simpler at low levels
       holdNoteComplexity: complexity <= 30 ? 0 : this.lerp(0, 0.6, (t - 0.3) * 1.43),
       
-      // Visual complexity
       noteVariations: Math.floor(this.lerp(1, 8, easeIn)),
       visualDistraction: complexity <= 40 ? 0 : this.lerp(0, 0.5, (t - 0.4) * 1.67),
-      fadeInTime: complexity <= 30 ? this.lerp(3.0, 2.0, t * 3.33) : // Much more warning time
-                  this.lerp(2.0, 0.3, (t - 0.3) * 1.43) // Normal to fast for higher levels
+      fadeInTime: complexity <= 30 ? this.lerp(3.0, 2.0, t * 3.33) : 
+                  this.lerp(2.0, 0.3, (t - 0.3) * 1.43)
     };
   }
 
