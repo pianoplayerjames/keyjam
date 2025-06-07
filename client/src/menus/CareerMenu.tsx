@@ -1,150 +1,55 @@
-// src/menus/CareerMenu.tsx
-import React, { useRef, useState } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { Text } from '@react-three/drei';
-import * as THREE from 'three';
-
 interface CareerMenuProps {
   onBack: () => void;
   onStart: () => void;
 }
 
-const CareerMenu: React.FC<CareerMenuProps> = ({ onBack, onStart }) => {
-  const groupRef = useRef<THREE.Group>(null!);
-  const [enterTime, setEnterTime] = useState(0);
-
-  useFrame((state, delta) => {
-    setEnterTime(prev => prev + delta);
-    
-    if (groupRef.current) {
-      const progress = Math.min(enterTime / 1.5, 1);
-      const ease = THREE.MathUtils.smoothstep(progress, 0, 1);
-      
-      groupRef.current.position.x = THREE.MathUtils.lerp(8, 0, ease);
-      groupRef.current.scale.setScalar(ease);
-    }
-  });
-
+const CareerMenu = ({ onBack, onStart }: CareerMenuProps) => {
   return (
-    <group ref={groupRef}>
-      {/* Back Button */}
-      <group position={[-3, 2.5, 0]}>
-        <Text
-          fontSize={0.4}
-          color="#cccccc"
-          anchorX="center"
-          anchorY="middle"
-          onClick={onBack}
-          onPointerOver={(e) => e.object.color.set('#ffffff')}
-          onPointerOut={(e) => e.object.color.set('#cccccc')}
-        >
-          ← Back
-        </Text>
-      </group>
+    <div className="flex flex-col items-center min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-pink-900 text-white p-8">
+      <button 
+        onClick={onBack}
+        className="absolute top-8 left-8 flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
+      >
+        <span className="text-xl">←</span> Back
+      </button>
 
-      {/* Career Mode Title */}
-      <group position={[0, 2, 0]}>
-        <Text
-          fontSize={1.2}
-          color="#ff4f7b"
-          anchorX="center"
-          anchorY="middle"
-          font="/fonts/Rajdhani-Regular.ttf"
-          outlineWidth={0.02}
-          outlineColor="black"
-        >
-          CAREER MODE
-        </Text>
-      </group>
+      <div className="flex flex-col items-center justify-center flex-1 max-w-4xl mx-auto">
+        <div className="text-center mb-12">
+          <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
+            CAREER MODE
+          </h1>
+          <p className="text-xl text-gray-300 max-w-2xl">
+            Start your journey as a rhythm novice and climb the ranks!
+            Begin with tutorial difficulty and unlock higher ranks as you progress.
+            Each rank lasts 2 minutes - survive to advance!
+          </p>
+        </div>
 
-      {/* Description */}
-      <group position={[0, 1.2, 0]}>
-        <Text
-          fontSize={0.4}
-          color="#cccccc"
-          anchorX="center"
-          anchorY="middle"
-          maxWidth={8}
-          textAlign="center"
-        >
-          Start your journey as a rhythm novice and climb the ranks!
-          {'\n'}Begin with tutorial difficulty and unlock higher ranks as you progress.
-          {'\n'}Each rank lasts 2 minutes - survive to advance!
-        </Text>
-      </group>
+        <div className="bg-black bg-opacity-50 rounded-xl p-8 mb-12 border border-gray-700">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-green-400 mb-4">CURRENT RANK</h2>
+            <div className="text-5xl mb-4">🎓</div>
+            <h3 className="text-3xl font-bold mb-2">ROOKIE</h3>
+            <p className="text-gray-400">Difficulty: Tutorial (Level 3)</p>
+          </div>
+        </div>
 
-      {/* Current Rank Display */}
-      <group position={[0, 0.2, 0]}>
-        <mesh>
-          <planeGeometry args={[6, 1.5]} />
-          <meshBasicMaterial color="#1a1a1a" transparent opacity={0.8} />
-        </mesh>
-        <Text
-          position={[0, 0.3, 0.01]}
-          fontSize={0.6}
-          color="#4caf50"
-          anchorX="center"
-          anchorY="middle"
-          font="/fonts/Rajdhani-Regular.ttf"
-        >
-          CURRENT RANK
-        </Text>
-        <Text
-          position={[0, -0.1, 0.01]}
-          fontSize={0.8}
-          color="#ffffff"
-          anchorX="center"
-          anchorY="middle"
-          font="/fonts/Rajdhani-Regular.ttf"
-        >
-          🎓 ROOKIE
-        </Text>
-        <Text
-          position={[0, -0.5, 0.01]}
-          fontSize={0.3}
-          color="#888888"
-          anchorX="center"
-          anchorY="middle"
-        >
-          Difficulty: Tutorial (Level 3)
-        </Text>
-      </group>
-
-      {/* Start Button */}
-      <group position={[0, -1.5, 0]}>
-        <mesh>
-          <planeGeometry args={[4, 0.8]} />
-          <meshBasicMaterial color="#ff4f7b" transparent opacity={0.8} />
-        </mesh>
-        <Text
-          position={[0, 0, 0.01]}
-          fontSize={0.6}
-          color="#ffffff"
-          anchorX="center"
-          anchorY="middle"
-          font="/fonts/Rajdhani-Regular.ttf"
+        <button
           onClick={onStart}
-          onPointerOver={(e) => e.object.parent.children[0].material.opacity = 1}
-          onPointerOut={(e) => e.object.parent.children[0].material.opacity = 0.8}
+          className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 
+                     px-12 py-4 rounded-xl text-2xl font-bold transform transition-all duration-300 
+                     hover:scale-105 hover:shadow-2xl"
         >
           START CAREER
-        </Text>
-      </group>
+        </button>
 
-      {/* Rank Preview */}
-      <group position={[0, -2.8, 0]}>
-        <Text
-          fontSize={0.25}
-          color="#666666"
-          anchorX="center"
-          anchorY="middle"
-          maxWidth={10}
-          textAlign="center"
-        >
-          Next Ranks: Amateur → Intermediate → Advanced → Expert → Master → Legend
-        </Text>
-      </group>
-    </group>
+        <div className="mt-8 text-center">
+          <p className="text-gray-500 text-sm">
+            Next Ranks: Amateur → Intermediate → Advanced → Expert → Master → Legend
+          </p>
+        </div>
+      </div>
+    </div>
   );
 };
 

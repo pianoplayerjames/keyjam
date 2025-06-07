@@ -1,168 +1,62 @@
-// src/menus/TimeSelectionMenu.tsx
-import React, { useRef, useState } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { Text } from '@react-three/drei';
-import * as THREE from 'three';
-
 interface TimeSelectionMenuProps {
   onBack: () => void;
   onSelectTime: (timeLimit: number) => void;
 }
 
-const TimeSelectionMenu: React.FC<TimeSelectionMenuProps> = ({ onBack, onSelectTime }) => {
-  const groupRef = useRef<THREE.Group>(null!);
-  const [enterTime, setEnterTime] = useState(0);
-
+const TimeSelectionMenu = ({ onBack, onSelectTime }: TimeSelectionMenuProps) => {
   const timeOptions = [
-    { text: '1 Minute', value: 60, color: '#4caf50' },
-    { text: '2 Minutes', value: 120, color: '#2196f3' },
-    { text: '3 Minutes', value: 180, color: '#ff9800' },
-    { text: '5 Minutes', value: 300, color: '#f44336' },
-    { text: '10 Minutes', value: 600, color: '#9c27b0' },
-    { text: 'Endless', value: -1, color: '#607d8b' }
+    { text: '1 Minute', value: 60, color: 'from-green-400 to-green-600', icon: '⚡' },
+    { text: '2 Minutes', value: 120, color: 'from-blue-400 to-blue-600', icon: '🎵' },
+    { text: '3 Minutes', value: 180, color: 'from-orange-400 to-orange-600', icon: '🎶' },
+    { text: '5 Minutes', value: 300, color: 'from-red-400 to-red-600', icon: '🔥' },
+    { text: '10 Minutes', value: 600, color: 'from-purple-400 to-purple-600', icon: '💪' },
+    { text: 'Endless', value: -1, color: 'from-gray-500 to-gray-700', icon: '♾️' }
   ];
 
-  useFrame((state, delta) => {
-    setEnterTime(prev => prev + delta);
-    
-    if (groupRef.current) {
-      const progress = Math.min(enterTime / 1.5, 1);
-      const ease = THREE.MathUtils.smoothstep(progress, 0, 1);
-      
-      groupRef.current.position.x = THREE.MathUtils.lerp(8, 0, ease);
-      groupRef.current.scale.setScalar(ease);
-    }
-  });
-
   return (
-    <group ref={groupRef}>
-      {/* Back Button */}
-      <group position={[-3, 2.5, 0]}>
-        <Text
-          fontSize={0.4}
-          color="#cccccc"
-          anchorX="center"
-          anchorY="middle"
-          onClick={onBack}
-          onPointerOver={(e) => e.object.color.set('#ffffff')}
-          onPointerOut={(e) => e.object.color.set('#cccccc')}
-        >
-          ← Back
-        </Text>
-      </group>
-
-      {/* Title */}
-      <group position={[0, 2, 0]}>
-        <Text
-          fontSize={1}
-          color="#9c27b0"
-          anchorX="center"
-          anchorY="middle"
-          font="/fonts/Rajdhani-Regular.ttf"
-          outlineWidth={0.02}
-          outlineColor="black"
-        >
-          SELECT TIME LIMIT
-        </Text>
-      </group>
-
-      {/* Description */}
-      <group position={[0, 1.4, 0]}>
-        <Text
-          fontSize={0.3}
-          color="#cccccc"
-          anchorX="center"
-          anchorY="middle"
-          maxWidth={8}
-          textAlign="center"
-        >
-          Choose how long you want to practice
-        </Text>
-      </group>
-
-      {/* Time Options Grid */}
-      <group position={[0, 0.2, 0]}>
-        {timeOptions.map((option, index) => {
-          const row = Math.floor(index / 2);
-          const col = index % 2;
-          const x = (col - 0.5) * 3.5;
-          const y = 0.8 - row * 0.8;
-          
-          return (
-            <TimeOption
-              key={option.text}
-              {...option}
-              position={[x, y, 0]}
-              onClick={() => onSelectTime(option.value)}
-              animationDelay={index * 0.1}
-            />
-          );
-        })}
-      </group>
-    </group>
-  );
-};
-
-interface TimeOptionProps {
-  text: string;
-  value: number;
-  color: string;
-  position: [number, number, number];
-  onClick: () => void;
-  animationDelay: number;
-}
-
-const TimeOption: React.FC<TimeOptionProps> = ({
-  text,
-  value,
-  color,
-  position,
-  onClick,
-  animationDelay
-}) => {
-  const [hovered, setHovered] = useState(false);
-  const groupRef = useRef<THREE.Group>(null!);
-  const [localTime, setLocalTime] = useState(0);
-
-  useFrame((state, delta) => {
-    setLocalTime(prev => prev + delta);
-    
-    if (groupRef.current) {
-      const progress = Math.max(0, Math.min((localTime - animationDelay) / 0.8, 1));
-      const ease = THREE.MathUtils.smoothstep(progress, 0, 1);
-      
-      groupRef.current.scale.setScalar(ease);
-      
-      const targetScale = hovered ? 1.1 : 1;
-      groupRef.current.scale.multiplyScalar(THREE.MathUtils.lerp(groupRef.current.scale.x / ease, targetScale, 0.1));
-    }
-  });
-
-  return (
-    <group ref={groupRef} position={position}>
-      <mesh>
-        <planeGeometry args={[3, 0.6]} />
-        <meshBasicMaterial 
-          color={color} 
-          transparent 
-          opacity={hovered ? 0.8 : 0.6} 
-        />
-      </mesh>
-      
-      <Text
-        position={[0, 0, 0.01]}
-        fontSize={0.4}
-        color="#ffffff"
-        anchorX="center"
-        anchorY="middle"
-        font="/fonts/Rajdhani-Regular.ttf"
-        onPointerOver={() => setHovered(true)}
-        onPointerOut={() => setHovered(false)}
-        onClick={onClick}
+    <div className="absolute inset-0 flex flex-col items-center justify-center text-white bg-black bg-opacity-30">
+      <button 
+        onClick={onBack}
+        className="absolute top-8 left-8 flex items-center gap-2 text-gray-300 hover:text-white transition-colors text-lg"
       >
-        {text}
-      </Text>
-    </group>
+        <span className="text-xl">←</span> Back
+      </button>
+
+      <div className="flex flex-col items-center justify-center flex-1 max-w-6xl mx-auto px-8">
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
+            SELECT TIME LIMIT
+          </h1>
+          <p className="text-lg text-gray-300">
+            Choose how long you want to practice
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+          {timeOptions.map((option, index) => (
+            <button
+              key={option.text}
+              onClick={() => onSelectTime(option.value)}
+              className={`
+                group relative overflow-hidden rounded-xl p-6 bg-gradient-to-r ${option.color}
+                transform transition-all duration-300 hover:scale-105 hover:shadow-2xl
+                animate-slide-up backdrop-blur-sm
+              `}
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              <div className="relative z-10 text-center">
+                <div className="text-3xl mb-3">{option.icon}</div>
+                <h3 className="text-xl font-bold">{option.text}</h3>
+                {option.value === -1 && (
+                  <p className="text-sm opacity-75 mt-2">Until you quit</p>
+                )}
+              </div>
+              <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 };
 

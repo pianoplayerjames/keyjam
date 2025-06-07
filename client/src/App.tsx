@@ -1,4 +1,3 @@
-// src/App.tsx
 import { useState, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import Game from './Game';
@@ -55,30 +54,37 @@ function App() {
   }
 
   return (
-    <Canvas camera={{ position: [0, 2.5, 5], fov: 75 }}>
-      <Suspense fallback={<SimpleLoading />}>
-        <GradientBackground combo={0} />
-        <FloatingShapes />
-        <ambientLight intensity={0.8} />
-        <directionalLight position={[10, 10, 5]} intensity={0.5} />
-        
-        {gameState === 'menu' && (
-          <MainMenu 
-            menuState={menuState}
-            onStartGame={handleStartGame}
-            onMenuNavigation={handleMenuNavigation}
-            isTransitioning={isTransitioning}
-          />
-        )}
-        
-        {gameState === 'in-transition' && (
-          <Transition 
-            onTransitionComplete={handleTransitionComplete}
-            gameMode={gameConfig.mode}
-          />
-        )}
-      </Suspense>
-    </Canvas>
+    <div className="relative w-screen h-screen overflow-hidden">
+      {/* 3D Background Canvas */}
+      <Canvas 
+        camera={{ position: [0, 2.5, 5], fov: 75 }} 
+        className="absolute inset-0"
+      >
+        <Suspense fallback={<SimpleLoading />}>
+          <GradientBackground combo={0} />
+          <FloatingShapes />
+          <ambientLight intensity={0.8} />
+          <directionalLight position={[10, 10, 5]} intensity={0.5} />
+          
+          {gameState === 'in-transition' && (
+            <Transition 
+              onTransitionComplete={handleTransitionComplete}
+              gameMode={gameConfig.mode}
+            />
+          )}
+        </Suspense>
+      </Canvas>
+
+      {/* HTML Menu Overlay */}
+      {gameState === 'menu' && (
+        <MainMenu 
+          menuState={menuState}
+          onStartGame={handleStartGame}
+          onMenuNavigation={handleMenuNavigation}
+          isTransitioning={isTransitioning}
+        />
+      )}
+    </div>
   );
 }
 

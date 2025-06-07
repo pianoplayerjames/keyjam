@@ -1,168 +1,105 @@
-// src/menus/DifficultyMenu.tsx
-import React, { useRef, useState } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { Text } from '@react-three/drei';
-import * as THREE from 'three';
-
 interface DifficultyMenuProps {
   onBack: () => void;
   onSelectDifficulty: (difficulty: number) => void;
 }
 
-const DifficultyMenu: React.FC<DifficultyMenuProps> = ({ onBack, onSelectDifficulty }) => {
-  const groupRef = useRef<THREE.Group>(null!);
-  const [enterTime, setEnterTime] = useState(0);
-
+const DifficultyMenu = ({ onBack, onSelectDifficulty }: DifficultyMenuProps) => {
   const difficultyOptions = [
-    { text: 'Tutorial', description: 'Very slow, huge timing windows', value: 3, color: '#4caf50' },
-    { text: 'Easy', description: 'Slow speed, generous timing', value: 15, color: '#8bc34a' },
-    { text: 'Normal', description: 'Comfortable pace', value: 35, color: '#ffc107' },
-    { text: 'Hard', description: 'Fast pace, tighter timing', value: 55, color: '#ff9800' },
-    { text: 'Expert', description: 'Very precise timing required', value: 75, color: '#f44336' },
-    { text: 'Master', description: 'Professional level difficulty', value: 90, color: '#9c27b0' }
+    { 
+      text: 'Tutorial', 
+      description: 'Very slow, huge timing windows', 
+      value: 3, 
+      color: 'from-green-400 to-green-600',
+      icon: '🎓'
+    },
+    { 
+      text: 'Easy', 
+      description: 'Slow speed, generous timing', 
+      value: 15, 
+      color: 'from-lime-400 to-green-600',
+      icon: '🟢'
+    },
+    { 
+      text: 'Normal', 
+      description: 'Comfortable pace', 
+      value: 35, 
+      color: 'from-yellow-400 to-orange-600',
+      icon: '🟡'
+    },
+    { 
+      text: 'Hard', 
+      description: 'Fast pace, tighter timing', 
+      value: 55, 
+      color: 'from-orange-400 to-red-600',
+      icon: '🟠'
+    },
+    { 
+      text: 'Expert', 
+      description: 'Very precise timing required', 
+      value: 75, 
+      color: 'from-red-400 to-pink-600',
+      icon: '🔴'
+    },
+    { 
+      text: 'Master', 
+      description: 'Professional level difficulty', 
+      value: 90, 
+      color: 'from-purple-400 to-indigo-600',
+      icon: '⭐'
+    }
   ];
 
-  useFrame((state, delta) => {
-    setEnterTime(prev => prev + delta);
-    
-    if (groupRef.current) {
-      const progress = Math.min(enterTime / 1.5, 1);
-      const ease = THREE.MathUtils.smoothstep(progress, 0, 1);
-      
-      groupRef.current.position.x = THREE.MathUtils.lerp(8, 0, ease);
-      groupRef.current.scale.setScalar(ease);
-    }
-  });
-
   return (
-    <group ref={groupRef}>
-      {/* Back Button */}
-      <group position={[-3, 2.5, 0]}>
-        <Text
-          fontSize={0.4}
-          color="#cccccc"
-          anchorX="center"
-          anchorY="middle"
-          onClick={onBack}
-          onPointerOver={(e) => e.object.color.set('#ffffff')}
-          onPointerOut={(e) => e.object.color.set('#cccccc')}
-        >
-          ← Back
-        </Text>
-      </group>
+    <div className="absolute inset-0 flex flex-col items-center justify-center text-white bg-black bg-opacity-30">
+      <button 
+        onClick={onBack}
+        className="absolute top-8 left-8 flex items-center gap-2 text-gray-300 hover:text-white transition-colors text-lg"
+      >
+        <span className="text-xl">←</span> Back
+      </button>
 
-      {/* Title */}
-      <group position={[0, 2.2, 0]}>
-        <Text
-          fontSize={1}
-          color="#ffffff"
-          anchorX="center"
-          anchorY="middle"
-          font="/fonts/Rajdhani-Regular.ttf"
-          outlineWidth={0.02}
-          outlineColor="black"
-        >
-          SELECT DIFFICULTY
-        </Text>
-      </group>
+      <div className="flex flex-col items-center justify-center flex-1 max-w-6xl mx-auto px-8">
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+            SELECT DIFFICULTY
+          </h1>
+          <p className="text-lg text-gray-300">
+            Choose your challenge level
+          </p>
+        </div>
 
-      {/* Difficulty Options */}
-      <group position={[0, 0.5, 0]}>
-        {difficultyOptions.map((option, index) => {
-          const row = Math.floor(index / 2);
-          const col = index % 2;
-          const x = (col - 0.5) * 4.5;
-          const y = 1.2 - row * 1;
-          
-          return (
-            <DifficultyOption
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+          {difficultyOptions.map((option, index) => (
+            <button
               key={option.text}
-              {...option}
-              position={[x, y, 0]}
               onClick={() => onSelectDifficulty(option.value)}
-              animationDelay={index * 0.1}
-            />
-          );
-        })}
-      </group>
-    </group>
-  );
-};
+              className={`
+                group relative overflow-hidden rounded-xl p-6 bg-gradient-to-r ${option.color}
+                transform transition-all duration-300 hover:scale-105 hover:shadow-2xl
+                animate-slide-up backdrop-blur-sm
+              `}
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              <div className="relative z-10 text-center">
+                <div className="text-3xl mb-3">{option.icon}</div>
+                <h3 className="text-xl font-bold mb-2">{option.text} ({option.value})</h3>
+                <p className="text-sm opacity-90">{option.description}</p>
+              </div>
+              <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+            </button>
+          ))}
+        </div>
 
-interface DifficultyOptionProps {
-  text: string;
-  description: string;
-  value: number;
-  color: string;
-  position: [number, number, number];
-  onClick: () => void;
-  animationDelay: number;
-}
-
-const DifficultyOption: React.FC<DifficultyOptionProps> = ({
-  text,
-  description,
-  value,
-  color,
-  position,
-  onClick,
-  animationDelay
-}) => {
-  const [hovered, setHovered] = useState(false);
-  const groupRef = useRef<THREE.Group>(null!);
-  const [localTime, setLocalTime] = useState(0);
-
-  useFrame((state, delta) => {
-    setLocalTime(prev => prev + delta);
-    
-    if (groupRef.current) {
-      const progress = Math.max(0, Math.min((localTime - animationDelay) / 0.8, 1));
-      const ease = THREE.MathUtils.smoothstep(progress, 0, 1);
-      
-      groupRef.current.scale.setScalar(ease);
-      
-      const targetScale = hovered ? 1.05 : 1;
-      groupRef.current.scale.multiplyScalar(THREE.MathUtils.lerp(groupRef.current.scale.x / ease, targetScale, 0.1));
-    }
-  });
-
-  return (
-    <group ref={groupRef} position={position}>
-      <mesh>
-        <planeGeometry args={[4, 0.8]} />
-        <meshBasicMaterial 
-          color={color} 
-          transparent 
-          opacity={hovered ? 0.8 : 0.6} 
-        />
-      </mesh>
-      
-      <Text
-        position={[0, 0.15, 0.01]}
-        fontSize={0.4}
-        color="#ffffff"
-        anchorX="center"
-        anchorY="middle"
-        font="/fonts/Rajdhani-Regular.ttf"
-        onPointerOver={() => setHovered(true)}
-        onPointerOut={() => setHovered(false)}
-        onClick={onClick}
-      >
-        {text} ({value})
-      </Text>
-      
-      <Text
-        position={[0, -0.2, 0.01]}
-        fontSize={0.2}
-        color="#cccccc"
-        anchorX="center"
-        anchorY="middle"
-        maxWidth={3.5}
-        textAlign="center"
-      >
-        {description}
-      </Text>
-    </group>
+        {/* Professional Level Warning */}
+        <div className="mt-8 max-w-2xl">
+          <div className="bg-purple-900 bg-opacity-50 border border-purple-500 rounded-xl p-4 text-center">
+            <p className="text-purple-200 text-sm">
+              <span className="font-bold">Expert & Master:</span> Frame-perfect timing, complex patterns, years of practice recommended
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

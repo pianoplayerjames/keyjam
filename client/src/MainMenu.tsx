@@ -1,8 +1,4 @@
-// src/MainMenu.tsx
-import React, { useState, useRef, useEffect } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { Text, useTexture } from '@react-three/drei';
-import * as THREE from 'three';
+import { useState } from 'react';
 import CareerMenu from './menus/CareerMenu';
 import OnlineMenu from './menus/OnlineMenu';
 import PractiseMenu from './menus/PractiseMenu';
@@ -10,47 +6,6 @@ import SettingsMenu from './menus/SettingsMenu';
 import DifficultyMenu from './menus/DifficultyMenu';
 import TimeSelectionMenu from './menus/TimeSelectionMenu';
 import ScoreSelectionMenu from './menus/ScoreSelectionMenu';
-
-const Logo = () => {
-  const meshRef = useRef<THREE.Mesh>(null!);
-  const glowRef = useRef<THREE.Mesh>(null!);
-  const texture = useTexture('/logo.png');
-
-  const image = texture.image;
-  const aspectRatio = image ? image.width / image.height : 2;
-
-  useFrame(({ clock }) => {
-    if (meshRef.current && glowRef.current) {
-      const time = clock.getElapsedTime();
-      
-      meshRef.current.position.y = 0.5 + Math.sin(time * 0.5) * 0.3;
-      meshRef.current.rotation.y = Math.sin(time * 0.3) * 0.2;
-      meshRef.current.rotation.x = Math.sin(time * 0.2) * 0.1;
-      
-      const glowIntensity = 0.5 + Math.sin(time * 2) * 0.3;
-      glowRef.current.material.opacity = glowIntensity * 0.3;
-      glowRef.current.scale.set(1.2 + glowIntensity * 0.1, 1.2 + glowIntensity * 0.1, 1);
-      
-      glowRef.current.rotation.copy(meshRef.current.rotation);
-      glowRef.current.position.copy(meshRef.current.position);
-      glowRef.current.position.z -= 0.1;
-    }
-  });
-
-  return (
-    <group position={[-0.2, -0.2, 0]} scale={6}>
-      <mesh ref={glowRef}>
-        <planeGeometry args={[aspectRatio, 1]} />
-        <meshBasicMaterial color="#ff4f7b" transparent side={THREE.DoubleSide} />
-      </mesh>
-      
-      <mesh ref={meshRef}>
-        <planeGeometry args={[aspectRatio, 1]} />
-        <meshStandardMaterial map={texture} transparent side={THREE.DoubleSide} />
-      </mesh>
-    </group>
-  );
-};
 
 interface GameConfig {
   mode: string;
@@ -67,12 +22,12 @@ interface MainMenuProps {
   isTransitioning?: boolean;
 }
 
-const MainMenu: React.FC<MainMenuProps> = ({ 
+const MainMenu = ({ 
   menuState, 
   onStartGame, 
   onMenuNavigation, 
   isTransitioning = false 
-}) => {
+}: MainMenuProps) => {
   const [gameConfig, setGameConfig] = useState<GameConfig>({
     mode: '',
     subMode: '',
@@ -82,57 +37,14 @@ const MainMenu: React.FC<MainMenuProps> = ({
   });
 
   const menuOptions = [
-    { text: 'Career Mode', description: 'Progress through difficulty ranks', color: '#ff4f7b', target: 'career' },
-    { text: 'Online', description: 'Play with other players', color: '#4caf50', target: 'online' },
-    { text: 'Practise', description: 'Free practice mode', color: '#2196f3', target: 'practise' },
-    { text: 'Settings', description: 'Game settings', color: '#9c27b0', target: 'settings' }
+    { text: 'Career Mode', description: 'Progress through difficulty ranks', color: 'from-pink-500 to-purple-600', target: 'career' },
+    { text: 'Online', description: 'Play with other players', color: 'from-green-500 to-emerald-600', target: 'online' },
+    { text: 'Practise', description: 'Free practice mode', color: 'from-blue-500 to-cyan-600', target: 'practise' },
+    { text: 'Settings', description: 'Game settings', color: 'from-purple-500 to-indigo-600', target: 'settings' }
   ];
-  
-  const groupRef = useRef<THREE.Group>(null!);
-  const [animationPhase, setAnimationPhase] = useState<'entering' | 'idle' | 'exiting'>('entering');
-  const [enterTime, setEnterTime] = useState(0);
-
-  useEffect(() => {
-    if (isTransitioning) {
-      setAnimationPhase('exiting');
-    }
-  }, [isTransitioning]);
-
-  useFrame(({ clock }, delta) => {
-    if (groupRef.current) {
-      const time = clock.getElapsedTime();
-      
-      switch (animationPhase) {
-        case 'entering':
-          setEnterTime(prev => prev + delta);
-          const enterProgress = Math.min(enterTime / 2.0, 1);
-          const enterEase = THREE.MathUtils.smoothstep(enterProgress, 0, 1);
-          
-          groupRef.current.position.x = THREE.MathUtils.lerp(-10, 0, enterEase);
-          groupRef.current.rotation.y = THREE.MathUtils.lerp(Math.PI * 0.5, 0, enterEase);
-          
-          if (enterProgress >= 1) {
-            setAnimationPhase('idle');
-          }
-          break;
-          
-        case 'idle':
-          groupRef.current.rotation.y = Math.sin(time * 0.1) * 0.03;
-          groupRef.current.rotation.x = Math.sin(time * 0.05) * 0.015;
-          groupRef.current.position.y = Math.sin(time * 0.3) * 0.05;
-          break;
-          
-        case 'exiting':
-          groupRef.current.rotation.y += delta * 3;
-          groupRef.current.position.x += delta * 15;
-          groupRef.current.scale.multiplyScalar(1 + delta * 2);
-          break;
-      }
-    }
-  });
 
   const handleMenuClick = (target: string) => {
-    if (isTransitioning || animationPhase === 'exiting') return;
+    if (isTransitioning) return;
     onMenuNavigation(target);
   };
 
@@ -145,8 +57,7 @@ const MainMenu: React.FC<MainMenuProps> = ({
   };
 
   const handleGameStart = () => {
-    setAnimationPhase('exiting');
-    setTimeout(() => onStartGame(gameConfig), 500);
+    onStartGame(gameConfig);
   };
 
   const renderCurrentMenu = () => {
@@ -167,7 +78,6 @@ const MainMenu: React.FC<MainMenuProps> = ({
             onBack={handleBackClick}
             onSelectMode={(mode) => {
               handleConfigUpdate({ mode: 'online', subMode: mode });
-              // For now, just start the game. Later we'll add matchmaking
               handleGameStart();
             }}
           />
@@ -220,148 +130,59 @@ const MainMenu: React.FC<MainMenuProps> = ({
         );
       default:
         return (
-          <group position={[3.5, 0, 0]}>
-            {menuOptions.map((option, index) => (
-              <MenuItem
-                key={option.text}
-                {...option}
-                position={[0, 1.5 - index * 1.3, 0]}
-                onClick={() => handleMenuClick(option.target)}
-                isDisabled={false}
-                animationDelay={index * 0.2}
-                animationPhase={animationPhase}
-              />
-            ))}
-          </group>
+          <div className="flex flex-col items-center min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-pink-900 text-white">
+            <div className="flex flex-col items-center justify-center flex-1 max-w-4xl mx-auto px-8">
+              <div className="mb-16 text-center">
+                <img 
+                  src="/logo.png" 
+                  alt="Game Logo" 
+                  className="w-80 h-auto mx-auto mb-8 animate-pulse"
+                />
+                <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
+                  Rhythm Master
+                </h1>
+                <p className="text-xl text-gray-300">Master the rhythm, become the legend</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
+                {menuOptions.map((option, index) => (
+                  <button
+                    key={option.text}
+                    onClick={() => handleMenuClick(option.target)}
+                    disabled={isTransitioning}
+                    className={`
+                      group relative overflow-hidden rounded-xl p-6 bg-gradient-to-r ${option.color}
+                      transform transition-all duration-300 hover:scale-105 hover:shadow-2xl
+                      disabled:opacity-50 disabled:cursor-not-allowed
+                      animate-slide-up
+                    `}
+                    style={{ animationDelay: `${index * 150}ms` }}
+                  >
+                    <div className="relative z-10">
+                      <h3 className="text-2xl font-bold mb-2">{option.text}</h3>
+                      <p className="text-sm opacity-90">{option.description}</p>
+                    </div>
+                    <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+                    <div className="absolute -inset-1 bg-gradient-to-r from-pink-600 to-purple-600 rounded-xl blur opacity-0 group-hover:opacity-75 transition duration-300 group-hover:duration-200 animate-tilt" />
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-12 text-center">
+                <p className="text-gray-400 text-sm">Use keys 1, 2, 3, 4, 5 to play</p>
+              </div>
+            </div>
+          </div>
         );
     }
   };
 
   return (
-    <group ref={groupRef}>
-      {menuState === 'main' && <Logo />}
+    <div className={`fixed inset-0 z-50 transition-transform duration-1000 ${
+      isTransitioning ? 'transform translate-x-full' : 'transform translate-x-0'
+    }`}>
       {renderCurrentMenu()}
-    </group>
-  );
-};
-
-interface MenuItemProps {
-  text: string;
-  description: string;
-  color: string;
-  position: [number, number, number];
-  onClick: () => void;
-  isDisabled: boolean;
-  animationDelay: number;
-  animationPhase: 'entering' | 'idle' | 'exiting';
-}
-
-const MenuItem: React.FC<MenuItemProps> = ({ 
-  text, 
-  description, 
-  color, 
-  position, 
-  onClick, 
-  isDisabled,
-  animationDelay,
-  animationPhase
-}) => {
-  const [hovered, setHovered] = useState(false);
-  const groupRef = useRef<THREE.Group>(null!);
-  const textRef = useRef<any>(null!);
-  const descRef = useRef<any>(null!);
-  const glowRef = useRef<THREE.Mesh>(null!);
-  const [localTime, setLocalTime] = useState(0);
-
-  useFrame((state, delta) => {
-    setLocalTime(prev => prev + delta);
-    
-    if (groupRef.current && textRef.current && descRef.current && glowRef.current) {
-      const time = state.clock.elapsedTime;
-      
-      switch (animationPhase) {
-        case 'entering':
-          const enterProgress = Math.max(0, Math.min((localTime - animationDelay) / 1.0, 1));
-          const enterEase = THREE.MathUtils.smoothstep(enterProgress, 0, 1);
-          
-          groupRef.current.position.x = THREE.MathUtils.lerp(5, 0, enterEase);
-          groupRef.current.scale.setScalar(THREE.MathUtils.lerp(0.3, 1, enterEase));
-          
-          const opacity = enterEase;
-          textRef.current.fillOpacity = opacity;
-          descRef.current.fillOpacity = opacity * 0.7;
-          break;
-          
-        case 'idle':
-          const targetScale = hovered ? 1.15 : 1;
-          groupRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
-          
-          const targetColor = new THREE.Color(hovered && !isDisabled ? '#ffffff' : color);
-          textRef.current.color.lerp(targetColor, 0.1);
-          
-          glowRef.current.material.opacity = hovered && !isDisabled ? 0.3 : 0;
-          glowRef.current.scale.setScalar(hovered ? 1.2 : 1);
-          
-          if (hovered && !isDisabled) {
-            groupRef.current.position.y = Math.sin(time * 5) * 0.05;
-            groupRef.current.rotation.z = Math.sin(time * 3) * 0.05;
-          } else {
-            groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, 0, 0.1);
-            groupRef.current.rotation.z = THREE.MathUtils.lerp(groupRef.current.rotation.z, 0, 0.1);
-          }
-          break;
-          
-        case 'exiting':
-          groupRef.current.scale.multiplyScalar(1 + delta * 3);
-          textRef.current.fillOpacity *= (1 - delta * 5);
-          descRef.current.fillOpacity *= (1 - delta * 5);
-          break;
-      }
-    }
-  });
-
-  const handleClick = () => {
-    if (!isDisabled && animationPhase === 'idle') {
-      onClick();
-    }
-  };
-
-  return (
-    <group ref={groupRef} position={position}>
-      <mesh ref={glowRef} position={[0, 0, -0.1]}>
-        <planeGeometry args={[4, 1]} />
-        <meshBasicMaterial color={color} transparent />
-      </mesh>
-      
-      <Text
-        ref={textRef}
-        position={[0, 0.1, 0]}
-        fontSize={0.8}
-        color={color}
-        anchorX="center"
-        anchorY="middle"
-        onPointerOver={() => !isDisabled && setHovered(true)}
-        onPointerOut={() => setHovered(false)}
-        onClick={handleClick}
-        font="/fonts/Rajdhani-Regular.ttf"
-        outlineWidth={hovered && !isDisabled ? 0.02 : 0}
-        outlineColor="black"
-      >
-        {text}
-      </Text>
-      
-      <Text
-        ref={descRef}
-        position={[0, -0.3, 0]}
-        fontSize={0.3}
-        color={isDisabled ? '#666666' : '#cccccc'}
-        anchorX="center"
-        anchorY="middle"
-        font="/fonts/Rajdhani-Regular.ttf"
-      >
-        {description}
-      </Text>
-    </group>
+    </div>
   );
 };
 

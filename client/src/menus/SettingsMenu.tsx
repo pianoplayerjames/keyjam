@@ -1,91 +1,65 @@
-// src/menus/SettingsMenu.tsx
-import React, { useRef, useState } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { Text } from '@react-three/drei';
-import * as THREE from 'three';
-
 interface SettingsMenuProps {
   onBack: () => void;
 }
 
-const SettingsMenu: React.FC<SettingsMenuProps> = ({ onBack }) => {
-  const groupRef = useRef<THREE.Group>(null!);
-  const [enterTime, setEnterTime] = useState(0);
-
-  useFrame((state, delta) => {
-    setEnterTime(prev => prev + delta);
-    
-    if (groupRef.current) {
-      const progress = Math.min(enterTime / 1.5, 1);
-      const ease = THREE.MathUtils.smoothstep(progress, 0, 1);
-      
-      groupRef.current.position.x = THREE.MathUtils.lerp(8, 0, ease);
-      groupRef.current.scale.setScalar(ease);
-    }
-  });
+const SettingsMenu = ({ onBack }: SettingsMenuProps) => {
+  const upcomingFeatures = [
+    { icon: '🔊', title: 'Audio Settings', description: 'Master volume, SFX, music controls' },
+    { icon: '✨', title: 'Visual Effects', description: 'Particles, bloom, motion blur toggle' },
+    { icon: '⌨️', title: 'Key Bindings', description: 'Customize your control scheme' },
+    { icon: '⚡', title: 'Performance', description: 'Graphics quality and FPS options' },
+    { icon: '🎨', title: 'Themes', description: 'Color schemes and UI customization' },
+    { icon: '📊', title: 'Statistics', description: 'Detailed gameplay analytics' }
+  ];
 
   return (
-    <group ref={groupRef}>
-      {/* Back Button */}
-      <group position={[-3, 2.5, 0]}>
-        <Text
-          fontSize={0.4}
-          color="#cccccc"
-          anchorX="center"
-          anchorY="middle"
-          onClick={onBack}
-          onPointerOver={(e) => e.object.color.set('#ffffff')}
-          onPointerOut={(e) => e.object.color.set('#cccccc')}
-        >
-          ← Back
-        </Text>
-      </group>
+    <div className="absolute inset-0 flex flex-col items-center justify-center text-white bg-black bg-opacity-30">
+      <button 
+        onClick={onBack}
+        className="absolute top-8 left-8 flex items-center gap-2 text-gray-300 hover:text-white transition-colors text-lg"
+      >
+        <span className="text-xl">←</span> Back
+      </button>
 
-      {/* Settings Title */}
-      <group position={[0, 2, 0]}>
-        <Text
-          fontSize={1.2}
-          color="#9c27b0"
-          anchorX="center"
-          anchorY="middle"
-          font="/fonts/Rajdhani-Regular.ttf"
-          outlineWidth={0.02}
-          outlineColor="black"
-        >
-          SETTINGS
-        </Text>
-      </group>
+      <div className="flex flex-col items-center justify-center flex-1 max-w-6xl mx-auto px-8">
+        <div className="text-center mb-12">
+          <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
+            SETTINGS
+          </h1>
+          <p className="text-xl text-gray-300 max-w-2xl">
+            Customize your gaming experience
+          </p>
+        </div>
 
-      {/* Coming Soon */}
-      <group position={[0, 0, 0]}>
-        <Text
-          fontSize={0.6}
-          color="#ffc107"
-          anchorX="center"
-          anchorY="middle"
-          font="/fonts/Rajdhani-Regular.ttf"
-        >
-          🚧 COMING SOON! 🚧
-        </Text>
-        
-        <Text
-          position={[0, -0.8, 0]}
-          fontSize={0.3}
-          color="#888888"
-          anchorX="center"
-          anchorY="middle"
-          maxWidth={8}
-          textAlign="center"
-        >
-          Settings menu is in development.
-          {'\n'}Future options will include:
-          {'\n'}• Audio settings
-          {'\n'}• Visual effects toggle
-          {'\n'}• Key bindings
-          {'\n'}• Performance options
-        </Text>
-      </group>
-    </group>
+        <div className="text-center mb-12">
+          <div className="inline-block bg-yellow-900 bg-opacity-50 border border-yellow-500 rounded-xl p-6">
+            <h2 className="text-3xl font-bold text-yellow-400 mb-3">🚧 COMING SOON! 🚧</h2>
+            <p className="text-yellow-200">Settings menu is currently in development</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+          {upcomingFeatures.map((feature, index) => (
+            <div
+              key={feature.title}
+              className="bg-gray-800 bg-opacity-50 border border-gray-600 rounded-xl p-6 text-center animate-slide-up"
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              <div className="text-4xl mb-4 opacity-60">{feature.icon}</div>
+              <h3 className="text-xl font-bold mb-2 text-gray-300">{feature.title}</h3>
+              <p className="text-sm text-gray-500">{feature.description}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-12 text-center">
+          <p className="text-gray-400 text-sm max-w-2xl">
+            These features will be available in a future update. 
+            Currently focusing on core gameplay mechanics and multiplayer functionality.
+          </p>
+        </div>
+      </div>
+    </div>
   );
 };
 

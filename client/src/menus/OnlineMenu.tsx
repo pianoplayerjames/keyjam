@@ -1,199 +1,102 @@
-// src/menus/OnlineMenu.tsx
-import React, { useRef, useState } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { Text } from '@react-three/drei';
-import * as THREE from 'three';
-
 interface OnlineMenuProps {
   onBack: () => void;
   onSelectMode: (mode: string) => void;
 }
 
-const OnlineMenu: React.FC<OnlineMenuProps> = ({ onBack, onSelectMode }) => {
-  const groupRef = useRef<THREE.Group>(null!);
-  const [enterTime, setEnterTime] = useState(0);
-
+const OnlineMenu = ({ onBack, onSelectMode }: OnlineMenuProps) => {
   const onlineOptions = [
     { 
       text: 'Arenas', 
       description: 'Join public rooms with up to 8 players', 
-      color: '#4caf50',
+      color: 'from-green-400 to-emerald-600',
+      icon: '🏟️',
       mode: 'arenas',
       comingSoon: true
     },
     { 
       text: 'Duels', 
       description: '1v1 competitive matches', 
-      color: '#f44336',
+      color: 'from-red-400 to-pink-600',
+      icon: '⚔️',
       mode: 'duels',
       comingSoon: true
     },
     { 
       text: 'Invite Friend', 
       description: 'Play with friends via invite code', 
-      color: '#2196f3',
+      color: 'from-blue-400 to-cyan-600',
+      icon: '👥',
       mode: 'invite',
       comingSoon: true
     }
   ];
 
-  useFrame((state, delta) => {
-    setEnterTime(prev => prev + delta);
-    
-    if (groupRef.current) {
-      const progress = Math.min(enterTime / 1.5, 1);
-      const ease = THREE.MathUtils.smoothstep(progress, 0, 1);
-      
-      groupRef.current.position.x = THREE.MathUtils.lerp(8, 0, ease);
-      groupRef.current.scale.setScalar(ease);
-    }
-  });
-
   return (
-    <group ref={groupRef}>
-      {/* Back Button */}
-      <group position={[-3, 2.5, 0]}>
-        <Text
-          fontSize={0.4}
-          color="#cccccc"
-          anchorX="center"
-          anchorY="middle"
-          onClick={onBack}
-          onPointerOver={(e) => e.object.color.set('#ffffff')}
-          onPointerOut={(e) => e.object.color.set('#cccccc')}
-        >
-          ← Back
-        </Text>
-      </group>
-
-      {/* Online Title */}
-      <group position={[0, 2, 0]}>
-        <Text
-          fontSize={1.2}
-          color="#4caf50"
-          anchorX="center"
-          anchorY="middle"
-          font="/fonts/Rajdhani-Regular.ttf"
-          outlineWidth={0.02}
-          outlineColor="black"
-        >
-          ONLINE PLAY
-        </Text>
-      </group>
-
-      {/* Options */}
-      {onlineOptions.map((option, index) => (
-        <OnlineMenuItem
-          key={option.text}
-          {...option}
-          position={[0, 0.8 - index * 1.2, 0]}
-          onClick={() => onSelectMode(option.mode)}
-          animationDelay={index * 0.2}
-        />
-      ))}
-
-      {/* Coming Soon Notice */}
-      <group position={[0, -2.5, 0]}>
-        <Text
-          fontSize={0.4}
-          color="#ffc107"
-          anchorX="center"
-          anchorY="middle"
-          font="/fonts/Rajdhani-Regular.ttf"
-        >
-          🚧 ONLINE FEATURES COMING SOON! 🚧
-        </Text>
-        <Text
-          position={[0, -0.4, 0]}
-          fontSize={0.25}
-          color="#888888"
-          anchorX="center"
-          anchorY="middle"
-          maxWidth={8}
-          textAlign="center"
-        >
-          For now, these options will start a practice game.
-          {'\n'}Full multiplayer functionality is in development!
-        </Text>
-      </group>
-    </group>
-  );
-};
-
-interface OnlineMenuItemProps {
-  text: string;
-  description: string;
-  color: string;
-  mode: string;
-  comingSoon: boolean;
-  position: [number, number, number];
-  onClick: () => void;
-  animationDelay: number;
-}
-
-const OnlineMenuItem: React.FC<OnlineMenuItemProps> = ({
-  text,
-  description,
-  color,
-  comingSoon,
-  position,
-  onClick,
-  animationDelay
-}) => {
-  const [hovered, setHovered] = useState(false);
-  const groupRef = useRef<THREE.Group>(null!);
-  const [localTime, setLocalTime] = useState(0);
-
-  useFrame((state, delta) => {
-    setLocalTime(prev => prev + delta);
-    
-    if (groupRef.current) {
-      const progress = Math.max(0, Math.min((localTime - animationDelay) / 1.0, 1));
-      const ease = THREE.MathUtils.smoothstep(progress, 0, 1);
-      
-      groupRef.current.position.x = THREE.MathUtils.lerp(6, 0, ease);
-      groupRef.current.scale.setScalar(ease);
-      
-      const targetScale = hovered ? 1.1 : 1;
-      groupRef.current.scale.multiplyScalar(THREE.MathUtils.lerp(groupRef.current.scale.x / ease, targetScale, 0.1));
-    }
-  });
-
-  return (
-    <group ref={groupRef} position={position}>
-      <mesh>
-        <planeGeometry args={[6, 0.8]} />
-        <meshBasicMaterial 
-          color={comingSoon ? '#444444' : color} 
-          transparent 
-          opacity={hovered ? 0.8 : 0.6} 
-        />
-      </mesh>
-      
-      <Text
-        position={[0, 0.1, 0.01]}
-        fontSize={0.5}
-        color={comingSoon ? '#888888' : '#ffffff'}
-        anchorX="center"
-        anchorY="middle"
-        font="/fonts/Rajdhani-Regular.ttf"
-        onPointerOver={() => setHovered(true)}
-        onPointerOut={() => setHovered(false)}
-        onClick={onClick}
+    <div className="absolute inset-0 flex flex-col items-center justify-center text-white bg-black bg-opacity-30">
+      <button 
+        onClick={onBack}
+        className="absolute top-8 left-8 flex items-center gap-2 text-gray-300 hover:text-white transition-colors text-lg"
       >
-        {text} {comingSoon && '(Soon)'}
-      </Text>
-      
-      <Text
-        position={[0, -0.25, 0.01]}
-        fontSize={0.25}
-        color={comingSoon ? '#666666' : '#cccccc'}
-        anchorX="center"
-        anchorY="middle"
-      >
-        {description}
-      </Text>
-    </group>
+        <span className="text-xl">←</span> Back
+      </button>
+
+      <div className="flex flex-col items-center justify-center flex-1 max-w-4xl mx-auto px-8">
+        <div className="text-center mb-12">
+          <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+            ONLINE PLAY
+          </h1>
+          <p className="text-xl text-gray-300 max-w-2xl">
+            Challenge players from around the world
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-6 w-full max-w-2xl">
+          {onlineOptions.map((option, index) => (
+            <button
+              key={option.text}
+              onClick={() => onSelectMode(option.mode)}
+              className={`
+                group relative overflow-hidden rounded-xl p-6 
+                ${option.comingSoon 
+                  ? 'bg-gradient-to-r from-gray-600 to-gray-700 cursor-not-allowed' 
+                  : `bg-gradient-to-r ${option.color} hover:scale-105 hover:shadow-2xl`
+                }
+                transform transition-all duration-300
+                animate-slide-up backdrop-blur-sm
+              `}
+              style={{ animationDelay: `${index * 150}ms` }}
+              disabled={option.comingSoon}
+            >
+              <div className="relative z-10 flex items-center gap-6">
+                <div className="text-4xl opacity-75">{option.icon}</div>
+                <div className="text-left flex-1">
+                  <h3 className={`text-2xl font-bold mb-2 ${option.comingSoon ? 'text-gray-400' : 'text-white'}`}>
+                    {option.text} {option.comingSoon && '(Soon)'}
+                  </h3>
+                  <p className={`text-sm ${option.comingSoon ? 'text-gray-500' : 'text-white opacity-90'}`}>
+                    {option.description}
+                  </p>
+                </div>
+              </div>
+              {!option.comingSoon && (
+                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Coming Soon Notice */}
+        <div className="mt-12 text-center max-w-2xl">
+          <div className="bg-yellow-900 bg-opacity-50 border border-yellow-500 rounded-xl p-6">
+            <h3 className="text-xl font-bold text-yellow-400 mb-3">🚧 ONLINE FEATURES COMING SOON! 🚧</h3>
+            <p className="text-yellow-200 text-sm leading-relaxed">
+              For now, these options will start a practice game.
+              Full multiplayer functionality is in development!
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
