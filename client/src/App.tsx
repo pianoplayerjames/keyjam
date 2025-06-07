@@ -8,7 +8,6 @@ import FloatingShapes from './FloatingShapes';
 import GradientBackground from './GradientBackground';
 import './App.css';
 
-// Simple loading component without Text
 const SimpleLoading = () => (
   <group>
     <mesh>
@@ -19,19 +18,19 @@ const SimpleLoading = () => (
 );
 
 function App() {
-  const [gameState, setGameState] = useState('menu'); // 'menu', 'in-transition', 'game'
-  const [gameMode, setGameMode] = useState('');
+  const [gameState, setGameState] = useState('menu');
+  const [menuState, setMenuState] = useState('main');
+  const [gameConfig, setGameConfig] = useState({
+    mode: '',
+    subMode: '',
+    difficulty: 30,
+    timeLimit: 120,
+    scoreTarget: 1000
+  });
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  const handleStartGame = (mode: string) => {
-    let actualGameMode = 'score';
-    if (mode === 'Solo') {
-      actualGameMode = 'score';
-    } else if (mode === 'Training') {
-      actualGameMode = 'time';
-    }
-    
-    setGameMode(actualGameMode);
+  const handleStartGame = (config: typeof gameConfig) => {
+    setGameConfig(config);
     setIsTransitioning(true);
     setGameState('in-transition');
   };
@@ -43,12 +42,16 @@ function App() {
 
   const handleBackToMenu = () => {
     setGameState('menu');
-    setGameMode('');
+    setMenuState('main');
     setIsTransitioning(false);
   };
 
+  const handleMenuNavigation = (newState: string) => {
+    setMenuState(newState);
+  };
+
   if (gameState === 'game') {
-      return <Game gameMode={gameMode} onBackToMenu={handleBackToMenu} />;
+    return <Game gameConfig={gameConfig} onBackToMenu={handleBackToMenu} />;
   }
 
   return (
@@ -61,7 +64,9 @@ function App() {
         
         {gameState === 'menu' && (
           <MainMenu 
-            onStartGame={handleStartGame} 
+            menuState={menuState}
+            onStartGame={handleStartGame}
+            onMenuNavigation={handleMenuNavigation}
             isTransitioning={isTransitioning}
           />
         )}
@@ -69,7 +74,7 @@ function App() {
         {gameState === 'in-transition' && (
           <Transition 
             onTransitionComplete={handleTransitionComplete}
-            gameMode={gameMode}
+            gameMode={gameConfig.mode}
           />
         )}
       </Suspense>
