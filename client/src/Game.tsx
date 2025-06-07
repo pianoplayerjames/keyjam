@@ -1,6 +1,7 @@
 // Game.tsx - Complete file with replay system integration
 import { useEffect, useState, Suspense, useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
+import { Stats } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import FallingLetter from './FallingLetter'
 import Fretboard from './Fretboard'
@@ -1135,6 +1136,7 @@ const Game = ({ gameConfig, onBackToMenu }: GameProps) => {
          <EffectComposer>
            <Bloom intensity={0.5} luminanceThreshold={0.2} luminanceSmoothing={0.9} />
          </EffectComposer>
+         <Stats />
        </Suspense>
      </Canvas>
    </>
