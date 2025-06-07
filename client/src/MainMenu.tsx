@@ -146,12 +146,8 @@ const MainMenu = ({
                <img 
                  src="/logo.png" 
                  alt="Game Logo" 
-                 className="w-80 h-auto mx-auto mb-8 animate-pulse"
+                 className="w-80 h-auto mx-auto animate-pulse"
                />
-               <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
-                 Rhythm Master
-               </h1>
-               <p className="text-xl text-gray-300">Master the rhythm, become the legend</p>
              </div>
 
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">

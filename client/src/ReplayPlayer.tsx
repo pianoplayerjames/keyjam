@@ -1,4 +1,4 @@
-// ReplayPlayer.tsx - Updated with proper imports and ReplayViewer component
+// ReplayPlayer.tsx - Fixed version with proper replay engine communication
 import React, { useState, useRef, useCallback, useEffect, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
@@ -39,19 +39,31 @@ class ReplayEngine {
 
   constructor(replayData: ReplayData) {
     this.replayData = replayData;
+    console.log('🎬 ReplayEngine created with data:', {
+      events: replayData.events.length,
+      duration: replayData.duration,
+      firstEvent: replayData.events[0],
+      spawnEvents: replayData.events.filter(e => e.type === 'note_spawn').length
+    });
   }
 
   setStateUpdateCallback(callback: (state: any) => void): void {
     this.onStateUpdate = callback;
+    console.log('🎬 State update callback set');
+    
+    // Initialize immediately
+    this.initializeGameState();
   }
 
   play(): void {
+    console.log('🎬 Play called, current frame:', this.currentFrame);
     this.isPlaying = true;
     this.lastFrameTime = performance.now();
     this.tick();
   }
 
   pause(): void {
+    console.log('🎬 Pause called');
     this.isPlaying = false;
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
@@ -60,43 +72,37 @@ class ReplayEngine {
   }
 
   stop(): void {
+    console.log('🎬 Stop called');
     this.pause();
     this.seekToFrame(0);
   }
 
   setPlaybackSpeed(speed: number): void {
     this.playbackSpeed = Math.max(0.1, Math.min(5.0, speed));
+    console.log('🎬 Playback speed set to:', this.playbackSpeed);
   }
 
   seekToFrame(frame: number): void {
+    console.log('🎬 Seeking to frame:', frame);
     const wasPlaying = this.isPlaying;
     this.pause();
     
     this.currentFrame = Math.max(0, Math.min(frame, this.getMaxFrame()));
     
-    // Find the closest keyframe before this frame
-    const keyframe = this.findClosestKeyframe(this.currentFrame);
+    // Reset to beginning and replay events up to this frame
+    this.currentEventIndex = 0;
+    this.initializeGameState();
     
-    if (keyframe) {
-      // Restore from keyframe
-      this.applyKeyframe(keyframe);
-      
-      // Apply events from keyframe to current frame
-      this.applyEventsFromFrame(keyframe.frame, this.currentFrame);
-    } else {
-      // No keyframe found, start from beginning
-      this.currentFrame = 0;
-      this.currentEventIndex = 0;
-      this.initializeGameState();
+    // Apply all events up to current frame
+    while (
+      this.currentEventIndex < this.replayData.events.length &&
+      this.replayData.events[this.currentEventIndex].frame <= this.currentFrame
+    ) {
+      this.applyEvent(this.replayData.events[this.currentEventIndex]);
+      this.currentEventIndex++;
     }
     
-    // Update event index
-    this.currentEventIndex = this.replayData.events.findIndex(
-      event => event.frame > this.currentFrame
-    );
-    if (this.currentEventIndex === -1) {
-      this.currentEventIndex = this.replayData.events.length;
-    }
+    this.updateState();
     
     if (wasPlaying) {
       this.play();
@@ -120,7 +126,12 @@ class ReplayEngine {
       this.lastFrameTime = now - (deltaTime % adjustedFrameTime);
     }
 
-    this.animationFrameId = requestAnimationFrame(this.tick);
+    if (this.currentFrame < this.getMaxFrame()) {
+      this.animationFrameId = requestAnimationFrame(this.tick);
+    } else {
+      console.log('🎬 Reached end of replay');
+      this.pause();
+    }
   };
 
   private advanceFrame(): void {
@@ -135,48 +146,11 @@ class ReplayEngine {
       this.currentEventIndex++;
     }
 
-    // Check if we've reached the end
-    if (this.currentFrame >= this.getMaxFrame()) {
-      this.pause();
-    }
-
     this.updateState();
   }
 
-  private findClosestKeyframe(frame: number): GameState | null {
-    let closest: GameState | null = null;
-    
-    for (const keyframe of this.replayData.keyframes) {
-      if (keyframe.frame <= frame) {
-        if (!closest || keyframe.frame > closest.frame) {
-          closest = keyframe;
-        }
-      }
-    }
-    
-    return closest;
-  }
-
-  private applyKeyframe(keyframe: GameState): void {
-    if (this.onStateUpdate) {
-      this.onStateUpdate({
-        type: 'restore_keyframe',
-        data: keyframe
-      });
-    }
-  }
-
-  private applyEventsFromFrame(startFrame: number, endFrame: number): void {
-    const eventsInRange = this.replayData.events.filter(
-      event => event.frame > startFrame && event.frame <= endFrame
-    );
-    
-    for (const event of eventsInRange) {
-      this.applyEvent(event);
-    }
-  }
-
   private applyEvent(event: GameEvent): void {
+    console.log('🎬 Applying event:', event.type, 'at frame', event.frame);
     if (this.onStateUpdate) {
       this.onStateUpdate({
         type: 'apply_event',
@@ -186,10 +160,14 @@ class ReplayEngine {
   }
 
   private initializeGameState(): void {
+    console.log('🎬 Initializing game state');
     if (this.onStateUpdate) {
       this.onStateUpdate({
         type: 'initialize',
-        data: this.replayData.gameConfig
+        data: {
+          difficulty: this.replayData.gameConfig.difficulty,
+          timeLimit: this.replayData.gameConfig.timeLimit
+        }
       });
     }
   }
@@ -206,10 +184,7 @@ class ReplayEngine {
 
   getMaxFrame(): number {
     if (this.replayData.events.length === 0) return 0;
-    return Math.max(
-      ...this.replayData.events.map(event => event.frame),
-      ...this.replayData.keyframes.map(keyframe => keyframe.frame)
-    );
+    return Math.max(...this.replayData.events.map(event => event.frame));
   }
 
   getCurrentFrame(): number {
@@ -233,7 +208,7 @@ class ReplayEngine {
   }
 }
 
-// ReplayViewer Component
+// ReplayViewer Component - Simplified for debugging
 interface ReplayViewerProps {
   replayData: ReplayData;
   replayEngine: ReplayEngine;
@@ -252,6 +227,7 @@ interface ReplayGameState {
   complexity: number;
   timeLeft: number;
   currentFrame: number;
+  moveSpeed: number;
 }
 
 const ReplayViewer: React.FC<ReplayViewerProps> = ({ replayData, replayEngine }) => {
@@ -267,20 +243,38 @@ const ReplayViewer: React.FC<ReplayViewerProps> = ({ replayData, replayEngine })
     showTimingDisplay: false,
     complexity: replayData.gameConfig.difficulty,
     timeLeft: replayData.gameConfig.timeLimit,
-    currentFrame: 0
+    currentFrame: 0,
+    moveSpeed: 4
+  });
+
+  // Create a map of all spawn events for quick lookup
+  const [spawnEvents] = useState(() => {
+    const events = new Map();
+    
+    replayData.events.forEach(event => {
+      if (event.type === 'note_spawn' && event.data.letter) {
+        const letter = event.data.letter;
+        events.set(letter.id, {
+          frame: event.frame,
+          timestamp: event.timestamp,
+          letter: letter.letter,
+          position: letter.position,
+          duration: letter.duration || 0,
+          color: letter.color,
+          complexityType: letter.complexityType || 'normal'
+        });
+      }
+    });
+    
+    console.log('📝 Processed spawn events:', events.size);
+    return events;
   });
 
   useEffect(() => {
     const handleReplayUpdate = (update: any) => {
+      console.log('🎬 Viewer received update:', update.type);
+      
       switch (update.type) {
-        case 'restore_keyframe':
-          setGameState(prevState => ({
-            ...prevState,
-            ...update.data,
-            heldKeys: new Set(update.data.heldKeys)
-          }));
-          break;
-          
         case 'apply_event':
           const event = update.event;
           setGameState(prevState => {
@@ -300,17 +294,10 @@ const ReplayViewer: React.FC<ReplayViewerProps> = ({ replayData, replayEngine })
                 newState.combo = event.data.combo || newState.combo;
                 newState.health = event.data.health || newState.health;
                 newState.hitFeedback = {
-                  text: event.data.hitResult?.feedback || event.data.feedback || 'HIT',
-                  color: event.data.hitResult?.color || event.data.color || '#00e676',
+                  text: event.data.hitResult?.feedback || 'HIT',
+                  color: event.data.hitResult?.color || '#00e676',
                   key: prevState.hitFeedback.key + 1
                 };
-                if (event.data.timingOffset !== undefined) {
-                  newState.timingOffset = event.data.timingOffset;
-                  newState.showTimingDisplay = true;
-                }
-                if (event.data.stamp) {
-                  newState.stamps = [...newState.stamps, event.data.stamp];
-                }
                 break;
                 
               case 'note_miss':
@@ -321,27 +308,10 @@ const ReplayViewer: React.FC<ReplayViewerProps> = ({ replayData, replayEngine })
                   color: '#f44336',
                   key: prevState.hitFeedback.key + 1
                 };
-                if (event.data.stamp) {
-                  newState.stamps = [...newState.stamps, event.data.stamp];
-                }
-                break;
-                
-              case 'note_spawn':
-                if (event.data.letter) {
-                  newState.fallingLetters = [...newState.fallingLetters, event.data.letter];
-                }
                 break;
                 
               case 'score_change':
                 newState.score = event.data.score || newState.score;
-                break;
-                
-              case 'combo_change':
-                newState.combo = event.data.combo || newState.combo;
-                break;
-                
-              case 'health_change':
-                newState.health = event.data.health || newState.health;
                 break;
             }
             
@@ -350,23 +320,52 @@ const ReplayViewer: React.FC<ReplayViewerProps> = ({ replayData, replayEngine })
           break;
           
         case 'update_frame':
-          setGameState(prevState => ({
-            ...prevState,
-            currentFrame: update.frame,
-            // Update falling letters positions based on frame
-            fallingLetters: prevState.fallingLetters.map(letter => ({
-              ...letter,
-              position: [
-                letter.position[0],
-                letter.position[1],
-                letter.originalZ + (update.frame - letter.spawnFrame) * 0.1 // Simulate movement
-              ]
-            })).filter(letter => letter.position[2] < 10) // Remove off-screen letters
-          }));
+          const currentFrame = update.frame;
+          
+          setGameState(prevState => {
+            // Calculate time left
+            const timeElapsed = (currentFrame / 60); // seconds
+            const newTimeLeft = Math.max(0, replayData.gameConfig.timeLimit - timeElapsed);
+            
+            // Calculate visible notes
+            const visibleNotes = [];
+            
+            spawnEvents.forEach((spawnEvent, noteId) => {
+              if (currentFrame >= spawnEvent.frame) {
+                const framesSinceSpawn = currentFrame - spawnEvent.frame;
+                const moveSpeed = 0.15; // Adjust this value to match your game
+                const currentZ = spawnEvent.position[2] + (framesSinceSpawn * moveSpeed);
+                
+                // Show notes that are on screen
+                if (currentZ > -50 && currentZ < 20) {
+                  visibleNotes.push({
+                    id: noteId,
+                    letter: spawnEvent.letter,
+                    position: [spawnEvent.position[0], spawnEvent.position[1], currentZ],
+                    duration: spawnEvent.duration,
+                    color: spawnEvent.color,
+                    opacity: 1,
+                    isMissed: false,
+                    isHit: false,
+                    isBeingHeld: false
+                  });
+                }
+              }
+            });
+            
+            return {
+              ...prevState,
+              currentFrame,
+              timeLeft: newTimeLeft,
+              fallingLetters: visibleNotes
+            };
+          });
           break;
           
         case 'initialize':
-          setGameState({
+          console.log('🎬 Initializing viewer state');
+          setGameState(prevState => ({
+            ...prevState,
             score: 0,
             combo: 0,
             health: 100,
@@ -378,14 +377,15 @@ const ReplayViewer: React.FC<ReplayViewerProps> = ({ replayData, replayEngine })
             showTimingDisplay: false,
             complexity: update.data.difficulty,
             timeLeft: update.data.timeLimit,
-            currentFrame: 0
-          });
+            currentFrame: 0,
+            moveSpeed: 4
+          }));
           break;
       }
     };
 
     replayEngine.setStateUpdateCallback(handleReplayUpdate);
-  }, [replayEngine]);
+  }, [replayEngine, spawnEvents, replayData.gameConfig]);
 
   const removeStamp = (id: number) => {
     setGameState(prevState => ({
@@ -403,44 +403,43 @@ const ReplayViewer: React.FC<ReplayViewerProps> = ({ replayData, replayEngine })
     }
   };
 
+  console.log('🎮 ReplayViewer state:', {
+    frame: gameState.currentFrame,
+    timeLeft: gameState.timeLeft,
+    notesVisible: gameState.fallingLetters.length,
+    totalSpawnEvents: spawnEvents.size
+  });
+
   return (
     <>
       {renderUI()}
       
-      {/* Replay Mode Indicator */}
+      {/* Debug Info */}
       <div style={{
         position: 'absolute',
         bottom: '140px',
         left: '20px',
-        background: 'rgba(255, 0, 0, 0.8)',
+        background: 'rgba(0, 0, 0, 0.9)',
         color: 'white',
-        padding: '8px 15px',
-        borderRadius: '20px',
-        fontSize: '14px',
-        fontWeight: 'bold',
+        padding: '15px',
+        borderRadius: '8px',
+        fontSize: '12px',
         zIndex: 1000,
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px'
+        fontFamily: 'monospace'
       }}>
-        <div style={{
-          width: '8px',
-          height: '8px',
-          borderRadius: '50%',
-          backgroundColor: 'white',
-          animation: 'pulse 1s infinite'
-        }} />
-        REPLAY MODE
+        <div style={{ color: '#00ff00', fontWeight: 'bold' }}>REPLAY DEBUG</div>
+        Frame: {gameState.currentFrame}<br/>
+        Time Left: {gameState.timeLeft.toFixed(1)}s<br/>
+        Total Spawns: {spawnEvents.size}<br/>
+        Notes Visible: {gameState.fallingLetters.length}<br/>
+        Playing: {replayEngine.isCurrentlyPlaying() ? 'YES' : 'NO'}<br/>
+        {gameState.fallingLetters.length > 0 && (
+          <>
+            First Note Z: {gameState.fallingLetters[0].position[2].toFixed(2)}<br/>
+            First Note Letter: {gameState.fallingLetters[0].letter}
+          </>
+        )}
       </div>
-
-      <style>
-        {`
-          @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-          }
-        `}
-      </style>
 
       <Canvas camera={{ position: [0, 2.5, 5], fov: 75 }}>
         <Suspense fallback={null}>
@@ -482,6 +481,14 @@ const ReplayViewer: React.FC<ReplayViewerProps> = ({ replayData, replayEngine })
             />
           ))}
 
+          {/* Render test cube if no notes to verify rendering works */}
+          {gameState.fallingLetters.length === 0 && gameState.currentFrame > 60 && (
+            <mesh position={[0, 1, 2]}>
+              <boxGeometry args={[0.5, 0.5, 0.5]} />
+              <meshStandardMaterial color="#ff0000" emissive="#ff0000" emissiveIntensity={0.5} />
+            </mesh>
+          )}
+
           {gameState.fallingLetters.map(letter => (
             <FallingLetter
               key={letter.id}
@@ -491,7 +498,7 @@ const ReplayViewer: React.FC<ReplayViewerProps> = ({ replayData, replayEngine })
               duration={letter.duration}
               color={letter.color}
               isMissed={letter.isMissed}
-              opacity={letter.opacity}
+              opacity={letter.opacity || 1}
               isHit={letter.isHit}
               isBeingHeld={letter.isBeingHeld}
             />
@@ -506,7 +513,7 @@ const ReplayViewer: React.FC<ReplayViewerProps> = ({ replayData, replayEngine })
   );
 };
 
-// Main ReplayPlayer Component
+// Main ReplayPlayer Component - Fixed
 const ReplayPlayer: React.FC<ReplayPlayerProps> = ({ replayData, onClose, isVisible }) => {
   const [replayEngine] = useState(() => new ReplayEngine(replayData));
   const [isPlaying, setIsPlaying] = useState(false);
@@ -518,53 +525,49 @@ const ReplayPlayer: React.FC<ReplayPlayerProps> = ({ replayData, onClose, isVisi
   const maxTime = replayData.duration;
   const maxFrame = replayEngine.getMaxFrame();
 
+  // Auto-start playback when component mounts
   useEffect(() => {
-    replayEngine.setStateUpdateCallback((update) => {
-      // Handle state updates from replay engine
-      console.log('Replay update:', update);
-      
+    if (isVisible) {
+      console.log('🎬 ReplayPlayer mounted, starting playback');
+      setTimeout(() => {
+        handlePlay();
+      }, 500); // Small delay to ensure everything is initialized
+    }
+  }, [isVisible]);
+
+  // Update current time and frame from engine
+  useEffect(() => {
+    const interval = setInterval(() => {
       setCurrentFrame(replayEngine.getCurrentFrame());
       setCurrentTime(replayEngine.getCurrentTime());
-    });
+      setIsPlaying(replayEngine.isCurrentlyPlaying());
+    }, 100);
+
+    return () => clearInterval(interval);
   }, [replayEngine]);
 
   const handlePlay = useCallback(() => {
+    console.log('🎬 Play button clicked');
     if (isPlaying) {
       replayEngine.pause();
-      setIsPlaying(false);
     } else {
       replayEngine.play();
-      setIsPlaying(true);
     }
   }, [isPlaying, replayEngine]);
 
   const handleStop = useCallback(() => {
     replayEngine.stop();
-    setIsPlaying(false);
-    setCurrentTime(0);
-    setCurrentFrame(0);
   }, [replayEngine]);
 
   const handleTimelineChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const newTime = parseFloat(e.target.value);
     replayEngine.seekToTime(newTime);
-    setCurrentTime(newTime);
   }, [replayEngine]);
 
   const handleSpeedChange = useCallback((speed: number) => {
     replayEngine.setPlaybackSpeed(speed);
     setPlaybackSpeed(speed);
   }, [replayEngine]);
-
-  const handleRewind = useCallback(() => {
-    const newTime = Math.max(0, currentTime - 5000); // Rewind 5 seconds
-    replayEngine.seekToTime(newTime);
-  }, [currentTime, replayEngine]);
-
-  const handleFastForward = useCallback(() => {
-    const newTime = Math.min(maxTime, currentTime + 5000); // Fast forward 5 seconds
-    replayEngine.seekToTime(newTime);
-  }, [currentTime, maxTime, replayEngine]);
 
   const formatTime = (ms: number): string => {
     const seconds = Math.floor(ms / 1000);
@@ -617,26 +620,6 @@ const ReplayPlayer: React.FC<ReplayPlayerProps> = ({ replayData, onClose, isVisi
         >
           ✕ Close
         </button>
-        
-        {/* Replay Info Overlay */}
-        <div style={{
-          position: 'absolute',
-          top: '20px',
-          left: '20px',
-          background: 'rgba(0, 0, 0, 0.8)',
-          color: 'white',
-          padding: '15px',
-          borderRadius: '10px',
-          fontSize: '14px',
-          minWidth: '200px'
-        }}>
-          <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>📹 REPLAY</div>
-          <div>Frame: {currentFrame} / {maxFrame}</div>
-          <div>Time: {formatTime(currentTime)} / {formatTime(maxTime)}</div>
-          <div>Speed: {playbackSpeed}x</div>
-          <div>Score: {replayData.metadata.finalScore}</div>
-          <div>Accuracy: {replayData.metadata.accuracy.toFixed(1)}%</div>
-        </div>
       </div>
 
       {/* Controls */}
@@ -682,11 +665,6 @@ const ReplayPlayer: React.FC<ReplayPlayerProps> = ({ replayData, onClose, isVisi
           alignItems: 'center', 
           gap: '15px' 
         }}>
-          {/* Rewind */}
-          <button onClick={handleRewind} style={buttonStyle}>
-            ⏪
-          </button>
-          
           {/* Play/Pause */}
           <button onClick={handlePlay} style={{...buttonStyle, fontSize: '24px'}}>
             {isPlaying ? '⏸️' : '▶️'}
@@ -695,11 +673,6 @@ const ReplayPlayer: React.FC<ReplayPlayerProps> = ({ replayData, onClose, isVisi
           {/* Stop */}
           <button onClick={handleStop} style={buttonStyle}>
             ⏹️
-          </button>
-          
-          {/* Fast Forward */}
-          <button onClick={handleFastForward} style={buttonStyle}>
-            ⏩
           </button>
           
           {/* Speed Controls */}

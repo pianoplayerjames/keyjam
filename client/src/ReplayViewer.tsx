@@ -1,4 +1,4 @@
-// ReplayViewer.tsx - Updated to properly handle note reconstruction
+// ReplayViewer.tsx - Enhanced debugging version
 import React, { useState, useEffect, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
@@ -58,25 +58,61 @@ const ReplayViewer: React.FC<ReplayViewerProps> = ({ replayData, replayEngine })
     moveSpeed: 4
   });
 
-  // Store all spawned notes with their spawn times
-  const [allSpawnedNotes] = useState(() => {
-    const notes = new Map();
-    replayData.events.forEach(event => {
-      if (event.type === 'note_spawn' && event.data.letter) {
-        const note = {
-          ...event.data.letter,
-          spawnFrame: event.frame,
-          spawnTime: event.timestamp,
-          isActive: true
+  // Enhanced debugging for spawn events
+  const [debugInfo, setDebugInfo] = useState<any>({});
+
+  // Process all spawn events with detailed logging
+  const [spawnEvents] = useState(() => {
+    const events = [];
+    
+    console.log('🔍 Processing replay events...');
+    console.log('Total events:', replayData.events.length);
+    
+    replayData.events.forEach((event, index) => {
+      if (event.type === 'note_spawn') {
+        console.log(`Spawn Event ${index}:`, {
+          frame: event.frame,
+          timestamp: event.timestamp,
+          data: event.data
+        });
+        
+        // Handle both possible data structures
+        let letterData;
+        if (event.data.letter) {
+          letterData = event.data.letter;
+        } else if (event.data.id) {
+          letterData = event.data;
+        } else {
+          console.warn('Unknown spawn event structure:', event.data);
+          return;
+        }
+        
+        const spawnEvent = {
+          frame: event.frame,
+          timestamp: event.timestamp,
+          id: letterData.id,
+          letter: letterData.letter,
+          position: letterData.position || [0, 0.02, -40],
+          duration: letterData.duration || 0,
+          color: letterData.color || '#fff',
+          complexityType: letterData.complexityType || 'normal',
+          originalEvent: event
         };
-        notes.set(event.data.letter.id, note);
+        
+        events.push(spawnEvent);
       }
     });
-    return notes;
+    
+    console.log('Processed spawn events:', events.length);
+    console.log('Sample spawn event:', events[0]);
+    
+    return events;
   });
 
   useEffect(() => {
     const handleReplayUpdate = (update: any) => {
+      console.log('🎬 Replay update:', update.type, update);
+      
       switch (update.type) {
         case 'restore_keyframe':
           setGameState(prevState => ({
@@ -95,10 +131,12 @@ const ReplayViewer: React.FC<ReplayViewerProps> = ({ replayData, replayEngine })
             switch (event.type) {
               case 'keydown':
                 newState.heldKeys = new Set([...newState.heldKeys, event.data.key]);
+                console.log('Key pressed:', event.data.key);
                 break;
                 
               case 'keyup':
                 newState.heldKeys = new Set([...newState.heldKeys].filter(k => k !== event.data.key));
+                console.log('Key released:', event.data.key);
                 break;
                 
               case 'note_hit':
@@ -120,9 +158,11 @@ const ReplayViewer: React.FC<ReplayViewerProps> = ({ replayData, replayEngine })
                 if (event.data.stamp) {
                   newState.stamps = [...newState.stamps, {
                     ...event.data.stamp,
-                    id: Math.random() // Ensure unique ID
+                    id: Math.random(),
+                    spawnFrame: event.frame
                   }];
                 }
+                console.log('Note hit:', event.data);
                 break;
                 
               case 'note_miss':
@@ -133,24 +173,11 @@ const ReplayViewer: React.FC<ReplayViewerProps> = ({ replayData, replayEngine })
                   color: '#f44336',
                   key: prevState.hitFeedback.key + 1
                 };
-                if (event.data.stamp) {
-                  newState.stamps = [...newState.stamps, {
-                    ...event.data.stamp,
-                    id: Math.random()
-                  }];
-                }
+                console.log('Note missed:', event.data);
                 break;
                 
               case 'score_change':
                 newState.score = event.data.score || newState.score;
-                break;
-                
-              case 'combo_change':
-                newState.combo = event.data.combo || newState.combo;
-                break;
-                
-              case 'health_change':
-                newState.health = event.data.health || newState.health;
                 break;
             }
             
@@ -159,81 +186,75 @@ const ReplayViewer: React.FC<ReplayViewerProps> = ({ replayData, replayEngine })
           break;
           
         case 'update_frame':
-          setGameState(prevState => {
-            const currentFrame = update.frame;
-            const currentTime = update.time;
-            
-            // Calculate which notes should be visible at this frame
-            const visibleNotes = [];
-            const frameRate = 60; // 60 FPS
-            const moveSpeedPerFrame = 0.1; // Adjust this to match your game's move speed
-            
-            allSpawnedNotes.forEach((spawnedNote, noteId) => {
-              // Calculate how many frames have passed since this note spawned
-              const framesSinceSpawn = currentFrame - spawnedNote.spawnFrame;
+          const currentFrame = update.frame;
+          const currentTime = update.time;
+          
+          // Simple approach: show all notes that should be spawned by this frame
+          const visibleNotes = [];
+          
+          spawnEvents.forEach((spawnEvent, index) => {
+            // Only process notes that have spawned by this frame
+            if (currentFrame >= spawnEvent.frame) {
+              // Calculate frames since spawn
+              const framesSinceSpawn = currentFrame - spawnEvent.frame;
               
-              if (framesSinceSpawn >= 0) {
-                // Calculate the note's current position
-                const startZ = spawnedNote.position[2];
-                const currentZ = startZ + (framesSinceSpawn * moveSpeedPerFrame);
+              // Simple movement calculation (you can adjust this)
+              const moveSpeed = 0.1; // Units per frame
+              const startZ = spawnEvent.position[2];
+              const currentZ = startZ + (framesSinceSpawn * moveSpeed);
+              
+              // Show notes that are still on screen
+              if (currentZ > -50 && currentZ < 20) {
+                const note = {
+                  id: spawnEvent.id,
+                  letter: spawnEvent.letter,
+                  position: [
+                    spawnEvent.position[0],
+                    spawnEvent.position[1],
+                    currentZ
+                  ],
+                  duration: spawnEvent.duration,
+                  color: spawnEvent.color,
+                  opacity: 1,
+                  isMissed: false,
+                  isHit: false,
+                  isBeingHeld: false,
+                  complexityType: spawnEvent.complexityType,
+                  framesSinceSpawn
+                };
                 
-                // Only show notes that are still on screen and haven't been processed
-                if (currentZ < 10 && currentZ > -25) {
-                  const note = {
-                    ...spawnedNote,
-                    position: [
-                      spawnedNote.position[0],
-                      spawnedNote.position[1],
-                      currentZ
-                    ]
-                  };
-                  
-                  // Check if this note has been hit or missed by looking at events
-                  const hitEvent = replayData.events.find(e => 
-                    e.type === 'note_hit' && 
-                    e.data.letter?.id === noteId && 
-                    e.frame <= currentFrame
-                  );
-                  
-                  const missEvent = replayData.events.find(e => 
-                    e.type === 'note_miss' && 
-                    e.data.letter?.id === noteId && 
-                    e.frame <= currentFrame
-                  );
-                  
-                  if (hitEvent) {
-                    note.isHit = true;
-                    note.opacity = Math.max(0, 1 - ((currentFrame - hitEvent.frame) / 60)); // Fade out over 1 second
-                  } else if (missEvent) {
-                    note.isMissed = true;
-                  }
-                  
-                  // Check if note is being held
-                  const isBeingHeld = prevState.heldKeys.has(note.letter) && 
-                                    note.duration > 0 && 
-                                    !note.isHit && 
-                                    !note.isMissed;
-                  note.isBeingHeld = isBeingHeld;
-                  
-                  visibleNotes.push(note);
-                }
+                visibleNotes.push(note);
               }
-            });
-            
-            return {
-              ...prevState,
-              currentFrame,
-              fallingLetters: visibleNotes,
-              // Clean up old stamps
-              stamps: prevState.stamps.filter(stamp => {
-                const age = currentFrame - (stamp.spawnFrame || currentFrame);
-                return age < 30; // Remove stamps after 30 frames (0.5 seconds)
-              })
-            };
+            }
           });
+          
+          setGameState(prevState => ({
+            ...prevState,
+            currentFrame,
+            fallingLetters: visibleNotes,
+            stamps: prevState.stamps.filter(stamp => {
+              const age = currentFrame - (stamp.spawnFrame || currentFrame);
+              return age < 30;
+            })
+          }));
+          
+          // Update debug info
+          setDebugInfo({
+            currentFrame,
+            totalSpawnEvents: spawnEvents.length,
+            spawnedByNow: spawnEvents.filter(e => currentFrame >= e.frame).length,
+            visibleNotes: visibleNotes.length,
+            sampleCalculation: spawnEvents.length > 0 ? {
+              spawnFrame: spawnEvents[0].frame,
+              framesSinceSpawn: Math.max(0, currentFrame - spawnEvents[0].frame),
+              calculatedZ: spawnEvents[0].position[2] + (Math.max(0, currentFrame - spawnEvents[0].frame) * 0.1)
+            } : null
+          });
+          
           break;
           
         case 'initialize':
+          console.log('🎬 Initializing replay viewer');
           setGameState({
             score: 0,
             combo: 0,
@@ -254,7 +275,7 @@ const ReplayViewer: React.FC<ReplayViewerProps> = ({ replayData, replayEngine })
     };
 
     replayEngine.setStateUpdateCallback(handleReplayUpdate);
-  }, [replayEngine, replayData.events, allSpawnedNotes]);
+  }, [replayEngine, spawnEvents]);
 
   const removeStamp = (id: number) => {
     setGameState(prevState => ({
@@ -272,14 +293,32 @@ const ReplayViewer: React.FC<ReplayViewerProps> = ({ replayData, replayEngine })
     }
   };
 
-  // Debug info to help troubleshoot
-  console.log('Replay Debug:', {
+  // Console logging for debugging
+  console.log('🎮 Current game state:', {
     currentFrame: gameState.currentFrame,
-    visibleNotes: gameState.fallingLetters.length,
-    totalSpawnedNotes: allSpawnedNotes.size,
+    fallingLetters: gameState.fallingLetters.length,
     heldKeys: Array.from(gameState.heldKeys),
-    stamps: gameState.stamps.length
+    debugInfo
   });
+
+  // Force show a test note if no notes are visible but we should have some
+  const testNotes = [];
+  if (gameState.fallingLetters.length === 0 && gameState.currentFrame > 100) {
+    // Add a test note to see if rendering works
+    testNotes.push({
+      id: 'test-note',
+      letter: '3',
+      position: [0, 0.02, 0],
+      duration: 0,
+      color: '#4caf50',
+      opacity: 1,
+      isMissed: false,
+      isHit: false,
+      isBeingHeld: false
+    });
+  }
+
+  const allNotes = [...gameState.fallingLetters, ...testNotes];
 
   return (
     <>
@@ -311,22 +350,62 @@ const ReplayViewer: React.FC<ReplayViewerProps> = ({ replayData, replayEngine })
         REPLAY MODE
       </div>
 
-      {/* Debug Info */}
+      {/* Enhanced Debug Info */}
       <div style={{
         position: 'absolute',
         bottom: '180px',
         left: '20px',
-        background: 'rgba(0, 0, 0, 0.8)',
+        background: 'rgba(0, 0, 0, 0.9)',
         color: 'white',
-        padding: '10px',
+        padding: '15px',
         borderRadius: '8px',
-        fontSize: '12px',
-        zIndex: 1000
+        fontSize: '11px',
+        zIndex: 1000,
+        fontFamily: 'monospace',
+        minWidth: '300px',
+        maxHeight: '300px',
+        overflowY: 'auto'
       }}>
+        <div style={{ color: '#00ff00', fontWeight: 'bold', marginBottom: '5px' }}>
+          REPLAY DEBUG INFO
+        </div>
         Frame: {gameState.currentFrame}<br/>
-        Notes: {gameState.fallingLetters.length}<br/>
-        Total Spawned: {allSpawnedNotes.size}<br/>
-        Held Keys: {Array.from(gameState.heldKeys).join(', ')}
+        Total Spawn Events: {spawnEvents.length}<br/>
+        Should Be Spawned: {debugInfo.spawnedByNow || 0}<br/>
+        Notes Visible: {gameState.fallingLetters.length}<br/>
+        Test Notes: {testNotes.length}<br/>
+        Total Rendering: {allNotes.length}<br/>
+        Held Keys: {Array.from(gameState.heldKeys).join(', ') || 'None'}<br/>
+        <hr style={{ margin: '10px 0' }} />
+        
+        {debugInfo.sampleCalculation && (
+          <>
+            <div style={{ color: '#ffff00' }}>Sample Calculation:</div>
+            Spawn Frame: {debugInfo.sampleCalculation.spawnFrame}<br/>
+            Frames Since: {debugInfo.sampleCalculation.framesSinceSpawn}<br/>
+            Calculated Z: {debugInfo.sampleCalculation.calculatedZ?.toFixed(2)}<br/>
+          </>
+        )}
+        
+        {spawnEvents.length > 0 && (
+          <>
+            <hr style={{ margin: '10px 0' }} />
+            <div style={{ color: '#ffff00' }}>First Spawn Event:</div>
+            Frame: {spawnEvents[0].frame}<br/>
+            Letter: {spawnEvents[0].letter}<br/>
+            Pos: [{spawnEvents[0].position.map(p => p.toFixed(1)).join(', ')}]<br/>
+          </>
+        )}
+        
+        {gameState.fallingLetters.length > 0 && (
+          <>
+            <hr style={{ margin: '10px 0' }} />
+            <div style={{ color: '#00ff00' }}>First Visible Note:</div>
+            Letter: {gameState.fallingLetters[0].letter}<br/>
+            Pos: [{gameState.fallingLetters[0].position.map((p: number) => p.toFixed(1)).join(', ')}]<br/>
+            Since Spawn: {gameState.fallingLetters[0].framesSinceSpawn}<br/>
+          </>
+        )}
       </div>
 
       <style>
@@ -368,6 +447,14 @@ const ReplayViewer: React.FC<ReplayViewerProps> = ({ replayData, replayEngine })
             channelColors={channelColors} 
           />
           
+          {/* Force render a test cube if no notes are showing */}
+          {allNotes.length === 0 && gameState.currentFrame > 100 && (
+            <mesh position={[0, 1, 0]}>
+              <boxGeometry args={[0.5, 0.5, 0.5]} />
+              <meshStandardMaterial color="#ff0000" />
+            </mesh>
+          )}
+          
           {gameState.stamps.map(stamp => (
             <Stamp
               key={stamp.id}
@@ -378,7 +465,7 @@ const ReplayViewer: React.FC<ReplayViewerProps> = ({ replayData, replayEngine })
             />
           ))}
 
-          {gameState.fallingLetters.map(letter => (
+          {allNotes.map(letter => (
             <FallingLetter
               key={letter.id}
               id={letter.id}
