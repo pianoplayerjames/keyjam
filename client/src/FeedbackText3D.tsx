@@ -17,6 +17,7 @@ const FeedbackText3D = ({ feedback }: FeedbackText3DProps) => {
   const [currentFeedback, setCurrentFeedback] = useState(feedback);
   const life = useRef(0);
   const animationDuration = 1.0;
+  const initialColor = useRef<THREE.Color | null>(null);
 
   useEffect(() => {
     if (feedback.text && feedback.key !== currentFeedback.key) {
@@ -26,10 +27,8 @@ const FeedbackText3D = ({ feedback }: FeedbackText3DProps) => {
         groupRef.current.scale.set(0.1, 0.1, 0.1);
         groupRef.current.rotation.z = (Math.random() - 0.5) * 0.4;
       }
-      if (textRef.current) {
-        // Reset color on new feedback
-        textRef.current.color = new THREE.Color(feedback.color);
-      }
+      // Store the initial color
+      initialColor.current = new THREE.Color(feedback.color);
     }
   }, [feedback, currentFeedback.key]);
 
@@ -47,11 +46,13 @@ const FeedbackText3D = ({ feedback }: FeedbackText3DProps) => {
       if (textRef.current) {
         const opacity = life.current < animationDuration / 2 ? (life.current / (animationDuration / 2)) : 1;
         textRef.current.fillOpacity = opacity;
-        textRef.current.strokeOpacity = opacity * 0.5; // Apply opacity to stroke
+        textRef.current.strokeOpacity = opacity * 0.5;
 
-        // Animate color from initial to white for a gradient effect over time
-        if (textRef.current.color instanceof THREE.Color) {
-            textRef.current.color.lerp(new THREE.Color('white'), delta * 2);
+        // Animate color by interpolating between initial color and white
+        if (initialColor.current) {
+          const currentColor = initialColor.current.clone();
+          currentColor.lerp(new THREE.Color('white'), progress * 0.5);
+          textRef.current.color = currentColor;
         }
       }
     }
@@ -63,7 +64,7 @@ const FeedbackText3D = ({ feedback }: FeedbackText3DProps) => {
     <group ref={groupRef} position={[0, 2.5, 0]}>
       <Text
         ref={textRef}
-        fontSize={0.6} // Made text smaller
+        fontSize={0.6}
         color={currentFeedback.color}
         anchorX="center"
         anchorY="middle"

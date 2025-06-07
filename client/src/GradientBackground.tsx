@@ -9,6 +9,9 @@ const GradientMaterial = shaderMaterial(
     u_time: 0,
     u_colorA: new THREE.Color('#330867'),
     u_colorB: new THREE.Color('#30cfd0'),
+    u_colorC: new THREE.Color('#ff006e'),
+    u_combo: 0,
+    u_intensity: 1.0,
   },
   // Vertex Shader
   `
@@ -23,62 +26,158 @@ const GradientMaterial = shaderMaterial(
     uniform float u_time;
     uniform vec3 u_colorA;
     uniform vec3 u_colorB;
+    uniform vec3 u_colorC;
+    uniform float u_combo;
+    uniform float u_intensity;
     varying vec2 vUv;
 
-    float random (vec2 st) {
-        return fract(sin(dot(st.xy,
-                            vec2(12.9898,78.233)))*
-            43758.5453123);
+    // Hash function for better randomness
+    float hash(vec2 p) {
+        vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+        p3 += dot(p3, p3.yzx + 33.33);
+        return fract((p3.x + p3.y) * p3.z);
     }
 
-    float noise (in vec2 st) {
-        vec2 i = floor(st);
-        vec2 f = fract(st);
+    // Improved noise function
+    float noise(vec2 p) {
+        vec2 i = floor(p);
+        vec2 f = fract(p);
+        
+        float a = hash(i);
+        float b = hash(i + vec2(1.0, 0.0));
+        float c = hash(i + vec2(0.0, 1.0));
+        float d = hash(i + vec2(1.0, 1.0));
+        
+        vec2 u = f * f * (3.0 - 2.0 * f);
+        return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+    }
 
-        float a = random(i);
-        float b = random(i + vec2(1.0, 0.0));
-        float c = random(i + vec2(0.0, 1.0));
-        float d = random(i + vec2(1.0, 1.0));
+    // Fractal brownian motion
+    float fbm(vec2 p) {
+        float value = 0.0;
+        float amplitude = 0.5;
+        for(int i = 0; i < 5; i++) {
+            value += amplitude * noise(p);
+            p *= 2.0;
+            amplitude *= 0.5;
+        }
+        return value;
+    }
 
-        vec2 u = f*f*(3.0-2.0*f);
-        return mix(a, b, u.x) +
-                (c - a)* u.y * (1.0 - u.x) +
-                (d - b) * u.x * u.y;
+    // Hexagonal distance for honeycomb pattern
+    float hexDist(vec2 p) {
+        p = abs(p);
+        return max(dot(p, normalize(vec2(1.0, 1.73))), p.x);
+    }
+
+    // Create pulsing circles
+    float circles(vec2 uv, float time) {
+        vec2 center1 = vec2(0.3, 0.7) + 0.2 * vec2(sin(time * 0.8), cos(time * 0.6));
+        vec2 center2 = vec2(0.7, 0.3) + 0.2 * vec2(cos(time * 0.7), sin(time * 0.9));
+        vec2 center3 = vec2(0.5, 0.5) + 0.1 * vec2(sin(time * 1.2), cos(time * 1.1));
+        
+        float d1 = length(uv - center1);
+        float d2 = length(uv - center2);
+        float d3 = length(uv - center3);
+        
+        float circle1 = smoothstep(0.2, 0.0, d1) * sin(time * 2.0 + d1 * 10.0);
+        float circle2 = smoothstep(0.15, 0.0, d2) * sin(time * 1.5 + d2 * 8.0);
+        float circle3 = smoothstep(0.1, 0.0, d3) * sin(time * 3.0 + d3 * 12.0);
+        
+        return (circle1 + circle2 + circle3) * 0.3;
+    }
+
+    // Energy waves
+    float waves(vec2 uv, float time) {
+        float wave1 = sin(uv.x * 8.0 + time * 2.0) * 0.5 + 0.5;
+        float wave2 = sin(uv.y * 12.0 + time * 1.5) * 0.5 + 0.5;
+        float wave3 = sin((uv.x + uv.y) * 6.0 + time * 2.5) * 0.5 + 0.5;
+        
+        return (wave1 * wave2 + wave3) * 0.2;
+    }
+
+    // Grid pattern for tech feel
+    float grid(vec2 uv, float time) {
+        vec2 grid_uv = uv * 20.0 + time * 0.5;
+        vec2 grid_id = floor(grid_uv);
+        vec2 grid_fract = fract(grid_uv);
+        
+        float line_x = smoothstep(0.0, 0.05, grid_fract.x) * smoothstep(1.0, 0.95, grid_fract.x);
+        float line_y = smoothstep(0.0, 0.05, grid_fract.y) * smoothstep(1.0, 0.95, grid_fract.y);
+        
+        float grid_intensity = (line_x + line_y) * 0.1;
+        
+        // Add some random bright spots
+        float bright_spot = step(0.98, hash(grid_id + floor(time * 2.0)));
+        grid_intensity += bright_spot * 0.5;
+        
+        return grid_intensity;
+    }
+
+    // Particle field
+    float particles(vec2 uv, float time) {
+        vec2 particle_uv = uv * 15.0;
+        particle_uv.y += time * 3.0; // Particles move upward
+        
+        vec2 particle_id = floor(particle_uv);
+        vec2 particle_pos = fract(particle_uv);
+        
+        // Random position within cell
+        vec2 offset = vec2(hash(particle_id), hash(particle_id + vec2(1.0, 0.0)));
+        offset = offset * 0.8 + 0.1; // Keep particles away from edges
+        
+        float dist = length(particle_pos - offset);
+        float particle_size = 0.02 + 0.03 * hash(particle_id + vec2(2.0, 0.0));
+        
+        // Twinkle effect
+        float twinkle = sin(time * 5.0 + hash(particle_id) * 6.28) * 0.5 + 0.5;
+        twinkle = smoothstep(0.3, 1.0, twinkle);
+        
+        float particle = smoothstep(particle_size, 0.0, dist) * twinkle;
+        return particle * 0.4;
     }
 
     void main() {
-      // Background Gradient
-      vec2 pos = vUv;
-      float n = noise(pos * 5.0 + u_time * 0.2);
-      vec3 gradient = mix(u_colorA, u_colorB, pos.y + n * 0.1);
-
-      // Starfield Layer
-      vec2 star_uv = vUv;
-      star_uv.y -= u_time * 0.03; // Stars float upwards
-
-      star_uv *= 10.0; // Scale to create a 10x10 grid
-
-      vec2 tile_id = floor(star_uv);
-      vec2 tiled_uv = fract(star_uv);
-
-      // Jitter the position of the star within each tile
-      vec2 star_center = vec2(0.5, 0.5);
-      star_center.x += random(tile_id) * 0.8 - 0.4;
-      star_center.y += random(tile_id + vec2(1.0, 0.0)) * 0.8 - 0.4;
-
-      // Create a twinkling effect for each star
-      float twinkle = sin(u_time * 3.0 + random(tile_id) * 6.28) * 0.5 + 0.5;
-      twinkle = smoothstep(0.8, 1.0, twinkle); // Make the twinkle sharp
-
-      // Draw a star (diamond shape) based on distance to the jittered center
-      float d = abs(tiled_uv.x - star_center.x) + abs(tiled_uv.y - star_center.y);
-      float star_shape = 1.0 - smoothstep(0.0, 0.07, d); // Small, sharp diamond
-
-      float stars = star_shape * twinkle;
-      vec3 star_color = vec3(1.0, 1.0, 0.9) * stars; // Soft white star color
-
-      // Combine gradient and stars
-      gl_FragColor = vec4(gradient + star_color, 1.0);
+        vec2 uv = vUv;
+        
+        // Base gradient with combo-influenced colors
+        float combo_factor = min(u_combo / 50.0, 1.0);
+        vec3 base_gradient = mix(
+            mix(u_colorA, u_colorB, uv.y + fbm(uv * 2.0 + u_time * 0.1) * 0.3),
+            u_colorC,
+            combo_factor * 0.4
+        );
+        
+        // Add dynamic effects
+        float effect_intensity = u_intensity * (1.0 + combo_factor);
+        
+        // Energy waves
+        float wave_effect = waves(uv, u_time) * effect_intensity;
+        
+        // Pulsing circles
+        float circle_effect = circles(uv, u_time) * effect_intensity;
+        
+        // Tech grid (more prominent at higher combos)
+        float grid_effect = grid(uv, u_time) * combo_factor * 2.0;
+        
+        // Particle field
+        float particle_effect = particles(uv, u_time);
+        
+        // Combine all effects
+        vec3 final_color = base_gradient;
+        final_color += wave_effect * u_colorB;
+        final_color += circle_effect * u_colorC;
+        final_color += grid_effect * vec3(1.0, 1.0, 0.8);
+        final_color += particle_effect * vec3(1.0, 1.0, 1.0);
+        
+        // Add some overall glow based on combo
+        final_color *= (1.0 + combo_factor * 0.5);
+        
+        // Vignette effect
+        float vignette = 1.0 - length(uv - 0.5) * 0.8;
+        final_color *= vignette;
+        
+        gl_FragColor = vec4(final_color, 1.0);
     }
   `
 )
@@ -86,25 +185,37 @@ const GradientMaterial = shaderMaterial(
 extend({ GradientMaterial })
 
 const comboColors = [
-  { colorA: '#330867', colorB: '#30cfd0' },
-  { colorA: '#ff4f7b', colorB: '#ffc107' },
-  { colorA: '#4caf50', colorB: '#2196f3' },
-  { colorA: '#9c27b0', colorB: '#f44336' },
+  { colorA: '#1a0033', colorB: '#330066', colorC: '#ff006e' },    // Purple/Pink - Base
+  { colorA: '#ff1744', colorB: '#ff9800', colorC: '#ffeb3b' },    // Red/Orange/Yellow - Fire
+  { colorA: '#00e676', colorB: '#00bcd4', colorC: '#3f51b5' },    // Green/Cyan/Blue - Cool
+  { colorA: '#9c27b0', colorB: '#e91e63', colorC: '#ff5722' },    // Purple/Pink/Red - Hot
+  { colorA: '#ffc107', colorB: '#ff9800', colorC: '#f44336' },    // Gold/Orange/Red - Intense
+  { colorA: '#00e5ff', colorB: '#1de9b6', colorC: '#76ff03' },    // Cyan/Teal/Lime - Electric
 ];
 
 const GradientBackground = ({ combo }: { combo: number }) => {
   const ref = useRef<THREE.ShaderMaterial>(null!)
   
-  const { colorA, colorB } = useMemo(() => {
+  const { colorA, colorB, colorC } = useMemo(() => {
     const colorIndex = Math.floor(combo / 10) % comboColors.length;
     return comboColors[colorIndex];
+  }, [combo]);
+
+  // Intensity based on combo for more dramatic effects
+  const intensity = useMemo(() => {
+    return 1.0 + Math.min(combo / 20.0, 2.0);
   }, [combo]);
 
   useFrame(({ clock }) => {
     if (ref.current) {
       ref.current.uniforms.u_time.value = clock.getElapsedTime()
-      ref.current.uniforms.u_colorA.value.lerp(new THREE.Color(colorA), 0.05);
-      ref.current.uniforms.u_colorB.value.lerp(new THREE.Color(colorB), 0.05);
+      ref.current.uniforms.u_combo.value = combo
+      ref.current.uniforms.u_intensity.value = intensity
+      
+      // Smooth color transitions
+      ref.current.uniforms.u_colorA.value.lerp(new THREE.Color(colorA), 0.02);
+      ref.current.uniforms.u_colorB.value.lerp(new THREE.Color(colorB), 0.02);
+      ref.current.uniforms.u_colorC.value.lerp(new THREE.Color(colorC), 0.02);
     }
   })
 
