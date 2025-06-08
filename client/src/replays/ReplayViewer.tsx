@@ -1,13 +1,12 @@
-// ReplayViewer.tsx - Enhanced debugging version
+// client/src/replays/ReplayViewer.tsx
 import React, { useState, useEffect, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import FallingLetter from '../FallingNotes';
 import Fretboard from '../Fretboard';
-import GradientBackground from '../GradientBackground';
+import PulsingBackground from '../PulsingBackground'; // Changed
 import SparklesEffect from '../SparklesEffect';
 import FeedbackText3D from '../FeedbackText3D';
-import FloatingShapes from '../FloatingShapes';
 import { Veronica } from '../Veronica';
 import HealthUI from '../HealthUI';
 import TimeUI from '../TimeUI';
@@ -65,7 +64,7 @@ const ReplayViewer: React.FC<ReplayViewerProps> = ({ replayData, replayEngine })
   const [spawnEvents] = useState(() => {
     const events = [];
     
-    console.log('🔍 Processing replay events...');
+    console.log('剥 Processing replay events...');
     console.log('Total events:', replayData.events.length);
     
     replayData.events.forEach((event, index) => {
@@ -111,7 +110,7 @@ const ReplayViewer: React.FC<ReplayViewerProps> = ({ replayData, replayEngine })
 
   useEffect(() => {
     const handleReplayUpdate = (update: any) => {
-      console.log('🎬 Replay update:', update.type, update);
+      console.log('汐 Replay update:', update.type, update);
       
       switch (update.type) {
         case 'restore_keyframe':
@@ -254,7 +253,7 @@ const ReplayViewer: React.FC<ReplayViewerProps> = ({ replayData, replayEngine })
           break;
           
         case 'initialize':
-          console.log('🎬 Initializing replay viewer');
+          console.log('汐 Initializing replay viewer');
           setGameState({
             score: 0,
             combo: 0,
@@ -294,7 +293,7 @@ const ReplayViewer: React.FC<ReplayViewerProps> = ({ replayData, replayEngine })
   };
 
   // Console logging for debugging
-  console.log('🎮 Current game state:', {
+  console.log('式 Current game state:', {
     currentFrame: gameState.currentFrame,
     fallingLetters: gameState.fallingLetters.length,
     heldKeys: Array.from(gameState.heldKeys),
@@ -420,8 +419,7 @@ const ReplayViewer: React.FC<ReplayViewerProps> = ({ replayData, replayEngine })
       <Canvas camera={{ position: [0, 2.5, 5], fov: 75 }}>
         <Suspense fallback={null}>
           <color attach="background" args={['#191919']} />
-          <GradientBackground combo={gameState.combo} />
-          <FloatingShapes />
+          <PulsingBackground combo={gameState.combo} /> {/* Changed */}
           <ambientLight intensity={0.8} />
 
           <Veronica position={[-4.5, -1.5, 0]} scale={1.5} rotation={[0, 0.5, 0]} />

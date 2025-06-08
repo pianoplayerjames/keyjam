@@ -6,10 +6,9 @@ import { useReplayStore } from '../stores/replayStore';
 import { ReplayEngine } from './ReplayEngine';
 import FallingLetter from '../FallingNotes';
 import Fretboard from '../Fretboard';
-import GradientBackground from '../GradientBackground';
+import PulsingBackground from '../PulsingBackground'; // Changed
 import SparklesEffect from '../SparklesEffect';
 import FeedbackText3D from '../FeedbackText3D';
-import FloatingShapes from '../FloatingShapes';
 import { Veronica } from '../Veronica';
 import HealthUI from '../HealthUI';
 import TimeUI from '../TimeUI';
@@ -129,8 +128,7 @@ const ReplayViewer: React.FC = () => {
       <Canvas camera={{ position: [0, 2.5, 5], fov: 75 }}>
         <Suspense fallback={null}>
           <color attach="background" args={['#191919']} />
-          <GradientBackground />
-          <FloatingShapes />
+          <PulsingBackground combo={gameState.combo} /> {/* Changed */}
           <ambientLight intensity={0.8} />
           <Veronica position={[-4.5, -1.5, 0]} scale={1.5} rotation={[0, 0.5, 0]} />
           <FeedbackText3D />

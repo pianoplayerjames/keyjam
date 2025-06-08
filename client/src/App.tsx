@@ -4,8 +4,7 @@ import { Canvas } from '@react-three/fiber';
 import Game from './Game';
 import MainMenu from './MainMenu';
 import Transition from './Transition';
-import FloatingShapes from './FloatingShapes';
-import GradientBackground from './GradientBackground';
+import PulsingBackground from './PulsingBackground'; // Changed
 import { useGameStore } from './stores/gameStore';
 import { useMenuStore } from './stores/menuStore';
 import { useReplayStore } from './stores/replayStore';
@@ -57,8 +56,7 @@ function App() {
         className="absolute inset-0"
       >
         <Suspense fallback={<SimpleLoading />}>
-          <GradientBackground />
-          <FloatingShapes />
+          <PulsingBackground /> {/* Changed */}
           <ambientLight intensity={0.8} />
           <directionalLight position={[10, 10, 5]} intensity={0.5} />
           

@@ -1,3 +1,4 @@
+// client/src/MainMenu.tsx
 import { useState, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import CareerMenu from './menus/CareerMenu';
@@ -8,8 +9,7 @@ import DifficultyMenu from './menus/DifficultyMenu';
 import TimeSelectionMenu from './menus/TimeSelectionMenu';
 import ScoreSelectionMenu from './menus/ScoreSelectionMenu';
 import ReplayBrowser from './replays/ReplayBrowser';
-import GradientBackground from './GradientBackground';
-import FloatingShapes from './FloatingShapes';
+import PulsingBackground from './PulsingBackground'; // Changed
 import { useMenuStore } from './stores/menuStore';
 import { useGameStore } from './stores/gameStore';
 
@@ -61,8 +61,7 @@ const MainMenu = () => {
               className="absolute inset-0"
             >
               <Suspense fallback={null}>
-                <GradientBackground combo={0} />
-                <FloatingShapes />
+                <PulsingBackground /> {/* Changed */}
                 <ambientLight intensity={0.8} />
                 <directionalLight position={[10, 10, 5]} intensity={0.5} />
               </Suspense>
@@ -87,8 +86,7 @@ const MainMenu = () => {
               className="absolute inset-0"
             >
               <Suspense fallback={null}>
-                <GradientBackground combo={5} />
-                <FloatingShapes />
+                <PulsingBackground /> {/* Changed */}
                 <ambientLight intensity={0.8} />
                 <directionalLight position={[10, 10, 5]} intensity={0.5} />
               </Suspense>
@@ -117,8 +115,7 @@ const MainMenu = () => {
               className="absolute inset-0"
             >
               <Suspense fallback={null}>
-                <GradientBackground combo={10} />
-                <FloatingShapes />
+                <PulsingBackground /> {/* Changed */}
                 <ambientLight intensity={0.8} />
                 <directionalLight position={[10, 10, 5]} intensity={0.5} />
               </Suspense>
@@ -143,8 +140,7 @@ const MainMenu = () => {
               className="absolute inset-0"
             >
               <Suspense fallback={null}>
-                <GradientBackground combo={15} />
-                <FloatingShapes />
+                <PulsingBackground /> {/* Changed */}
                 <ambientLight intensity={0.8} />
                 <directionalLight position={[10, 10, 5]} intensity={0.5} />
               </Suspense>
@@ -169,8 +165,7 @@ const MainMenu = () => {
               className="absolute inset-0"
             >
               <Suspense fallback={null}>
-                <GradientBackground combo={20} />
-                <FloatingShapes />
+                <PulsingBackground /> {/* Changed */}
                 <ambientLight intensity={0.8} />
                 <directionalLight position={[10, 10, 5]} intensity={0.5} />
               </Suspense>
@@ -195,8 +190,7 @@ const MainMenu = () => {
               className="absolute inset-0"
             >
               <Suspense fallback={null}>
-                <GradientBackground combo={25} />
-                <FloatingShapes />
+                <PulsingBackground /> {/* Changed */}
                 <ambientLight intensity={0.8} />
                 <directionalLight position={[10, 10, 5]} intensity={0.5} />
               </Suspense>
@@ -221,8 +215,7 @@ const MainMenu = () => {
               className="absolute inset-0"
             >
               <Suspense fallback={null}>
-                <GradientBackground combo={30} />
-                <FloatingShapes />
+                <PulsingBackground /> {/* Changed */}
                 <ambientLight intensity={0.8} />
                 <directionalLight position={[10, 10, 5]} intensity={0.5} />
               </Suspense>
@@ -244,8 +237,7 @@ const MainMenu = () => {
               className="absolute inset-0"
             >
               <Suspense fallback={null}>
-                <GradientBackground combo={35} />
-                <FloatingShapes />
+                <PulsingBackground /> {/* Changed */}
                 <ambientLight intensity={0.8} />
                 <directionalLight position={[10, 10, 5]} intensity={0.5} />
               </Suspense>
@@ -266,8 +258,7 @@ const MainMenu = () => {
               className="absolute inset-0"
             >
               <Suspense fallback={null}>
-                <GradientBackground combo={0} />
-                <FloatingShapes />
+                <PulsingBackground /> {/* Changed */}
                 <ambientLight intensity={0.8} />
                 <directionalLight position={[10, 10, 5]} intensity={0.5} />
               </Suspense>

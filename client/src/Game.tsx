@@ -1,13 +1,13 @@
+// client/src/Game.tsx
 import { useEffect, Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { Stats } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import FallingLetter from './FallingNotes'
 import Fretboard from './Fretboard'
-import GradientBackground from './GradientBackground'
+import PulsingBackground from './PulsingBackground' // Changed
 import SparklesEffect from './SparklesEffect'
 import FeedbackText3D from './FeedbackText3D'
-import FloatingShapes from './FloatingShapes'
 import { Veronica } from './Veronica'
 import HealthUI from './HealthUI'
 import TimeUI from './TimeUI'
@@ -92,8 +92,7 @@ const Game = ({ onBackToMenu }: GameProps) => {
         <GameLogic />
         <Suspense fallback={null}>
           <color attach="background" args={['#191919']} />
-          <GradientBackground combo={combo} />
-          <FloatingShapes />
+          <PulsingBackground /> {/* Changed */}
           <ambientLight intensity={0.8} />
 
           <Veronica position={[-4.5, -1.5, 0]} scale={1.5} rotation={[0, 0.5, 0]} />
