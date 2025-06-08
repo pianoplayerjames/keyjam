@@ -3,7 +3,10 @@ import React from 'react';
 import { useGameStore } from './stores/gameStore';
 
 const HealthUI: React.FC = () => {
-  const { health, score, combo } = useGameStore();
+  const health = useGameStore((state) => state.health);
+  const score = useGameStore((state) => state.score);
+  const combo = useGameStore((state) => state.combo);
+
   const healthBarColor = health > 50 ? '#4caf50' : health > 20 ? '#ffc107' : '#f44336';
 
   return (

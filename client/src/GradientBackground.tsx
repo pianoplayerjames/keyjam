@@ -186,48 +186,43 @@ const GradientMaterial = shaderMaterial(
 extend({ GradientMaterial })
 
 const comboColors = [
-  { colorA: '#1a0033', colorB: '#330066', colorC: '#ff006e' },    // Purple/Pink - Base
-  { colorA: '#ff1744', colorB: '#ff9800', colorC: '#ffeb3b' },    // Red/Orange/Yellow - Fire
-  { colorA: '#00e676', colorB: '#00bcd4', colorC: '#3f51b5' },    // Green/Cyan/Blue - Cool
-  { colorA: '#9c27b0', colorB: '#e91e63', colorC: '#ff5722' },    // Purple/Pink/Red - Hot
-  { colorA: '#ffc107', colorB: '#ff9800', colorC: '#f44336' },    // Gold/Orange/Red - Intense
-  { colorA: '#00e5ff', colorB: '#1de9b6', colorC: '#76ff03' },    // Cyan/Teal/Lime - Electric
+    { colorA: '#1a0033', colorB: '#330066', colorC: '#ff006e' },
+    { colorA: '#ff1744', colorB: '#ff9800', colorC: '#ffeb3b' },
+    { colorA: '#00e676', colorB: '#00bcd4', colorC: '#3f51b5' },
+    { colorA: '#9c27b0', colorB: '#e91e63', colorC: '#ff5722' },
+    { colorA: '#ffc107', colorB: '#ff9800', colorC: '#f44336' },
+    { colorA: '#00e5ff', colorB: '#1de9b6', colorC: '#76ff03' },
 ];
 
 const GradientBackground = () => {
-  const ref = useRef<THREE.ShaderMaterial>(null!)
-  const combo = useGameStore((state) => state.combo)
-  
-  const { colorA, colorB, colorC } = useMemo(() => {
+    const ref = useRef<THREE.ShaderMaterial>(null!)
+    const combo = useGameStore((state) => state.combo)
+
     const colorIndex = Math.floor(combo / 10) % comboColors.length;
-    return comboColors[colorIndex];
-  }, [combo]);
+    const { colorA, colorB, colorC } = comboColors[colorIndex];
 
-  // Intensity based on combo for more dramatic effects
-  const intensity = useMemo(() => {
-    return 1.0 + Math.min(combo / 20.0, 2.0);
-  }, [combo]);
+    const intensity = 1.0 + Math.min(combo / 20.0, 2.0);
 
-  useFrame(({ clock }) => {
-    if (ref.current) {
-      ref.current.uniforms.u_time.value = clock.getElapsedTime()
-      ref.current.uniforms.u_combo.value = combo
-      ref.current.uniforms.u_intensity.value = intensity
-      
-      // Smooth color transitions
-      ref.current.uniforms.u_colorA.value.lerp(new THREE.Color(colorA), 0.02);
-      ref.current.uniforms.u_colorB.value.lerp(new THREE.Color(colorB), 0.02);
-      ref.current.uniforms.u_colorC.value.lerp(new THREE.Color(colorC), 0.02);
-    }
-  })
+    useFrame(({ clock }) => {
+        if (ref.current) {
+            ref.current.uniforms.u_time.value = clock.getElapsedTime()
+            ref.current.uniforms.u_combo.value = combo
+            ref.current.uniforms.u_intensity.value = intensity
+            
+            // Smooth color transitions
+            ref.current.uniforms.u_colorA.value.lerp(new THREE.Color(colorA), 0.02);
+            ref.current.uniforms.u_colorB.value.lerp(new THREE.Color(colorB), 0.02);
+            ref.current.uniforms.u_colorC.value.lerp(new THREE.Color(colorC), 0.02);
+        }
+    })
 
-  return (
-    <mesh>
-      <planeGeometry args={[2, 2]} />
-      {/* @ts-ignore */}
-      <gradientMaterial ref={ref} depthWrite={false} />
-    </mesh>
-  )
+    return (
+        <mesh>
+            <planeGeometry args={[2, 2]} />
+            {/* @ts-ignore */}
+            <gradientMaterial ref={ref} depthWrite={false} />
+        </mesh>
+    )
 }
 
 export default GradientBackground;
