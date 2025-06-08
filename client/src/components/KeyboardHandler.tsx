@@ -1,4 +1,3 @@
-// client/src/components/KeyboardHandler.tsx
 import { useEffect } from 'react'
 import { useGameStore } from '../stores/gameStore'
 import { ComplexityManager } from '../ComplexityManager'
@@ -15,12 +14,15 @@ const calculateHitAccuracy = (
   const config = ComplexityManager.getConfig(complexity)
   const distance = Math.abs(notePosition - hitZoneCenter)
   
-  const perfectWindow = config.timingWindows.perfect * (complexity <= 30 ? 2 : complexity <= 60 ? 1.5 : 1)
-  const goodWindow = config.timingWindows.good * (complexity <= 30 ? 1.8 : complexity <= 60 ? 1.3 : 1)
-  const almostWindow = config.timingWindows.almost * (complexity <= 30 ? 1.5 : 1.2)
+  const baseSpeed = 15;
+  const moveSpeed = baseSpeed * config.speedMultiplier;
+
+  const perfectWindow = config.timingWindows.perfect * moveSpeed;
+  const goodWindow = config.timingWindows.good * moveSpeed;
+  const almostWindow = config.timingWindows.almost * moveSpeed;
   
   const baseScore = 10 + (complexity / 10)
-  const timingOffset = notePosition - hitZoneCenter
+  const timingOffset = (notePosition - hitZoneCenter) / moveSpeed;
   
   if (distance <= perfectWindow) {
     return {
@@ -97,7 +99,6 @@ const KeyboardHandler = () => {
       
       const xPosition = channelPositions[channelIndex]
 
-      // Update held keys
       const newHeldKeys = new Set(heldKeys)
       newHeldKeys.add(pressedLetter)
       setHeldKeys(newHeldKeys)
@@ -147,7 +148,6 @@ const KeyboardHandler = () => {
                            1 + (complexity / 200)
         const newHealth = Math.min(100, health + healthBonus + (newCombo * 0.1))
         
-        // Update statistics based on hit result
         incrementTotalNotesProcessed()
         switch (hitResult.accuracy) {
           case 'perfect':
