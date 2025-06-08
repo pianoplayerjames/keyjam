@@ -17,6 +17,7 @@ import Stamp from './Stamp'
 import ScoreChart from './ScoreChart'
 import GameLogic from './components/GameLogic'
 import KeyboardHandler from './components/KeyboardHandler'
+import TutorialUI from './TutorialUI'
 import { useGameStore } from './stores/gameStore'
 import { useReplayStore } from './stores/replayStore'
 import { replayRecorder } from './replays/ReplayRecorder'
@@ -26,36 +27,49 @@ interface GameProps {
 }
 
 const Game = ({ onBackToMenu }: GameProps) => {
-  const gameConfig = useGameStore((state) => state.gameConfig);
-  const score = useGameStore((state) => state.score);
-  const maxCombo = useGameStore((state) => state.maxCombo);
-  const totalNotes = useGameStore((state) => state.totalNotes);
-  const calculateAccuracy = useGameStore((state) => state.calculateAccuracy);
-  const fallingLetters = useGameStore((state) => state.fallingLetters);
-  const stamps = useGameStore((state) => state.stamps);
-  const isGameOver = useGameStore((state) => state.isGameOver);
-  const removeStamp = useGameStore((state) => state.removeStamp);
-  const resetGame = useGameStore((state) => state.resetGame);
+  const {
+    gameConfig,
+    score,
+    maxCombo,
+    totalNotes,
+    calculateAccuracy,
+    fallingLetters,
+    stamps,
+    isGameOver,
+    removeStamp,
+    resetGame,
+    updateCareerProgress,
+  } = useGameStore();
 
-  const saveReplay = useReplayStore((state) => state.saveReplay);
-  const setIsRecording = useReplayStore((state) => state.setIsRecording);
+  const { saveReplay, setIsRecording } = useReplayStore();
 
   useEffect(() => {
     if (isGameOver) {
+      const accuracy = calculateAccuracy();
       const metadata = {
         finalScore: score,
         maxCombo: maxCombo,
         totalNotes: totalNotes,
-        accuracy: calculateAccuracy(),
+        accuracy: accuracy,
         gameConfig: gameConfig
       };
+
+      if (gameConfig.mode === 'career' && gameConfig.career) {
+        updateCareerProgress(
+          gameConfig.career.chapterIndex,
+          gameConfig.career.levelIndex,
+          score,
+          accuracy
+        );
+      }
+      
       const replayData = replayRecorder.stopRecording(metadata);
       if (replayData.events.length > 0) {
         saveReplay(replayData);
       }
       setIsRecording(false);
     }
-  }, [isGameOver, saveReplay, setIsRecording, score, maxCombo, totalNotes, calculateAccuracy, gameConfig]);
+  }, [isGameOver, saveReplay, setIsRecording, score, maxCombo, totalNotes, calculateAccuracy, gameConfig, updateCareerProgress]);
 
   const handleReplay = () => {
     resetGame();
@@ -88,6 +102,8 @@ const Game = ({ onBackToMenu }: GameProps) => {
       <KeyboardHandler />
       
       {!isGameOver && renderUI()}
+
+      {gameConfig.tutorial?.type === 'waitForInput' && <TutorialUI />}
       
       {!isGameOver && <ComplexityUI />}
       

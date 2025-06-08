@@ -1,4 +1,3 @@
-// client/src/components/GameLogic.tsx
 import { useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useGameStore } from '../stores/gameStore'
@@ -9,6 +8,7 @@ import { songs } from '../songs/song-data';
 
 const allLetters = '12345678';
 const allChannelColors = ['#ff4f7b', '#ffc107', '#4caf50', '#2196f3', '#9c27b0', '#f44336', '#673ab7', '#00bcd4'];
+const HIT_ZONE_Z = 2.0;
 
 type Letter = ReturnType<typeof useGameStore.getState>['fallingLetters'][0];
 
@@ -31,6 +31,7 @@ const GameLogic = () => {
     setIsGameOver,
     addScore,
     heldKeys,
+    setTutorialPrompt,
   } = useGameStore()
 
   const { isRecording } = useReplayStore()
@@ -47,7 +48,6 @@ const GameLogic = () => {
   const channelPositions = Array.from({ length: lanes }, (_, i) => i - (lanes - 1) / 2);
   const channelColors = allChannelColors.slice(0, lanes);
 
-
   if (!initComplexity.current && (gameConfig.difficulty > 0 || gameConfig.mode === 'arcade')) {
     if (gameConfig.mode === 'arcade' && gameConfig.songId) {
         const song = songs.find(s => s.id === gameConfig.songId);
@@ -61,7 +61,16 @@ const GameLogic = () => {
   }
 
   if (generatedPattern.current.length === 0 && complexity > 0) {
-    if (gameConfig.mode === 'arcade' && gameConfig.songId) {
+    const isTutorialWaitMode = gameConfig.tutorial?.type === 'waitForInput';
+    if (isTutorialWaitMode) {
+        generatedPattern.current = [
+            { channels: [0], timing: 0, type: 'normal' },
+            { channels: [0], timing: 2, type: 'normal' },
+            { channels: [0], timing: 4, type: 'normal' },
+            { channels: [0], timing: 6, type: 'normal' },
+            { channels: [0], timing: 8, type: 'normal' },
+        ];
+    } else if (gameConfig.mode === 'arcade' && gameConfig.songId) {
         const song = songs.find(s => s.id === gameConfig.songId);
         if (song) {
             generatedPattern.current = song.pattern;
@@ -85,6 +94,13 @@ const GameLogic = () => {
   useFrame((state, delta) => {
     if (isGameOver) return
 
+    const currentFallingLetters = useGameStore.getState().fallingLetters;
+    const isTutorialWaitMode = gameConfig.tutorial?.type === 'waitForInput';
+
+    if (isTutorialWaitMode && currentFallingLetters.some(l => l.isPaused)) {
+        return;
+    }
+
     frameCount.current++
 
     if (isRecording) {
@@ -105,9 +121,9 @@ const GameLogic = () => {
     const config = ComplexityManager.getConfig(complexity)
     const song = gameConfig.mode === 'arcade' && gameConfig.songId ? songs.find(s => s.id === gameConfig.songId) : null;
     const bpm = song ? song.bpm : 120 * config.bpmMultiplier;
-    const beatInterval = 60 / bpm
-    const spawnInterval = beatInterval / 2
-    
+    const beatInterval = 60 / bpm;
+    const spawnInterval = isTutorialWaitMode ? 3.0 : beatInterval / 2;
+
     const currentTime = state.clock.getElapsedTime()
     const newlySpawnedNotes: Letter[] = [];
 
@@ -146,7 +162,6 @@ const GameLogic = () => {
     const actualMoveSpeed = moveSpeed * delta
     const shrinkSpeed = 8
 
-    const currentFallingLetters = useGameStore.getState().fallingLetters;
     const allNotesThisFrame = [...currentFallingLetters, ...newlySpawnedNotes];
 
     const updatedLetters = allNotesThisFrame.map(letter => {
@@ -171,12 +186,14 @@ const GameLogic = () => {
         }
         return newLetter
       }
-
-      newLetter.position = [
-        newLetter.position[0], 
-        newLetter.position[1], 
-        newLetter.position[2] + actualMoveSpeed
-      ]
+      
+      if (isTutorialWaitMode && !newLetter.isPaused && newLetter.position[2] + actualMoveSpeed >= HIT_ZONE_Z) {
+          newLetter.position[2] = HIT_ZONE_Z;
+          newLetter.isPaused = true;
+          setTutorialPrompt({ text: `Press the '${newLetter.letter}' key to continue!`, visible: true });
+      } else {
+          newLetter.position[2] += actualMoveSpeed
+      }
 
       if (newLetter.isMissed) {
         newLetter.duration = Math.max(0, (newLetter.duration || 0) - shrinkSpeed * delta)

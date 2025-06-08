@@ -84,7 +84,8 @@ const KeyboardHandler = () => {
     incrementGoodNotes,
     incrementAlmostNotes,
     incrementMissedNotes,
-    incrementTotalNotesProcessed
+    incrementTotalNotesProcessed,
+    setTutorialPrompt
   } = useGameStore()
 
   const lanes = gameConfig.lanes || 5;
@@ -97,6 +98,18 @@ const KeyboardHandler = () => {
       
       const pressedLetter = event.key.toLowerCase()
       replayRecorder.recordEvent('keydown', { key: pressedLetter });
+      
+      const pausedNote = fallingLetters.find(l => l.isPaused && l.letter === pressedLetter);
+      if (pausedNote) {
+          setScore(score + 10);
+          setCombo(combo + 1);
+          setFallingLetters(prev => prev.map(l => 
+            l.id === pausedNote.id ? { ...l, isHit: true, isPaused: false, wasProcessed: true } : l
+          ));
+          setTutorialPrompt(null);
+          setHitFeedback({ text: 'GOOD!', color: '#4caf50', key: Date.now() });
+          return;
+      }
       
       const channelIndex = letters.indexOf(pressedLetter)
       if (channelIndex === -1) return
@@ -296,7 +309,8 @@ const KeyboardHandler = () => {
     incrementAlmostNotes,
     incrementMissedNotes,
     incrementTotalNotesProcessed,
-    lanes
+    lanes,
+    setTutorialPrompt
   ])
 
   return null
