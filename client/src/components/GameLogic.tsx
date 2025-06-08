@@ -1,3 +1,4 @@
+// client/src/components/GameLogic.tsx
 import { useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useGameStore } from '../stores/gameStore'
@@ -6,9 +7,8 @@ import { ComplexityManager, type PatternNote } from '../ComplexityManager'
 import { replayRecorder } from '../replays/ReplayRecorder'
 import { songs } from '../songs/song-data';
 
-const letters = '12345'
-const channelPositions = [-2, -1, 0, 1, 2]
-const channelColors = ['#ff4f7b', '#ffc107', '#4caf50', '#2196f3', '#9c27b0']
+const allLetters = '12345678';
+const allChannelColors = ['#ff4f7b', '#ffc107', '#4caf50', '#2196f3', '#9c27b0', '#f44336', '#673ab7', '#00bcd4'];
 
 type Letter = ReturnType<typeof useGameStore.getState>['fallingLetters'][0];
 
@@ -42,6 +42,12 @@ const GameLogic = () => {
   const timerRef = useRef(0)
   const initComplexity = useRef(false)
 
+  const lanes = gameConfig.lanes || 5;
+  const letters = allLetters.slice(0, lanes);
+  const channelPositions = Array.from({ length: lanes }, (_, i) => i - (lanes - 1) / 2);
+  const channelColors = allChannelColors.slice(0, lanes);
+
+
   if (!initComplexity.current && (gameConfig.difficulty > 0 || gameConfig.mode === 'arcade')) {
     if (gameConfig.mode === 'arcade' && gameConfig.songId) {
         const song = songs.find(s => s.id === gameConfig.songId);
@@ -63,7 +69,7 @@ const GameLogic = () => {
             generatedPattern.current = ComplexityManager.generatePattern(complexity, 8);
         }
     } else {
-        generatedPattern.current = ComplexityManager.generatePattern(complexity, 8);
+        generatedPattern.current = ComplexityManager.generatePattern(complexity, 8, lanes);
     }
   }
 
@@ -109,7 +115,7 @@ const GameLogic = () => {
       const note = generatedPattern.current[patternPosition.current % generatedPattern.current.length]
       
       note.channels.forEach(channelIndex => {
-        if (channelIndex >= 0 && channelIndex < 5) {
+        if (channelIndex >= 0 && channelIndex < lanes) {
           const newLetter: Letter = {
             id: Math.random(),
             letter: letters[channelIndex],

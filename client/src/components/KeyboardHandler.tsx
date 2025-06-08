@@ -3,8 +3,7 @@ import { useGameStore } from '../stores/gameStore'
 import { ComplexityManager } from '../ComplexityManager'
 import { replayRecorder } from '../replays/ReplayRecorder';
 
-const letters = '12345'
-const channelPositions = [-2, -1, 0, 1, 2]
+const allLetters = '12345678';
 
 const calculateHitAccuracy = (
   notePosition: number, 
@@ -63,6 +62,7 @@ const calculateHitAccuracy = (
 
 const KeyboardHandler = () => {
   const {
+    gameConfig,
     complexity,
     health,
     combo,
@@ -86,6 +86,10 @@ const KeyboardHandler = () => {
     incrementMissedNotes,
     incrementTotalNotesProcessed
   } = useGameStore()
+
+  const lanes = gameConfig.lanes || 5;
+  const letters = allLetters.slice(0, lanes);
+  const channelPositions = Array.from({ length: lanes }, (_, i) => i - (lanes - 1) / 2);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -291,7 +295,8 @@ const KeyboardHandler = () => {
     incrementGoodNotes,
     incrementAlmostNotes,
     incrementMissedNotes,
-    incrementTotalNotesProcessed
+    incrementTotalNotesProcessed,
+    lanes
   ])
 
   return null

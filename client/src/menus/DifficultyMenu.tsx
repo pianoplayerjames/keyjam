@@ -56,15 +56,26 @@ const DifficultyMenu = ({ onBack }: DifficultyMenuProps) => {
   ];
 
   const handleSelectDifficulty = (difficulty: number) => {
-    console.log('Setting difficulty to:', difficulty);
-    setGameConfig({
-      ...gameConfig,
-      difficulty
-    });
     setComplexity(difficulty);
+    // Don't transition yet, wait for lane selection or start.
+  };
+
+  const handleLaneChange = (lanes: number) => {
+    setGameConfig({
+        ...gameConfig,
+        lanes: lanes,
+    });
+  };
+
+  const handleStartGame = () => {
+    setGameConfig({
+        ...gameConfig,
+        difficulty: gameConfig.difficulty,
+    });
     setIsTransitioning(true);
     setGameState('in-transition');
   };
+
 
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center text-white bg-transparent">
@@ -94,6 +105,7 @@ const DifficultyMenu = ({ onBack }: DifficultyMenuProps) => {
                 group relative overflow-hidden rounded-xl p-6 bg-gradient-to-r ${option.color}
                 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl
                 animate-slide-up backdrop-blur-sm
+                ${gameConfig.difficulty === option.value ? 'ring-4 ring-white' : ''}
               `}
               style={{ animationDelay: `${index * 100}ms` }}
             >
@@ -107,13 +119,32 @@ const DifficultyMenu = ({ onBack }: DifficultyMenuProps) => {
           ))}
         </div>
 
-        <div className="mt-8 max-w-2xl">
-          <div className="bg-purple-900 bg-opacity-50 border border-purple-500 rounded-xl p-4 text-center">
-            <p className="text-purple-200 text-sm">
-              <span className="font-bold">Expert & Master:</span> Frame-perfect timing, complex patterns, years of practice recommended
-            </p>
-          </div>
+        <div className="mt-8">
+            <h2 className="text-2xl font-bold text-center mb-4">Number of Lanes</h2>
+            <div className="flex justify-center gap-4">
+                {[4, 5, 6, 7, 8].map(lanes => (
+                    <button
+                        key={lanes}
+                        onClick={() => handleLaneChange(lanes)}
+                        className={`px-6 py-3 rounded-lg font-bold transition-all duration-200 ${
+                            gameConfig.lanes === lanes
+                            ? 'bg-cyan-500 text-white scale-110'
+                            : 'bg-gray-700 hover:bg-gray-600'
+                        }`}
+                    >
+                        {lanes}
+                    </button>
+                ))}
+            </div>
         </div>
+
+        <button
+          onClick={handleStartGame}
+          className="mt-8 bg-green-500 hover:bg-green-600 px-12 py-4 rounded-xl text-2xl font-bold transform transition-all duration-300 hover:scale-105"
+        >
+          START
+        </button>
+
       </div>
     </div>
   );

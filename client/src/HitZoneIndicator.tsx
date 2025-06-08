@@ -13,7 +13,9 @@ interface HitZoneIndicatorProps {
 const HitZoneIndicator: React.FC<HitZoneIndicatorProps> = ({ 
   position = [0, 0.05, 2.0] 
 }) => {
-  const { complexity } = useGameStore();
+  const { complexity, gameConfig } = useGameStore();
+  const lanes = gameConfig.lanes || 5;
+  const hitZoneWidth = lanes;
   
   const perfectRef = useRef<THREE.Mesh>(null!);
   const goodRef = useRef<THREE.Mesh>(null!);
@@ -44,7 +46,7 @@ const HitZoneIndicator: React.FC<HitZoneIndicatorProps> = ({
     <group position={position}>
       <RoundedBox 
         ref={almostRef}
-        args={[4.8, almostHeight, 0.05]} 
+        args={[hitZoneWidth - 0.2, almostHeight, 0.05]} 
         radius={0.02} 
         smoothness={4}
         rotation={[-Math.PI / 2, 0, 0]}
@@ -61,7 +63,7 @@ const HitZoneIndicator: React.FC<HitZoneIndicatorProps> = ({
 
       <RoundedBox 
         ref={goodRef}
-        args={[4.6, goodHeight, 0.06]} 
+        args={[hitZoneWidth - 0.4, goodHeight, 0.06]} 
         radius={0.02} 
         smoothness={4}
         rotation={[-Math.PI / 2, 0, 0]}
@@ -78,7 +80,7 @@ const HitZoneIndicator: React.FC<HitZoneIndicatorProps> = ({
 
       <RoundedBox 
         ref={perfectRef}
-        args={[4.4, perfectHeight, 0.07]} 
+        args={[hitZoneWidth - 0.6, perfectHeight, 0.07]} 
         radius={0.02} 
         smoothness={4}
         rotation={[-Math.PI / 2, 0, 0]}
@@ -94,7 +96,7 @@ const HitZoneIndicator: React.FC<HitZoneIndicatorProps> = ({
       </RoundedBox>
 
       <RoundedBox 
-        args={[4.8, 0.02, 0.08]} 
+        args={[hitZoneWidth - 0.2, 0.02, 0.08]} 
         radius={0.01} 
         smoothness={4}
         rotation={[-Math.PI / 2, 0, 0]}
@@ -109,7 +111,7 @@ const HitZoneIndicator: React.FC<HitZoneIndicatorProps> = ({
         />
       </RoundedBox>
 
-      <group position={[2.8, 0, 0.1]}>
+      <group position={[hitZoneWidth / 2 + 0.3, 0, 0.1]}>
         <RoundedBox args={[0.3, 0.15, 0.05]} radius={0.02} smoothness={4}>
           <meshStandardMaterial 
             color={complexity <= 30 ? '#4caf50' : complexity <= 60 ? '#ffc107' : complexity <= 80 ? '#ff9800' : '#f44336'} 

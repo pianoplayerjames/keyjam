@@ -24,6 +24,7 @@ interface GameConfig {
   timeLimit: number
   scoreTarget: number
   songId?: string;
+  lanes: number; // Added lane configuration
 }
 
 interface StampState {
@@ -40,7 +41,7 @@ interface HitFeedbackState {
 
 interface GameState {
   gameConfig: GameConfig
-  setGameConfig: (config: GameConfig) => void
+  setGameConfig: (config: Partial<GameConfig>) => void // Changed to Partial
   
   gameState: 'menu' | 'in-transition' | 'game'
   setGameState: (state: 'menu' | 'in-transition' | 'game') => void
@@ -115,6 +116,7 @@ const initialGameConfig: GameConfig = {
   timeLimit: 120,
   scoreTarget: 1000,
   songId: undefined,
+  lanes: 5, // Default to 5 lanes
 }
 
 const initialHitFeedback: HitFeedbackState = {
@@ -126,7 +128,7 @@ const initialHitFeedback: HitFeedbackState = {
 export const useGameStore = create<GameState>()(
   subscribeWithSelector((set, get) => ({
     gameConfig: initialGameConfig,
-    setGameConfig: (config) => set({ gameConfig: config }),
+    setGameConfig: (config) => set(state => ({ gameConfig: { ...state.gameConfig, ...config } })),
     
     gameState: 'menu',
     setGameState: (state) => set({ gameState: state }),

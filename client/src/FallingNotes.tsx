@@ -1,5 +1,7 @@
+// client/src/FallingNotes.tsx
 import { Text, Box } from '@react-three/drei'
 import * as THREE from 'three'
+import { useGameStore } from './stores/gameStore'
 
 interface FallingLetterProps {
   id: number
@@ -14,6 +16,7 @@ interface FallingLetterProps {
 }
 
 const FallingLetter = ({ position, letter, duration = 0, color = 'hotpink', isMissed, isHit, isBeingHeld, opacity = 1 }: FallingLetterProps) => {
+  const { gameConfig } = useGameStore();
   const trailHeight = duration || 0;
   const noteHeadSize = 1.2;
   const borderColor = new THREE.Color(color).multiplyScalar(0.5);
@@ -23,6 +26,8 @@ const FallingLetter = ({ position, letter, duration = 0, color = 'hotpink', isMi
   }
 
   const emissiveIntensity = isBeingHeld ? 5 : 2;
+  
+  const showNoteNumbers = gameConfig.difficulty <= 70;
 
   return (
     <group position={position}>
@@ -42,9 +47,11 @@ const FallingLetter = ({ position, letter, duration = 0, color = 'hotpink', isMi
           </Box>
         )}
 
-        <Text position={[0, -trailHeight / 2 + 0.15, 0.5]} rotation={[Math.PI / 2, 0, 0]} fontSize={1} color="white" anchorX="center" anchorY="middle" textAlign="center" fillOpacity={opacity}>
-          {letter}
-        </Text>
+        {showNoteNumbers && (
+            <Text position={[0, -trailHeight / 2 + 0.15, 0.5]} rotation={[Math.PI / 2, 0, 0]} fontSize={1} color="white" anchorX="center" anchorY="middle" textAlign="center" fillOpacity={opacity}>
+                {letter}
+            </Text>
+        )}
       </group>
     </group>
   )

@@ -1,3 +1,4 @@
+// client/src/ComplexityManager.tsx
 interface ComplexityConfig {
   spawnProbability: number;
   maxSimultaneousNotes: number;
@@ -118,7 +119,7 @@ private static generateConfig(complexity: number): ComplexityConfig {
     return a + (b - a) * Math.max(0, Math.min(1, t));
   }
 
-  static generatePattern(complexity: number, measures: number = 4): PatternNote[] {
+  static generatePattern(complexity: number, measures: number = 4, lanes: number = 5): PatternNote[] {
     const pattern: PatternNote[] = [];
     const config = this.getConfig(complexity);
     
@@ -140,15 +141,15 @@ private static generateConfig(complexity: number): ComplexityConfig {
           
           // Single notes only for low complexity
           if (complexity <= 40) {
-            channels.push(Math.floor(Math.random() * 5));
+            channels.push(Math.floor(Math.random() * lanes));
           } else {
             const noteCount = Math.min(
               Math.floor(Math.random() * config.maxSimultaneousNotes) + 1,
-              5
+              lanes
             );
             
             for (let i = 0; i < noteCount; i++) {
-              const channel = Math.floor(Math.random() * 5);
+              const channel = Math.floor(Math.random() * lanes);
               if (!channels.includes(channel)) {
                 channels.push(channel);
               }
