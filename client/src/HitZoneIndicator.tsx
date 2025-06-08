@@ -1,18 +1,20 @@
+// client/src/HitZoneIndicator.tsx
 import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { RoundedBox } from '@react-three/drei';
 import * as THREE from 'three';
 import { ComplexityManager } from './ComplexityManager';
+import { useGameStore } from './stores/gameStore';
 
 interface HitZoneIndicatorProps {
-  complexity: number;
   position?: [number, number, number];
 }
 
 const HitZoneIndicator: React.FC<HitZoneIndicatorProps> = ({ 
-  complexity, 
   position = [0, 0.05, 2.0] 
 }) => {
+  const { complexity } = useGameStore();
+  
   const perfectRef = useRef<THREE.Mesh>(null!);
   const goodRef = useRef<THREE.Mesh>(null!);
   const almostRef = useRef<THREE.Mesh>(null!);
@@ -34,14 +36,12 @@ const HitZoneIndicator: React.FC<HitZoneIndicatorProps> = ({
 
   const config = ComplexityManager.getConfig(complexity);
   
-  // Scale timing windows for visual representation
   const perfectHeight = config.timingWindows.perfect * (complexity <= 30 ? 2 : complexity <= 60 ? 1.5 : 1) * 4;
   const goodHeight = config.timingWindows.good * (complexity <= 30 ? 1.8 : complexity <= 60 ? 1.3 : 1) * 4;
   const almostHeight = config.timingWindows.almost * (complexity <= 30 ? 1.5 : 1.2) * 4;
 
   return (
     <group position={position}>
-      {/* Almost Zone (outermost, largest) */}
       <RoundedBox 
         ref={almostRef}
         args={[4.8, almostHeight, 0.05]} 
@@ -59,7 +59,6 @@ const HitZoneIndicator: React.FC<HitZoneIndicatorProps> = ({
         />
       </RoundedBox>
 
-      {/* Good Zone (middle) */}
       <RoundedBox 
         ref={goodRef}
         args={[4.6, goodHeight, 0.06]} 
@@ -77,7 +76,6 @@ const HitZoneIndicator: React.FC<HitZoneIndicatorProps> = ({
         />
       </RoundedBox>
 
-      {/* Perfect Zone (innermost, smallest) */}
       <RoundedBox 
         ref={perfectRef}
         args={[4.4, perfectHeight, 0.07]} 
@@ -95,7 +93,6 @@ const HitZoneIndicator: React.FC<HitZoneIndicatorProps> = ({
         />
       </RoundedBox>
 
-      {/* Center Line for reference */}
       <RoundedBox 
         args={[4.8, 0.02, 0.08]} 
         radius={0.01} 
@@ -112,7 +109,6 @@ const HitZoneIndicator: React.FC<HitZoneIndicatorProps> = ({
         />
       </RoundedBox>
 
-      {/* Complexity indicator */}
       <group position={[2.8, 0, 0.1]}>
         <RoundedBox args={[0.3, 0.15, 0.05]} radius={0.02} smoothness={4}>
           <meshStandardMaterial 

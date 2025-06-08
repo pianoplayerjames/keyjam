@@ -1,36 +1,31 @@
+// client/src/FeedbackText3D.tsx
 import { useState, useEffect, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Text } from '@react-three/drei';
 import * as THREE from 'three';
+import { useGameStore } from './stores/gameStore';
 
-interface FeedbackText3DProps {
-  feedback: {
-    text: string;
-    color: string;
-    key: number;
-  };
-}
-
-const FeedbackText3D = ({ feedback }: FeedbackText3DProps) => {
+const FeedbackText3D = () => {
+  const { hitFeedback } = useGameStore();
+  
   const groupRef = useRef<THREE.Group>(null!);
   const textRef = useRef<any>(null!);
-  const [currentFeedback, setCurrentFeedback] = useState(feedback);
+  const [currentFeedback, setCurrentFeedback] = useState(hitFeedback);
   const life = useRef(0);
   const animationDuration = 1.0;
   const initialColor = useRef<THREE.Color | null>(null);
 
   useEffect(() => {
-    if (feedback.text && feedback.key !== currentFeedback.key) {
+    if (hitFeedback.text && hitFeedback.key !== currentFeedback.key) {
       life.current = animationDuration;
-      setCurrentFeedback(feedback);
+      setCurrentFeedback(hitFeedback);
       if (groupRef.current) {
         groupRef.current.scale.set(0.1, 0.1, 0.1);
         groupRef.current.rotation.z = (Math.random() - 0.5) * 0.4;
       }
-      // Store the initial color
-      initialColor.current = new THREE.Color(feedback.color);
+      initialColor.current = new THREE.Color(hitFeedback.color);
     }
-  }, [feedback, currentFeedback.key]);
+  }, [hitFeedback, currentFeedback.key]);
 
   useFrame((state, delta) => {
     if (life.current > 0) {
@@ -48,7 +43,6 @@ const FeedbackText3D = ({ feedback }: FeedbackText3DProps) => {
         textRef.current.fillOpacity = opacity;
         textRef.current.strokeOpacity = opacity * 0.5;
 
-        // Animate color by interpolating between initial color and white
         if (initialColor.current) {
           const currentColor = initialColor.current.clone();
           currentColor.lerp(new THREE.Color('white'), progress * 0.5);

@@ -1,11 +1,14 @@
-import { useState, Suspense } from 'react';
-import { Canvas } from '@react-three/fiber';
-import Game from './Game';
-import MainMenu from './MainMenu';
-import Transition from './Transition';
-import FloatingShapes from './FloatingShapes';
-import GradientBackground from './GradientBackground';
-import './App.css';
+// client/src/App.tsx
+import { useEffect, Suspense } from 'react' // Add Suspense to the import
+import { Canvas } from '@react-three/fiber'
+import Game from './Game'
+import MainMenu from './MainMenu'
+import Transition from './Transition'
+import FloatingShapes from './FloatingShapes'
+import GradientBackground from './GradientBackground'
+import { useGameStore } from './stores/gameStore'
+import { useMenuStore } from './stores/menuStore'
+import './App.css'
 
 const SimpleLoading = () => (
   <group>
@@ -14,48 +17,39 @@ const SimpleLoading = () => (
       <meshBasicMaterial color="#ff4f7b" />
     </mesh>
   </group>
-);
+)
 
 function App() {
-  const [gameState, setGameState] = useState('menu');
-  const [menuState, setMenuState] = useState('main');
-  const [gameConfig, setGameConfig] = useState({
-    mode: '',
-    subMode: '',
-    difficulty: 30,
-    timeLimit: 120,
-    scoreTarget: 1000
-  });
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const { gameState, gameConfig, setGameConfig, setGameState } = useGameStore()
+  const { menuState, isTransitioning, setIsTransitioning, setMenuState } = useMenuStore()
 
   const handleStartGame = (config: typeof gameConfig) => {
-    setGameConfig(config);
-    setIsTransitioning(true);
-    setGameState('in-transition');
-  };
+    setGameConfig(config)
+    setIsTransitioning(true)
+    setGameState('in-transition')
+  }
 
   const handleTransitionComplete = () => {
-    setGameState('game');
-    setIsTransitioning(false);
-  };
+    setGameState('game')
+    setIsTransitioning(false)
+  }
 
   const handleBackToMenu = () => {
-    setGameState('menu');
-    setMenuState('main');
-    setIsTransitioning(false);
-  };
+    setGameState('menu')
+    setMenuState('main')
+    setIsTransitioning(false)
+  }
 
   const handleMenuNavigation = (newState: string) => {
-    setMenuState(newState);
-  };
+    setMenuState(newState)
+  }
 
   if (gameState === 'game') {
-    return <Game gameConfig={gameConfig} onBackToMenu={handleBackToMenu} />;
+    return <Game onBackToMenu={handleBackToMenu} />
   }
 
   return (
     <div className="relative w-screen h-screen overflow-hidden">
-      {/* 3D Background Canvas */}
       <Canvas 
         camera={{ position: [0, 2.5, 5], fov: 75 }} 
         className="absolute inset-0"
@@ -75,7 +69,6 @@ function App() {
         </Suspense>
       </Canvas>
 
-      {/* HTML Menu Overlay */}
       {gameState === 'menu' && (
         <MainMenu 
           menuState={menuState}
@@ -85,7 +78,7 @@ function App() {
         />
       )}
     </div>
-  );
+  )
 }
 
-export default App;
+export default App

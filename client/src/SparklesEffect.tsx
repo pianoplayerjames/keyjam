@@ -1,13 +1,14 @@
+// client/src/SparklesEffect.tsx
 import { Sparkles } from '@react-three/drei'
+import { useGameStore } from './stores/gameStore'
 
-interface SparklesEffectProps {
-    heldKeys: Set<string>;
-    letters: string;
-    channelPositions: number[];
-    channelColors: string[];
-}
+const letters = '12345'
+const channelPositions = [-2, -1, 0, 1, 2]
+const channelColors = ['#ff4f7b', '#ffc107', '#4caf50', '#2196f3', '#9c27b0']
 
-const SparklesEffect = ({ heldKeys, letters, channelPositions, channelColors }: SparklesEffectProps) => {
+const SparklesEffect = () => {
+    const { heldKeys } = useGameStore()
+
     return (
         <>
             {letters.split('').map((letter, index) => {
@@ -17,7 +18,7 @@ const SparklesEffect = ({ heldKeys, letters, channelPositions, channelColors }: 
                     return (
                         <Sparkles
                             key={letter}
-                            position={[xPos, 0.2, 3]} // Positioned in the hit zone
+                            position={[xPos, 0.2, 3]}
                             count={50}
                             scale={1.5}
                             size={5}
@@ -33,4 +34,4 @@ const SparklesEffect = ({ heldKeys, letters, channelPositions, channelColors }: 
     )
 }
 
-export default SparklesEffect;
+export default SparklesEffect

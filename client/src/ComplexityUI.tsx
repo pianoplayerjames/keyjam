@@ -1,16 +1,20 @@
+// client/src/ComplexityUI.tsx
 import React from 'react';
+import { useGameStore } from './stores/gameStore';
 
 interface ComplexityUIProps {
-  complexity: number;
-  onComplexityChange: (complexity: number) => void;
   showDetails?: boolean;
 }
 
 const ComplexityUI: React.FC<ComplexityUIProps> = ({ 
-  complexity, 
-  onComplexityChange, 
   showDetails = false 
 }) => {
+  const { complexity, setComplexity, gameConfig } = useGameStore();
+  const isCareerMode = gameConfig.mode === 'career';
+
+  // Don't show complexity UI in career mode
+  if (isCareerMode) return null;
+
   const getComplexityLabel = (level: number): string => {
     if (level <= 5) return 'Tutorial';
     if (level <= 15) return 'Super Easy';
@@ -26,12 +30,12 @@ const ComplexityUI: React.FC<ComplexityUIProps> = ({
   };
 
   const getComplexityColor = (level: number): string => {
-    if (level <= 15) return '#4caf50';   // Green
-    if (level <= 35) return '#8bc34a';   // Light Green
-    if (level <= 55) return '#ffc107';   // Yellow
-    if (level <= 75) return '#ff9800';   // Orange
-    if (level <= 90) return '#f44336';   // Red
-    return '#9c27b0';                    // Purple
+    if (level <= 15) return '#4caf50';
+    if (level <= 35) return '#8bc34a';
+    if (level <= 55) return '#ffc107';
+    if (level <= 75) return '#ff9800';
+    if (level <= 90) return '#f44336';
+    return '#9c27b0';
   };
 
   const getComplexityDescription = (level: number): string => {
@@ -89,7 +93,6 @@ const ComplexityUI: React.FC<ComplexityUIProps> = ({
       boxShadow: '0 8px 32px rgba(0, 0, 0, 0.6)',
       backdropFilter: 'blur(10px)'
     }}>
-      {/* Header */}
       <h3 style={{ 
         margin: '0 0 20px 0', 
         textAlign: 'center',
@@ -100,14 +103,13 @@ const ComplexityUI: React.FC<ComplexityUIProps> = ({
         🎵 Complexity Level
       </h3>
       
-      {/* Complexity Slider */}
       <div style={{ marginBottom: '20px' }}>
         <input
           type="range"
           min="1"
           max="100"
           value={complexity}
-          onChange={(e) => onComplexityChange(parseInt(e.target.value))}
+          onChange={(e) => setComplexity(parseInt(e.target.value))}
           style={{
             width: '100%',
             height: '12px',
@@ -126,31 +128,8 @@ const ComplexityUI: React.FC<ComplexityUIProps> = ({
             WebkitAppearance: 'none'
           }}
         />
-        <style>{`
-          input[type="range"]::-webkit-slider-thumb {
-            appearance: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: white;
-            border: 3px solid ${getComplexityColor(complexity)};
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-          }
-          
-          input[type="range"]::-moz-range-thumb {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: white;
-            border: 3px solid ${getComplexityColor(complexity)};
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-          }
-        `}</style>
       </div>
 
-      {/* Current Level Display */}
       <div style={{ 
         textAlign: 'center', 
         marginBottom: '20px',
@@ -178,7 +157,6 @@ const ComplexityUI: React.FC<ComplexityUIProps> = ({
         </div>
       </div>
 
-      {/* Difficulty Indicators */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: '1fr',
@@ -229,7 +207,6 @@ const ComplexityUI: React.FC<ComplexityUIProps> = ({
         </div>
       </div>
 
-      {/* Description */}
       {showDetails && (
         <div style={{ 
           fontSize: '0.85em', 
@@ -244,7 +221,6 @@ const ComplexityUI: React.FC<ComplexityUIProps> = ({
         </div>
       )}
 
-      {/* Quick Preset Buttons */}
       <div style={{ 
         display: 'grid', 
         gridTemplateColumns: 'repeat(2, 1fr)', 
@@ -261,7 +237,7 @@ const ComplexityUI: React.FC<ComplexityUIProps> = ({
         ].map((preset) => (
           <button
             key={preset.label}
-            onClick={() => onComplexityChange(preset.value)}
+            onClick={() => setComplexity(preset.value)}
             style={{
               padding: '12px 8px',
               backgroundColor: complexity === preset.value ? 
@@ -284,14 +260,14 @@ const ComplexityUI: React.FC<ComplexityUIProps> = ({
             }}
             onMouseEnter={(e) => {
               if (complexity !== preset.value) {
-                e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
-                e.target.style.transform = 'scale(1.02)';
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                e.currentTarget.style.transform = 'scale(1.02)';
               }
             }}
             onMouseLeave={(e) => {
               if (complexity !== preset.value) {
-                e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                e.target.style.transform = 'scale(1)';
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                e.currentTarget.style.transform = 'scale(1)';
               }
             }}
           >
@@ -300,7 +276,6 @@ const ComplexityUI: React.FC<ComplexityUIProps> = ({
         ))}
       </div>
 
-      {/* Professional Level Warning */}
       {complexity >= 80 && (
         <div style={{
           marginTop: '15px',
@@ -328,7 +303,6 @@ const ComplexityUI: React.FC<ComplexityUIProps> = ({
         </div>
       )}
 
-      {/* Beginner Tips */}
       {complexity <= 25 && (
         <div style={{
           marginTop: '15px',

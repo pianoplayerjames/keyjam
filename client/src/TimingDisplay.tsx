@@ -1,25 +1,27 @@
+// client/src/TimingDisplay.tsx
 import React, { useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Text } from '@react-three/drei';
 import * as THREE from 'three';
+import { useGameStore } from './stores/gameStore';
 
 interface TimingDisplayProps {
-  timingOffset: number;
-  show: boolean;
   onComplete?: () => void;
 }
 
-const TimingDisplay: React.FC<TimingDisplayProps> = ({ timingOffset, show, onComplete }) => {
+const TimingDisplay: React.FC<TimingDisplayProps> = ({ onComplete }) => {
+  const { timingOffset, showTimingDisplay } = useGameStore();
+  
   const groupRef = useRef<THREE.Group>(null!);
   const textRef = useRef<any>(null!);
   const life = useRef(0);
   const maxLife = 1.5;
 
   useEffect(() => {
-    if (show) {
+    if (showTimingDisplay) {
       life.current = maxLife;
     }
-  }, [show]);
+  }, [showTimingDisplay]);
 
   useFrame((state, delta) => {
     if (life.current > 0) {
@@ -42,7 +44,7 @@ const TimingDisplay: React.FC<TimingDisplayProps> = ({ timingOffset, show, onCom
     }
   });
 
-  if (!show || life.current <= 0) return null;
+  if (!showTimingDisplay || life.current <= 0) return null;
 
   const offsetMs = Math.round(timingOffset * 1000);
   const offsetText = offsetMs === 0 ? 'PERFECT TIMING!' : 

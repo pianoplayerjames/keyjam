@@ -1,19 +1,15 @@
-// src/TimeUI.tsx
+// client/src/TimeUI.tsx
 import React from 'react';
+import { useGameStore } from './stores/gameStore';
 
-interface TimeUIProps {
-  timeLeft: number;
-  score: number;
-  combo: number;
-}
-
-const TimeUI: React.FC<TimeUIProps> = ({ timeLeft, score, combo }) => {
+const TimeUI: React.FC = () => {
+  const { timeLeft, score, combo, gameConfig } = useGameStore();
+  
   const minutes = Math.floor(timeLeft / 60);
   const seconds = Math.floor(timeLeft % 60);
   
-  // Color changes as time runs out
   const timeBarColor = timeLeft > 60 ? '#4caf50' : timeLeft > 30 ? '#ffc107' : '#f44336';
-  const timePercentage = (timeLeft / 120) * 100; // Assuming 2 minutes total
+  const timePercentage = gameConfig.timeLimit > 0 ? (timeLeft / gameConfig.timeLimit) * 100 : 100;
 
   return (
     <div style={{
@@ -55,7 +51,7 @@ const TimeUI: React.FC<TimeUIProps> = ({ timeLeft, score, combo }) => {
       }}>
         <span>Score: {Math.floor(score)}</span>
         <span style={{ fontSize: '1.2em', fontWeight: 'bold' }}>
-          {minutes}:{seconds.toString().padStart(2, '0')}
+          {gameConfig.timeLimit === -1 ? '∞' : `${minutes}:${seconds.toString().padStart(2, '0')}`}
         </span>
         <span>Combo: {combo}</span>
       </div>

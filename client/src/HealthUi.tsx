@@ -1,13 +1,9 @@
-// src/HealthUI.tsx
+// client/src/HealthUI.tsx
 import React from 'react';
+import { useGameStore } from './stores/gameStore';
 
-interface HealthUIProps {
-  health: number;
-  score: number;
-  combo: number;
-}
-
-const HealthUI: React.FC<HealthUIProps> = ({ health, score, combo }) => {
+const HealthUI: React.FC = () => {
+  const { health, score, combo } = useGameStore();
   const healthBarColor = health > 50 ? '#4caf50' : health > 20 ? '#ffc107' : '#f44336';
 
   return (
