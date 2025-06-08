@@ -1,14 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { useGameStore } from './stores/gameStore';
 
 interface ScoreChartProps {
-  finalScore: number;
-  maxCombo: number;
-  totalNotes: number;
-  perfectNotes: number;
-  goodNotes: number;
-  almostNotes: number;
-  missedNotes: number;
-  accuracy: number;
   onReplay: () => void;
   onBackToMenu: () => void;
   isVisible: boolean;
@@ -80,18 +73,21 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
 };
 
 const ScoreChart: React.FC<ScoreChartProps> = ({
-  finalScore,
-  maxCombo,
-  totalNotes,
-  perfectNotes,
-  goodNotes,
-  almostNotes,
-  missedNotes,
-  accuracy,
   onReplay,
   onBackToMenu,
   isVisible
 }) => {
+  const {
+    score: finalScore,
+    maxCombo,
+    totalNotes,
+    perfectNotes,
+    goodNotes,
+    almostNotes,
+    missedNotes,
+    accuracy,
+  } = useGameStore();
+
   const [animationStage, setAnimationStage] = useState(0);
   const [showGrade, setShowGrade] = useState(false);
 

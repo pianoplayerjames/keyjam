@@ -1,30 +1,15 @@
 // client/src/online/ArenasBrowser.tsx
-import React, { useState, useEffect } from 'react';
-
-interface Arena {
-  id: string;
-  name: string;
-  host: string;
-  players: number;
-  maxPlayers: number;
-  difficulty: number;
-  gameMode: string;
-  region: string;
-  ping: number;
-  status: 'waiting' | 'in-progress' | 'full';
-  isRanked: boolean;
-  minElo?: number;
-  maxElo?: number;
-}
+import React, { useState } from 'react';
+import { useOnlineStore } from '../stores/onlineStore';
+import type { Arena } from '../stores/onlineStore';
 
 interface ArenasBrowserProps {
-  playerData: any;
   onBack: () => void;
   onJoinArena: (arenaId: string) => void;
 }
 
-const ArenasBrowser: React.FC<ArenasBrowserProps> = ({ playerData, onBack, onJoinArena }) => {
-  const [arenas, setArenas] = useState<Arena[]>([]);
+const ArenasBrowser: React.FC<ArenasBrowserProps> = ({ onBack, onJoinArena }) => {
+  const { arenas, playerData } = useOnlineStore();
   const [filter, setFilter] = useState({
     gameMode: 'all',
     region: 'all',
@@ -32,84 +17,6 @@ const ArenasBrowser: React.FC<ArenasBrowserProps> = ({ playerData, onBack, onJoi
     showFull: false
   });
   const [searchTerm, setSearchTerm] = useState('');
-
-  useEffect(() => {
-    // Mock arena data
-    const mockArenas: Arena[] = [
-      {
-        id: 'arena_1',
-        name: 'Rhythm Champions',
-        host: 'BeatMaster99',
-        players: 6,
-        maxPlayers: 8,
-        difficulty: 75,
-        gameMode: 'Battle Royale',
-        region: 'NA-East',
-        ping: 23,
-        status: 'waiting',
-        isRanked: true,
-        minElo: 1500,
-        maxElo: 2000
-      },
-      {
-        id: 'arena_2',
-        name: 'Casual Beats',
-        host: 'ChillVibes',
-        players: 3,
-        maxPlayers: 6,
-        difficulty: 35,
-        gameMode: 'Team Battle',
-        region: 'EU-West',
-        ping: 45,
-        status: 'waiting',
-        isRanked: false
-      },
-      {
-        id: 'arena_3',
-        name: 'Pro League',
-        host: 'ElitePlayer',
-        players: 8,
-        maxPlayers: 8,
-        difficulty: 90,
-        gameMode: 'Tournament',
-        region: 'NA-West',
-        ping: 67,
-        status: 'full',
-        isRanked: true,
-        minElo: 2000
-      },
-      {
-        id: 'arena_4',
-        name: 'Beginner Friendly',
-        host: 'NewbieHelper',
-        players: 2,
-        maxPlayers: 4,
-        difficulty: 15,
-        gameMode: 'Practice',
-        region: 'NA-East',
-        ping: 12,
-        status: 'waiting',
-        isRanked: false
-      },
-      {
-        id: 'arena_5',
-        name: 'Speed Challenge',
-        host: 'FastFingers',
-        players: 4,
-        maxPlayers: 6,
-        difficulty: 60,
-        gameMode: 'Speed Battle',
-        region: 'Asia',
-        ping: 156,
-        status: 'in-progress',
-        isRanked: true,
-        minElo: 1200,
-        maxElo: 1800
-      }
-    ];
-    
-    setArenas(mockArenas);
-  }, []);
 
   const filteredArenas = arenas.filter(arena => {
     if (filter.gameMode !== 'all' && arena.gameMode !== filter.gameMode) return false;
@@ -140,11 +47,14 @@ const ArenasBrowser: React.FC<ArenasBrowserProps> = ({ playerData, onBack, onJoi
   };
 
   const canJoinArena = (arena: Arena) => {
+    if (!playerData) return false;
     if (arena.status !== 'waiting') return false;
     if (arena.isRanked && arena.minElo && playerData.elo < arena.minElo) return false;
     if (arena.isRanked && arena.maxElo && playerData.elo > arena.maxElo) return false;
     return true;
   };
+  
+  if (!playerData) return <div>Loading...</div>;
 
   return (
     <div style={{ padding: '20px', height: '100vh', overflow: 'hidden' }}>
@@ -585,7 +495,7 @@ const ArenasBrowser: React.FC<ArenasBrowserProps> = ({ playerData, onBack, onJoi
        </div>
      </div>
    </div>
- );
+  );
 };
 
 export default ArenasBrowser;

@@ -1,135 +1,24 @@
 // client/src/online/Leaderboards.tsx
 import React, { useState, useEffect } from 'react';
-
-interface LeaderboardPlayer {
-  rank: number;
-  username: string;
-  elo: number;
-  tier: string;
-  wins: number;
-  losses: number;
-  winRate: number;
-  recentChange: number;
-  country: string;
-  avatar: string;
-  isOnline: boolean;
-}
+import { useOnlineStore } from '../stores/onlineStore';
 
 interface LeaderboardsProps {
-  playerData: any;
   onBack: () => void;
 }
 
-const Leaderboards: React.FC<LeaderboardsProps> = ({ playerData, onBack }) => {
+const Leaderboards: React.FC<LeaderboardsProps> = ({ onBack }) => {
+  const { leaderboardData, playerData } = useOnlineStore();
   const [activeTab, setActiveTab] = useState<'global' | 'friends' | 'regional'>('global');
   const [timeRange, setTimeRange] = useState<'daily' | 'weekly' | 'monthly' | 'all-time'>('all-time');
-  const [leaderboardData, setLeaderboardData] = useState<LeaderboardPlayer[]>([]);
-  const [playerRanking, setPlayerRanking] = useState<LeaderboardPlayer | null>(null);
+  const [playerRanking, setPlayerRanking] = useState<typeof leaderboardData[0] | null>(null);
 
   useEffect(() => {
-    // Mock leaderboard data
-    const mockData: LeaderboardPlayer[] = [
-      {
-        rank: 1,
-        username: 'RhythmGod',
-        elo: 2547,
-        tier: 'Grandmaster',
-        wins: 342,
-        losses: 58,
-        winRate: 85.5,
-        recentChange: +23,
-        country: 'KR',
-        avatar: '/avatars/1.png',
-        isOnline: true
-      },
-      {
-        rank: 2,
-        username: 'BeatMachine',
-        elo: 2489,
-        tier: 'Grandmaster',
-        wins: 298,
-        losses: 67,
-        winRate: 81.6,
-        recentChange: +15,
-        country: 'JP',
-        avatar: '/avatars/2.png',
-        isOnline: false
-      },
-      {
-        rank: 3,
-        username: 'SoundWave',
-        elo: 2423,
-        tier: 'Master',
-        wins: 267,
-        losses: 89,
-        winRate: 75.0,
-        recentChange: -8,
-        country: 'US',
-        avatar: '/avatars/3.png',
-        isOnline: true
-      },
-      {
-        rank: 4,
-        username: 'MelodyMaster',
-        elo: 2391,
-        tier: 'Master',
-        wins: 245,
-        losses: 76,
-        winRate: 76.3,
-        recentChange: +12,
-        country: 'DE',
-        avatar: '/avatars/4.png',
-        isOnline: true
-      },
-      {
-        rank: 5,
-        username: 'NoteNinja',
-        elo: 2356,
-        tier: 'Master',
-        wins: 234,
-        losses: 92,
-        winRate: 71.8,
-        recentChange: +5,
-        country: 'FR',
-        avatar: '/avatars/5.png',
-        isOnline: false
-      }
-    ];
-
-    // Add more players to fill the leaderboard
-    for (let i = 6; i <= 100; i++) {
-      mockData.push({
-        rank: i,
-        username: `Player${i}`,
-        elo: 2350 - (i - 5) * 15 + Math.floor(Math.random() * 20) - 10,
-        tier: i <= 10 ? 'Master' : i <= 50 ? 'Diamond' : 'Platinum',
-        wins: Math.floor(Math.random() * 200) + 50,
-        losses: Math.floor(Math.random() * 100) + 20,
-        winRate: Math.random() * 30 + 60,
-        recentChange: Math.floor(Math.random() * 40) - 20,
-        country: ['US', 'KR', 'JP', 'DE', 'FR', 'GB', 'CA', 'AU'][Math.floor(Math.random() * 8)],
-        avatar: `/avatars/${Math.floor(Math.random() * 10) + 1}.png`,
-        isOnline: Math.random() > 0.5
-      });
+    if (playerData) {
+      // Find player's ranking from the store data
+      const ranking = leaderboardData.find(p => p.username === playerData.username);
+      setPlayerRanking(ranking || null);
     }
-
-    setLeaderboardData(mockData);
-
-    // Find player's ranking (mock)
-    setPlayerRanking({
-      rank: 47,
-      username: playerData.username,
-      elo: playerData.elo,
-      tier: playerData.rank,
-      wins: playerData.wins,
-      losses: playerData.losses,
-      winRate: (playerData.wins / (playerData.wins + playerData.losses)) * 100,
-      recentChange: +8,
-      country: 'US',
-      avatar: '/avatars/player.png',
-      isOnline: true
-    });
-  }, [activeTab, timeRange, playerData]);
+  }, [leaderboardData, playerData, activeTab, timeRange]);
 
   const getTierColor = (tier: string) => {
     switch (tier.toLowerCase()) {
@@ -168,6 +57,8 @@ const Leaderboards: React.FC<LeaderboardsProps> = ({ playerData, onBack }) => {
     { id: 'monthly', label: 'This Month' },
     { id: 'all-time', label: 'All Time' }
   ];
+
+  if (!playerData) return <div>Loading...</div>;
 
   return (
     <div style={{ padding: '20px', height: '100vh', overflow: 'hidden' }}>
@@ -356,10 +247,10 @@ const Leaderboards: React.FC<LeaderboardsProps> = ({ playerData, onBack }) => {
               📈 Statistics
             </h4>
             <div style={{ fontSize: '12px', color: '#ccc', lineHeight: '1.5' }}>
-              <div>Total Players: 47,839</div>
-              <div>Active Today: 12,456</div>
-              <div>Average ELO: 1,547</div>
-              <div>Top Player: 2,547 ELO</div>
+              <div>Total Players: {leaderboardData.length}</div>
+              <div>Active Today: {leaderboardData.filter(p => p.isOnline).length}</div>
+              <div>Average ELO: {Math.floor(leaderboardData.reduce((sum, p) => sum + p.elo, 0) / leaderboardData.length) || 0}</div>
+              <div>Top Player: {leaderboardData[0]?.elo || 0} ELO</div>
             </div>
           </div>
         </div>
@@ -405,7 +296,7 @@ const Leaderboards: React.FC<LeaderboardsProps> = ({ playerData, onBack }) => {
             overflowY: 'auto',
             padding: '10px 20px'
           }}>
-            {leaderboardData.slice(0, 50).map((player, index) => (
+            {leaderboardData.slice(0, 50).map((player) => (
               <div
                 key={player.rank}
                 style={{
@@ -443,7 +334,7 @@ const Leaderboards: React.FC<LeaderboardsProps> = ({ playerData, onBack }) => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div style={{
                     width: '32px',
-height: '32px',
+                    height: '32px',
                    borderRadius: '50%',
                    background: 'linear-gradient(45deg, #4caf50, #2196f3)',
                    display: 'flex',
@@ -539,7 +430,7 @@ height: '32px',
        </div>
      </div>
    </div>
- );
+  );
 };
 
 export default Leaderboards;

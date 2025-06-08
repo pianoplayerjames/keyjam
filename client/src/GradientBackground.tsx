@@ -2,6 +2,7 @@ import { useFrame, extend } from '@react-three/fiber'
 import { shaderMaterial } from '@react-three/drei'
 import * as THREE from 'three'
 import { useRef, useMemo } from 'react'
+import { useGameStore } from './stores/gameStore'
 
 const GradientMaterial = shaderMaterial(
   // Uniforms
@@ -193,8 +194,9 @@ const comboColors = [
   { colorA: '#00e5ff', colorB: '#1de9b6', colorC: '#76ff03' },    // Cyan/Teal/Lime - Electric
 ];
 
-const GradientBackground = ({ combo }: { combo: number }) => {
+const GradientBackground = () => {
   const ref = useRef<THREE.ShaderMaterial>(null!)
+  const combo = useGameStore((state) => state.combo)
   
   const { colorA, colorB, colorC } = useMemo(() => {
     const colorIndex = Math.floor(combo / 10) % comboColors.length;

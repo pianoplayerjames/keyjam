@@ -1,24 +1,18 @@
 // src/GameOverScreen.tsx
 import React from 'react';
+import { useGameStore } from './stores/gameStore';
 
 interface GameOverScreenProps {
-  gameMode: string;
-  score: number;
-  combo: number;
-  timeLeft: number;
   onRestart: () => void;
   onBackToMenu?: () => void;
 }
 
 const GameOverScreen: React.FC<GameOverScreenProps> = ({ 
-  gameMode, 
-  score, 
-  combo, 
-  timeLeft, 
   onRestart, 
   onBackToMenu 
 }) => {
-  const isTimeMode = gameMode === 'time';
+  const { gameConfig, score, combo } = useGameStore();
+  const isTimeMode = gameConfig.subMode === 'time';
   const title = isTimeMode ? 'TIME\'S UP!' : 'GAME OVER';
   
   return (
@@ -53,7 +47,7 @@ const GameOverScreen: React.FC<GameOverScreenProps> = ({
       }}>
         <div>Final Score: {Math.floor(score)}</div>
         <div>Best Combo: {combo}</div>
-        {isTimeMode && <div style={{ color: '#4caf50' }}>Survived full {gameMode === 'time' ? '2' : '0'} minutes!</div>}
+        {isTimeMode && <div style={{ color: '#4caf50' }}>Survived full {gameConfig.timeLimit / 60} minutes!</div>}
       </div>
       
       <div style={{

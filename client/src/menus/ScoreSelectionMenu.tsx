@@ -2,16 +2,20 @@ import React, { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Text, RoundedBox } from '@react-three/drei';
 import * as THREE from 'three';
+import { useGameStore } from '../stores/gameStore';
+import { useMenuStore } from '../stores/menuStore';
 
 interface ScoreSelectionMenuProps {
   onBack: () => void;
-  onSelectScore: (scoreTarget: number) => void;
 }
 
-const ScoreSelectionMenu: React.FC<ScoreSelectionMenuProps> = ({ onBack, onSelectScore }) => {
+const ScoreSelectionMenu: React.FC<ScoreSelectionMenuProps> = ({ onBack }) => {
   const groupRef = useRef<THREE.Group>(null!);
   const [enterTime, setEnterTime] = useState(0);
   const [hovered, setHovered] = useState<number | null>(null);
+
+  const setTargetScore = useGameStore((state) => state.setTargetScore);
+  const setMenuState = useMenuStore((state) => state.setMenuState);
 
   const scoreOptions = [
     { text: '1,000', subtitle: 'Quick win', value: 1000, color: '#4caf50', icon: '🌱' },
@@ -21,6 +25,11 @@ const ScoreSelectionMenu: React.FC<ScoreSelectionMenuProps> = ({ onBack, onSelec
     { text: '25,000', subtitle: 'Expert target', value: 25000, color: '#f44336', icon: '💎' },
     { text: '50,000', subtitle: 'Master level', value: 50000, color: '#9c27b0', icon: '👑' }
   ];
+
+  const handleSelectScore = (scoreTarget: number) => {
+    setTargetScore(scoreTarget);
+    setMenuState('difficulty');
+  };
 
   useFrame((state, delta) => {
     setEnterTime(prev => prev + delta);
@@ -111,7 +120,7 @@ const ScoreSelectionMenu: React.FC<ScoreSelectionMenuProps> = ({ onBack, onSelec
               key={option.value}
               {...option}
               position={[x, y, 0]}
-              onClick={() => onSelectScore(option.value)}
+              onClick={() => handleSelectScore(option.value)}
               isHovered={hovered === option.value}
               onHover={(hovering) => setHovered(hovering ? option.value : null)}
               animationDelay={index * 0.08}

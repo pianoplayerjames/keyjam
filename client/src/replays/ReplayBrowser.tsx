@@ -1,7 +1,7 @@
 // ReplayBrowser.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useReplayStore } from '../stores/replayStore';
 import { ReplayData } from './ReplayRecorder';
-import ReplayPlayer from './ReplayPlayer';
 
 interface ReplayBrowserProps {
   isVisible: boolean;
@@ -14,32 +14,8 @@ interface SavedReplay extends ReplayData {
 }
 
 const ReplayBrowser: React.FC<ReplayBrowserProps> = ({ isVisible, onClose }) => {
-  const [savedReplays, setSavedReplays] = useState<SavedReplay[]>([]);
-  const [selectedReplay, setSelectedReplay] = useState<SavedReplay | null>(null);
-  const [showReplayPlayer, setShowReplayPlayer] = useState(false);
+  const { savedReplays, deleteReplay, playReplay } = useReplayStore();
   const [sortBy, setSortBy] = useState<'timestamp' | 'score' | 'accuracy'>('timestamp');
-
-  useEffect(() => {
-    if (isVisible) {
-      loadSavedReplays();
-    }
-  }, [isVisible]);
-
-  const loadSavedReplays = () => {
-    try {
-      const replays = JSON.parse(localStorage.getItem('rhythm_game_replays') || '[]');
-      setSavedReplays(replays);
-    } catch (error) {
-      console.error('Failed to load replays:', error);
-      setSavedReplays([]);
-    }
-  };
-
-  const deleteReplay = (replayId: string) => {
-    const updatedReplays = savedReplays.filter(replay => replay.id !== replayId);
-    setSavedReplays(updatedReplays);
-    localStorage.setItem('rhythm_game_replays', JSON.stringify(updatedReplays));
-  };
 
   const formatDate = (timestamp: string) => {
     return new Date(timestamp).toLocaleString();
@@ -81,26 +57,11 @@ const ReplayBrowser: React.FC<ReplayBrowserProps> = ({ isVisible, onClose }) => 
   });
 
   const handleWatchReplay = (replay: SavedReplay) => {
-    setSelectedReplay(replay);
-    setShowReplayPlayer(true);
-  };
-
-  const handleCloseReplayPlayer = () => {
-    setShowReplayPlayer(false);
-    setSelectedReplay(null);
+    playReplay(replay);
+    // The main App component will now be responsible for showing the ReplayPlayer
   };
 
   if (!isVisible) return null;
-
-  if (showReplayPlayer && selectedReplay) {
-    return (
-      <ReplayPlayer
-        replayData={selectedReplay}
-        onClose={handleCloseReplayPlayer}
-        isVisible={true}
-      />
-    );
-  }
 
   return (
     <div style={{
@@ -145,7 +106,6 @@ const ReplayBrowser: React.FC<ReplayBrowserProps> = ({ isVisible, onClose }) => 
             background: 'linear-gradient(45deg, #ff6b6b, #4ecdc4)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text'
           }}>
             🎬 Replay Browser
           </h1>
@@ -211,7 +171,7 @@ const ReplayBrowser: React.FC<ReplayBrowserProps> = ({ isVisible, onClose }) => 
             display: 'grid',
             gap: '15px'
           }}>
-            {sortedReplays.map((replay, index) => {
+            {sortedReplays.map((replay) => {
               const grade = getGrade(replay.metadata.accuracy);
               
               return (
@@ -222,18 +182,6 @@ const ReplayBrowser: React.FC<ReplayBrowserProps> = ({ isVisible, onClose }) => 
                     borderRadius: '15px',
                     padding: '20px',
                     border: '1px solid rgba(255, 255, 255, 0.1)',
-                    transition: 'all 0.3s ease',
-                    cursor: 'pointer'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.3)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = 'none';
                   }}
                 >
                   <div style={{
@@ -315,10 +263,7 @@ const ReplayBrowser: React.FC<ReplayBrowserProps> = ({ isVisible, onClose }) => 
                     {/* Action Buttons */}
                     <div style={{ display: 'flex', gap: '10px' }}>
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleWatchReplay(replay);
-                        }}
+                        onClick={() => handleWatchReplay(replay)}
                         style={{
                           background: '#4caf50',
                           color: 'white',
@@ -328,27 +273,13 @@ const ReplayBrowser: React.FC<ReplayBrowserProps> = ({ isVisible, onClose }) => 
                           cursor: 'pointer',
                           fontSize: '14px',
                           fontWeight: 'bold',
-                          transition: 'all 0.3s ease'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = '#45a049';
-                          e.currentTarget.style.transform = 'scale(1.05)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = '#4caf50';
-                          e.currentTarget.style.transform = 'scale(1)';
                         }}
                       >
                         🎬 Watch
                       </button>
                       
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (confirm('Are you sure you want to delete this replay?')) {
-                            deleteReplay(replay.id);
-                          }
-                        }}
+                        onClick={() => deleteReplay(replay.id)}
                         style={{
                           background: '#f44336',
                           color: 'white',
@@ -358,15 +289,6 @@ const ReplayBrowser: React.FC<ReplayBrowserProps> = ({ isVisible, onClose }) => 
                           cursor: 'pointer',
                           fontSize: '14px',
                           fontWeight: 'bold',
-                          transition: 'all 0.3s ease'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = '#d32f2f';
-                          e.currentTarget.style.transform = 'scale(1.05)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = '#f44336';
-                          e.currentTarget.style.transform = 'scale(1)';
                         }}
                       >
                         🗑️ Delete
@@ -376,26 +298,6 @@ const ReplayBrowser: React.FC<ReplayBrowserProps> = ({ isVisible, onClose }) => 
                 </div>
               );
             })}
-          </div>
-        )}
-
-        {/* Footer Info */}
-        {savedReplays.length > 0 && (
-          <div style={{
-            marginTop: '30px',
-            padding: '20px',
-            background: 'rgba(255, 255, 255, 0.05)',
-            borderRadius: '10px',
-            textAlign: 'center',
-            fontSize: '0.9em',
-            color: '#999'
-          }}>
-            <div style={{ marginBottom: '10px' }}>
-              📊 {savedReplays.length} replay{savedReplays.length !== 1 ? 's' : ''} saved
-            </div>
-            <div>
-              💾 Replays are stored locally in your browser
-            </div>
           </div>
         )}
       </div>

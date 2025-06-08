@@ -7,7 +7,7 @@ import SettingsMenu from './menus/SettingsMenu';
 import DifficultyMenu from './menus/DifficultyMenu';
 import TimeSelectionMenu from './menus/TimeSelectionMenu';
 import ScoreSelectionMenu from './menus/ScoreSelectionMenu';
-import ReplayBrowser from './ReplayBrowser';
+import ReplayBrowser from './replays/ReplayBrowser';
 import GradientBackground from './GradientBackground';
 import FloatingShapes from './FloatingShapes';
 import { useMenuStore } from './stores/menuStore';

@@ -4,7 +4,7 @@ import { useFrame } from '@react-three/fiber'
 import { useGameStore } from '../stores/gameStore'
 import { useReplayStore } from '../stores/replayStore'
 import { ComplexityManager, type PatternNote } from '../ComplexityManager'
-import { replayRecorder } from '../ReplayRecorder'
+import { replayRecorder } from '../replays/ReplayRecorder'
 
 const letters = '12345'
 const channelPositions = [-2, -1, 0, 1, 2]

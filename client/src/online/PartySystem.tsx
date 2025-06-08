@@ -1,52 +1,27 @@
 // client/src/online/PartySystem.tsx
-import React, { useState, useEffect } from 'react';
-
-interface Party {
-  id: string;
-  name: string;
-  leader: string;
-  members: PartyMember[];
-  maxMembers: number;
-  isPublic: boolean;
-  gameMode?: string;
-  difficulty?: number;
-  region: string;
-  createdAt: Date;
-  status: 'waiting' | 'in-queue' | 'in-game';
-}
-
-interface PartyMember {
-  id: string;
-  username: string;
-  elo: number;
-  rank: string;
-  status: 'ready' | 'not-ready' | 'away';
-  joinedAt: Date;
-  avatar: string;
-  isLeader: boolean;
-}
-
-interface PartyInvite {
-  id: string;
-  fromUsername: string;
-  fromElo: number;
-  fromRank: string;
-  partyName: string;
-  sentAt: Date;
-  expiresAt: Date;
-}
+import React, { useState } from 'react';
+import { useOnlineStore } from '../stores/onlineStore';
+import type { Party, PartyMember } from '../stores/onlineStore';
 
 interface PartySystemProps {
-  playerData: any;
   onBack: () => void;
   onStartPartyGame: (config: any) => void;
 }
 
-const PartySystem: React.FC<PartySystemProps> = ({ playerData, onBack, onStartPartyGame }) => {
+const PartySystem: React.FC<PartySystemProps> = ({ onBack, onStartPartyGame }) => {
+  const {
+    playerData,
+    currentParty,
+    availableParties,
+    partyInvites,
+    createParty,
+    joinParty,
+    leaveParty,
+    setCurrentParty,
+    setPartyInvites
+  } = useOnlineStore();
+
   const [activeTab, setActiveTab] = useState<'current' | 'browse' | 'invites' | 'create'>('current');
-  const [currentParty, setCurrentParty] = useState<Party | null>(null);
-  const [availableParties, setAvailableParties] = useState<Party[]>([]);
-  const [partyInvites, setPartyInvites] = useState<PartyInvite[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [createPartyForm, setCreatePartyForm] = useState({
     name: '',
@@ -56,153 +31,6 @@ const PartySystem: React.FC<PartySystemProps> = ({ playerData, onBack, onStartPa
     difficulty: 50,
     region: 'NA-East'
   });
-
-  useEffect(() => {
-    // Mock data initialization
-    const mockParties: Party[] = [
-      {
-        id: 'party_1',
-        name: 'Elite Squad',
-        leader: 'ProGamer123',
-        members: [
-          {
-            id: 'member_1',
-            username: 'ProGamer123',
-            elo: 2156,
-            rank: 'Master',
-            status: 'ready',
-            joinedAt: new Date(Date.now() - 1000 * 60 * 30),
-            avatar: '/avatars/1.png',
-            isLeader: true
-          },
-          {
-            id: 'member_2',
-            username: 'RhythmKing',
-            elo: 1987,
-            rank: 'Diamond',
-            status: 'ready',
-            joinedAt: new Date(Date.now() - 1000 * 60 * 15),
-            avatar: '/avatars/2.png',
-            isLeader: false
-          },
-          {
-            id: 'member_3',
-            username: 'BeatMaster',
-            elo: 1834,
-            rank: 'Diamond',
-            status: 'not-ready',
-            joinedAt: new Date(Date.now() - 1000 * 60 * 10),
-            avatar: '/avatars/3.png',
-            isLeader: false
-          }
-        ],
-        maxMembers: 4,
-        isPublic: true,
-        gameMode: 'Tournament',
-        difficulty: 80,
-        region: 'NA-East',
-        createdAt: new Date(Date.now() - 1000 * 60 * 45),
-        status: 'waiting'
-      },
-      {
-        id: 'party_2',
-        name: 'Casual Beats',
-        leader: 'ChillPlayer',
-        members: [
-          {
-            id: 'member_4',
-            username: 'ChillPlayer',
-            elo: 1456,
-            rank: 'Gold',
-            status: 'ready',
-            joinedAt: new Date(Date.now() - 1000 * 60 * 20),
-            avatar: '/avatars/4.png',
-            isLeader: true
-          },
-          {
-            id: 'member_5',
-            username: 'MelodySeeker',
-            elo: 1523,
-            rank: 'Gold',
-            status: 'ready',
-            joinedAt: new Date(Date.now() - 1000 * 60 * 5),
-            avatar: '/avatars/5.png',
-            isLeader: false
-          }
-        ],
-        maxMembers: 6,
-        isPublic: true,
-        gameMode: 'Casual',
-        difficulty: 35,
-        region: 'EU-West',
-        createdAt: new Date(Date.now() - 1000 * 60 * 25),
-        status: 'waiting'
-      }
-    ];
-
-    const mockInvites: PartyInvite[] = [
-      {
-        id: 'invite_1',
-        fromUsername: 'BeatBuddy',
-        fromElo: 1756,
-        fromRank: 'Diamond',
-        partyName: 'Diamond Crushers',
-        sentAt: new Date(Date.now() - 1000 * 60 * 10),
-        expiresAt: new Date(Date.now() + 1000 * 60 * 50)
-      },
-      {
-        id: 'invite_2',
-        fromUsername: 'RhythmPal',
-        fromElo: 1623,
-        fromRank: 'Platinum',
-        partyName: 'Weekend Warriors',
-        sentAt: new Date(Date.now() - 1000 * 60 * 25),
-        expiresAt: new Date(Date.now() + 1000 * 60 * 35)
-      }
-    ];
-
-    setAvailableParties(mockParties);
-    setPartyInvites(mockInvites);
-
-    // Check if player is already in a party (mock)
-    const isInParty = Math.random() > 0.7; // 30% chance player is in a party
-    if (isInParty) {
-      setCurrentParty({
-        id: 'my_party',
-        name: 'My Squad',
-        leader: playerData.username,
-        members: [
-          {
-            id: 'me',
-            username: playerData.username,
-            elo: playerData.elo,
-            rank: playerData.rank,
-            status: 'ready',
-            joinedAt: new Date(Date.now() - 1000 * 60 * 60),
-            avatar: '/avatars/player.png',
-            isLeader: true
-          },
-          {
-            id: 'friend_1',
-            username: 'BeatBuddy',
-            elo: 1756,
-            rank: 'Diamond',
-            status: 'not-ready',
-            joinedAt: new Date(Date.now() - 1000 * 60 * 30),
-            avatar: '/avatars/friend1.png',
-            isLeader: false
-          }
-        ],
-        maxMembers: 4,
-        isPublic: false,
-        gameMode: 'Ranked',
-        difficulty: 60,
-        region: 'NA-East',
-        createdAt: new Date(Date.now() - 1000 * 60 * 60),
-        status: 'waiting'
-      });
-    }
-  }, [playerData]);
 
   const getRankColor = (rank: string) => {
     switch (rank.toLowerCase()) {
@@ -237,97 +65,44 @@ const PartySystem: React.FC<PartySystemProps> = ({ playerData, onBack, onStartPa
   };
 
   const handleCreateParty = () => {
-    const newParty: Party = {
-      id: `party_${Date.now()}`,
-      name: createPartyForm.name || `${playerData.username}'s Party`,
-      leader: playerData.username,
-      members: [{
-        id: 'me',
-        username: playerData.username,
-        elo: playerData.elo,
-        rank: playerData.rank,
-        status: 'ready',
-        joinedAt: new Date(),
-        avatar: '/avatars/player.png',
-        isLeader: true
-      }],
-      maxMembers: createPartyForm.maxMembers,
-      isPublic: createPartyForm.isPublic,
-      gameMode: createPartyForm.gameMode,
-      difficulty: createPartyForm.difficulty,
-      region: createPartyForm.region,
-      createdAt: new Date(),
-      status: 'waiting'
-    };
-    
-    setCurrentParty(newParty);
+    if (!playerData) return;
+    createParty(createPartyForm, playerData);
     setActiveTab('current');
-    
-    // Reset form
-    setCreatePartyForm({
-      name: '',
-      maxMembers: 4,
-      isPublic: true,
-      gameMode: 'Ranked',
-      difficulty: 50,
-      region: 'NA-East'
-    });
+    setCreatePartyForm({ name: '', maxMembers: 4, isPublic: true, gameMode: 'Ranked', difficulty: 50, region: 'NA-East' });
   };
 
   const handleJoinParty = (party: Party) => {
-    if (party.members.length >= party.maxMembers) return;
-    
-    const updatedParty = {
-      ...party,
-      members: [
-        ...party.members,
-        {
-          id: 'me',
-          username: playerData.username,
-          elo: playerData.elo,
-          rank: playerData.rank,
-          status: 'not-ready' as const,
-          joinedAt: new Date(),
-          avatar: '/avatars/player.png',
-          isLeader: false
-        }
-      ]
-    };
-    
-    setCurrentParty(updatedParty);
+    if (!playerData) return;
+    joinParty(party, playerData);
     setActiveTab('current');
   };
 
   const handleLeaveParty = () => {
     if (confirm('Are you sure you want to leave the party?')) {
-      setCurrentParty(null);
+      leaveParty();
     }
   };
 
   const handleToggleReady = () => {
-    if (!currentParty) return;
-    
+    if (!currentParty || !playerData) return;
     const updatedParty = {
       ...currentParty,
       members: currentParty.members.map(member => 
-        member.username === playerData.username 
+        member.id === playerData.id
           ? { ...member, status: member.status === 'ready' ? 'not-ready' : 'ready' }
           : member
       )
     };
-    
     setCurrentParty(updatedParty);
   };
 
   const handleStartGame = () => {
     if (!currentParty) return;
-    
     const allReady = currentParty.members.every(member => member.status === 'ready');
     if (!allReady) {
       alert('All party members must be ready before starting!');
       return;
     }
-    
     onStartPartyGame({
       mode: 'party',
       gameMode: currentParty.gameMode,
@@ -339,51 +114,14 @@ const PartySystem: React.FC<PartySystemProps> = ({ playerData, onBack, onStartPa
 
   const handleAcceptInvite = (inviteId: string) => {
     const invite = partyInvites.find(i => i.id === inviteId);
-    if (invite) {
-      // Create a mock party from the invite
-      const newParty: Party = {
-        id: `party_${Date.now()}`,
-        name: invite.partyName,
-        leader: invite.fromUsername,
-        members: [
-          {
-            id: 'leader',
-            username: invite.fromUsername,
-            elo: invite.fromElo,
-            rank: invite.fromRank,
-            status: 'ready',
-            joinedAt: new Date(Date.now() - 1000 * 60 * 30),
-            avatar: '/avatars/leader.png',
-            isLeader: true
-          },
-          {
-            id: 'me',
-            username: playerData.username,
-            elo: playerData.elo,
-            rank: playerData.rank,
-            status: 'not-ready',
-            joinedAt: new Date(),
-            avatar: '/avatars/player.png',
-            isLeader: false
-          }
-        ],
-        maxMembers: 4,
-        isPublic: false,
-        gameMode: 'Ranked',
-        difficulty: 60,
-        region: 'NA-East',
-        createdAt: new Date(),
-        status: 'waiting'
-      };
-      
-      setCurrentParty(newParty);
-      setPartyInvites(prev => prev.filter(i => i.id !== inviteId));
-      setActiveTab('current');
+    if (invite && playerData) {
+      handleDeclineInvite(inviteId);
+      alert(`Joining ${invite.partyName}! (Simulated)`);
     }
   };
 
   const handleDeclineInvite = (inviteId: string) => {
-    setPartyInvites(prev => prev.filter(i => i.id !== inviteId));
+    setPartyInvites(partyInvites.filter(i => i.id !== inviteId));
   };
 
   const filteredParties = availableParties.filter(party => 
@@ -398,6 +136,8 @@ const PartySystem: React.FC<PartySystemProps> = ({ playerData, onBack, onStartPa
     { id: 'invites', label: 'Invitations', icon: '📧', count: partyInvites.length },
     { id: 'create', label: 'Create Party', icon: '➕' }
   ];
+
+  if (!playerData) return <div>Loading...</div>;
 
   return (
     <div style={{ padding: '20px', height: '100vh', overflow: 'hidden' }}>
@@ -800,7 +540,7 @@ const PartySystem: React.FC<PartySystemProps> = ({ playerData, onBack, onStartPa
                       <button
                         onClick={handleToggleReady}
                         style={{
-                          background: currentParty.members.find(m => m.username === playerData.username)?.status === 'ready' 
+                          background: currentParty.members.find(m => m.id === playerData.id)?.status === 'ready' 
                             ? '#f44336' : '#4caf50',
                           border: 'none',
                           color: 'white',
@@ -808,10 +548,10 @@ const PartySystem: React.FC<PartySystemProps> = ({ playerData, onBack, onStartPa
                           borderRadius: '8px',
                           cursor: 'pointer',
                           fontSize: '16px',
-fontWeight: 'bold'
+                          fontWeight: 'bold'
                        }}
                      >
-                       {currentParty.members.find(m => m.username === playerData.username)?.status === 'ready' 
+                       {currentParty.members.find(m => m.id === playerData.id)?.status === 'ready' 
                          ? '❌ Not Ready' : '✅ Ready Up'}
                      </button>
 
@@ -1396,7 +1136,7 @@ fontWeight: 'bold'
        </div>
      </div>
    </div>
- );
+  );
 };
 
 export default PartySystem;

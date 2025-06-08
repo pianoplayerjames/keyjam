@@ -1,75 +1,95 @@
 // client/src/stores/replayStore.ts
-import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
-import { ReplayData } from '../ReplayRecorder'
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { ReplayData } from '../replays/ReplayRecorder';
+import { ReplayEngine } from '../replays/ReplayEngine';
 
 interface SavedReplay extends ReplayData {
-  id: string
-  timestamp: string
+  id: string;
+  timestamp: string;
 }
 
 interface ReplayState {
-  // Current replay
-  currentReplay: ReplayData | null
-  isRecording: boolean
-  isPlaying: boolean
-  
-  // Saved replays
-  savedReplays: SavedReplay[]
-  
-  // Actions
-  setCurrentReplay: (replay: ReplayData | null) => void
-  setIsRecording: (recording: boolean) => void
-  setIsPlaying: (playing: boolean) => void
-  saveReplay: (replay: ReplayData) => void
-  deleteReplay: (id: string) => void
-  loadReplays: () => void
+  currentReplay: ReplayData | null;
+  replayEngine: ReplayEngine | null;
+  isRecording: boolean;
+  isPlaying: boolean;
+  savedReplays: SavedReplay[];
+  setIsRecording: (recording: boolean) => void;
+  saveReplay: (replay: ReplayData) => void;
+  deleteReplay: (id: string) => void;
+  playReplay: (replay: SavedReplay) => void;
+  stopReplay: () => void;
+  togglePlayPause: () => void;
 }
 
 export const useReplayStore = create<ReplayState>()(
   persist(
     (set, get) => ({
-      // Current replay
       currentReplay: null,
+      replayEngine: null,
       isRecording: false,
       isPlaying: false,
-      
-      // Saved replays
       savedReplays: [],
-      
-      // Actions
-      setCurrentReplay: (replay) => set({ currentReplay: replay }),
       setIsRecording: (recording) => set({ isRecording: recording }),
-      setIsPlaying: (playing) => set({ isPlaying: playing }),
-      
       saveReplay: (replay) => {
         const savedReplay: SavedReplay = {
           ...replay,
           id: Date.now().toString(),
           timestamp: new Date().toISOString()
-        }
-        
+        };
         set((state) => {
-          const newReplays = [savedReplay, ...state.savedReplays]
-          // Keep only last 10 replays
-          if (newReplays.length > 10) {
-            newReplays.splice(10)
-          }
-          return { savedReplays: newReplays }
-        })
+          const newReplays = [savedReplay, ...state.savedReplays].slice(0, 10);
+          return { savedReplays: newReplays };
+        });
       },
-      
       deleteReplay: (id) => set((state) => ({
         savedReplays: state.savedReplays.filter(r => r.id !== id)
       })),
-      
-      loadReplays: () => {
-        // This is handled by the persist middleware
+      playReplay: (replay) => {
+        get().stopReplay(); // Stop any existing replay first
+        const newEngine = new ReplayEngine(replay);
+        set({
+            currentReplay: replay,
+            replayEngine: newEngine,
+            isPlaying: true
+        });
+        newEngine.play();
+      },
+      stopReplay: () => {
+        const { replayEngine } = get();
+        if (replayEngine) {
+            replayEngine.stop();
+        }
+        set({
+            currentReplay: null,
+            replayEngine: null,
+            isPlaying: false
+        });
+      },
+      togglePlayPause: () => {
+        const { replayEngine, isPlaying } = get();
+        if (replayEngine) {
+            if (isPlaying) {
+                replayEngine.pause();
+                set({ isPlaying: false });
+            } else {
+                replayEngine.play();
+                set({ isPlaying: true });
+            }
+        }
       }
     }),
     {
       name: 'rhythm-game-replays',
-      partialize: (state) => ({ savedReplays: state.savedReplays })
+      partialize: (state) => ({ savedReplays: state.savedReplays }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+            state.replayEngine = null;
+            state.isPlaying = false;
+            state.currentReplay = null;
+        }
+      }
     }
   )
-)
+);
