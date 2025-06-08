@@ -1,9 +1,14 @@
+// client/src/menus/PractiseMenu.tsx
+import { useGameStore } from '../stores/gameStore';
+
 interface PractiseMenuProps {
   onBack: () => void;
   onSelectMode: (mode: string) => void;
 }
 
 const PractiseMenu = ({ onBack, onSelectMode }: PractiseMenuProps) => {
+  const { setGameConfig, gameConfig } = useGameStore();
+
   const practiseOptions = [
     { 
       text: 'Score Based', 
@@ -21,8 +26,17 @@ const PractiseMenu = ({ onBack, onSelectMode }: PractiseMenuProps) => {
     }
   ];
 
+  const handleSelectMode = (mode: string) => {
+    setGameConfig({
+      ...gameConfig,
+      mode: 'practise',
+      subMode: mode
+    });
+    onSelectMode(mode);
+  };
+
   return (
-<div className="absolute inset-0 flex flex-col items-center justify-center text-white bg-transparent">
+    <div className="absolute inset-0 flex flex-col items-center justify-center text-white bg-transparent">
       <button 
         onClick={onBack}
         className="absolute top-8 left-8 flex items-center gap-2 text-gray-300 hover:text-white transition-colors text-lg"
@@ -44,7 +58,7 @@ const PractiseMenu = ({ onBack, onSelectMode }: PractiseMenuProps) => {
           {practiseOptions.map((option, index) => (
             <button
               key={option.text}
-              onClick={() => onSelectMode(option.mode)}
+              onClick={() => handleSelectMode(option.mode)}
               className={`
                 group relative overflow-hidden rounded-xl p-8 bg-gradient-to-r ${option.color}
                 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl

@@ -1,9 +1,15 @@
+// client/src/menus/DifficultyMenu.tsx
+import { useGameStore } from '../stores/gameStore';
+import { useMenuStore } from '../stores/menuStore';
+
 interface DifficultyMenuProps {
   onBack: () => void;
-  onSelectDifficulty: (difficulty: number) => void;
 }
 
-const DifficultyMenu = ({ onBack, onSelectDifficulty }: DifficultyMenuProps) => {
+const DifficultyMenu = ({ onBack }: DifficultyMenuProps) => {
+  const { gameConfig, setGameConfig, setGameState, setComplexity } = useGameStore();
+  const { setIsTransitioning } = useMenuStore();
+
   const difficultyOptions = [
     { 
       text: 'Tutorial', 
@@ -49,8 +55,19 @@ const DifficultyMenu = ({ onBack, onSelectDifficulty }: DifficultyMenuProps) => 
     }
   ];
 
+  const handleSelectDifficulty = (difficulty: number) => {
+    console.log('Setting difficulty to:', difficulty);
+    setGameConfig({
+      ...gameConfig,
+      difficulty
+    });
+    setComplexity(difficulty);
+    setIsTransitioning(true);
+    setGameState('in-transition');
+  };
+
   return (
-<div className="absolute inset-0 flex flex-col items-center justify-center text-white bg-transparent">
+    <div className="absolute inset-0 flex flex-col items-center justify-center text-white bg-transparent">
       <button 
         onClick={onBack}
         className="absolute top-8 left-8 flex items-center gap-2 text-gray-300 hover:text-white transition-colors text-lg"
@@ -72,7 +89,7 @@ const DifficultyMenu = ({ onBack, onSelectDifficulty }: DifficultyMenuProps) => 
           {difficultyOptions.map((option, index) => (
             <button
               key={option.text}
-              onClick={() => onSelectDifficulty(option.value)}
+              onClick={() => handleSelectDifficulty(option.value)}
               className={`
                 group relative overflow-hidden rounded-xl p-6 bg-gradient-to-r ${option.color}
                 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl
@@ -90,7 +107,6 @@ const DifficultyMenu = ({ onBack, onSelectDifficulty }: DifficultyMenuProps) => 
           ))}
         </div>
 
-        {/* Professional Level Warning */}
         <div className="mt-8 max-w-2xl">
           <div className="bg-purple-900 bg-opacity-50 border border-purple-500 rounded-xl p-4 text-center">
             <p className="text-purple-200 text-sm">

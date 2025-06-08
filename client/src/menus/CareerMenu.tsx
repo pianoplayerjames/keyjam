@@ -1,11 +1,29 @@
+// client/src/menus/CareerMenu.tsx
+import { useGameStore } from '../stores/gameStore';
+import { useMenuStore } from '../stores/menuStore';
+
 interface CareerMenuProps {
   onBack: () => void;
-  onStart: () => void;
 }
 
-const CareerMenu = ({ onBack, onStart }: CareerMenuProps) => {
+const CareerMenu = ({ onBack }: CareerMenuProps) => {
+  const { setGameConfig, setGameState } = useGameStore();
+  const { setIsTransitioning } = useMenuStore();
+
+  const handleStart = () => {
+    setGameConfig({
+      mode: 'career',
+      subMode: 'career',
+      difficulty: 3,
+      timeLimit: 120,
+      scoreTarget: 1000
+    });
+    setIsTransitioning(true);
+    setGameState('in-transition');
+  };
+
   return (
-<div className="flex flex-col items-center min-h-screen text-white p-8 bg-transparent">
+    <div className="flex flex-col items-center min-h-screen text-white p-8 bg-transparent">
       <button 
         onClick={onBack}
         className="absolute top-8 left-8 flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
@@ -35,7 +53,7 @@ const CareerMenu = ({ onBack, onStart }: CareerMenuProps) => {
         </div>
 
         <button
-          onClick={onStart}
+          onClick={handleStart}
           className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 
                      px-12 py-4 rounded-xl text-2xl font-bold transform transition-all duration-300 
                      hover:scale-105 hover:shadow-2xl"

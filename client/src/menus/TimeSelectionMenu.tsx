@@ -1,9 +1,14 @@
+// client/src/menus/TimeSelectionMenu.tsx
+import { useGameStore } from '../stores/gameStore';
+
 interface TimeSelectionMenuProps {
   onBack: () => void;
   onSelectTime: (timeLimit: number) => void;
 }
 
 const TimeSelectionMenu = ({ onBack, onSelectTime }: TimeSelectionMenuProps) => {
+  const { setGameConfig, gameConfig } = useGameStore();
+
   const timeOptions = [
     { text: '1 Minute', value: 60, color: 'from-green-400 to-green-600', icon: '⚡' },
     { text: '2 Minutes', value: 120, color: 'from-blue-400 to-blue-600', icon: '🎵' },
@@ -13,8 +18,16 @@ const TimeSelectionMenu = ({ onBack, onSelectTime }: TimeSelectionMenuProps) => 
     { text: 'Endless', value: -1, color: 'from-gray-500 to-gray-700', icon: '♾️' }
   ];
 
+  const handleSelectTime = (timeLimit: number) => {
+    setGameConfig({
+      ...gameConfig,
+      timeLimit
+    });
+    onSelectTime(timeLimit);
+  };
+
   return (
-<div className="absolute inset-0 flex flex-col items-center justify-center text-white bg-transparent">
+    <div className="absolute inset-0 flex flex-col items-center justify-center text-white bg-transparent">
       <button 
         onClick={onBack}
         className="absolute top-8 left-8 flex items-center gap-2 text-gray-300 hover:text-white transition-colors text-lg"
@@ -36,7 +49,7 @@ const TimeSelectionMenu = ({ onBack, onSelectTime }: TimeSelectionMenuProps) => 
           {timeOptions.map((option, index) => (
             <button
               key={option.text}
-              onClick={() => onSelectTime(option.value)}
+              onClick={() => handleSelectTime(option.value)}
               className={`
                 group relative overflow-hidden rounded-xl p-6 bg-gradient-to-r ${option.color}
                 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl

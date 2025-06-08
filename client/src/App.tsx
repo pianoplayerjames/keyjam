@@ -23,11 +23,12 @@ function App() {
   const { gameState, gameConfig, setGameConfig, setGameState } = useGameStore()
   const { menuState, isTransitioning, setIsTransitioning, setMenuState } = useMenuStore()
 
-  const handleStartGame = (config: typeof gameConfig) => {
-    setGameConfig(config)
-    setIsTransitioning(true)
-    setGameState('in-transition')
-  }
+const handleStartGame = (config: typeof gameConfig) => {
+  console.log('Starting game with config:', config)
+  setGameConfig(config)
+  setIsTransitioning(true)
+  setGameState('in-transition')
+}
 
   const handleTransitionComplete = () => {
     setGameState('game')

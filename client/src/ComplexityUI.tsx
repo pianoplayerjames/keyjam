@@ -2,13 +2,7 @@
 import React from 'react';
 import { useGameStore } from './stores/gameStore';
 
-interface ComplexityUIProps {
-  showDetails?: boolean;
-}
-
-const ComplexityUI: React.FC<ComplexityUIProps> = ({ 
-  showDetails = false 
-}) => {
+const ComplexityUI: React.FC = () => {
   const { complexity, setComplexity, gameConfig } = useGameStore();
   const isCareerMode = gameConfig.mode === 'career';
 
@@ -207,19 +201,17 @@ const ComplexityUI: React.FC<ComplexityUIProps> = ({
         </div>
       </div>
 
-      {showDetails && (
-        <div style={{ 
-          fontSize: '0.85em', 
-          lineHeight: '1.5',
-          marginBottom: '20px',
-          padding: '15px',
-          backgroundColor: 'rgba(255, 255, 255, 0.08)',
-          borderRadius: '12px',
-          borderLeft: `4px solid ${getComplexityColor(complexity)}`
-        }}>
-          {getComplexityDescription(complexity)}
-        </div>
-      )}
+      <div style={{ 
+        fontSize: '0.85em', 
+        lineHeight: '1.5',
+        marginBottom: '20px',
+        padding: '15px',
+        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+        borderRadius: '12px',
+        borderLeft: `4px solid ${getComplexityColor(complexity)}`
+      }}>
+        {getComplexityDescription(complexity)}
+      </div>
 
       <div style={{ 
         display: 'grid', 
