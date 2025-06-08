@@ -879,17 +879,7 @@ const OnlinePortal: React.FC<OnlinePortalProps> = ({ onBack, onStartGame }) => {
  };
 
  return (
-   <div style={{
-     position: 'fixed',
-     top: 0,
-     left: 0,
-     width: '100vw',
-     height: '100vh',
-     background: 'linear-gradient(135deg, #0a0f1c 0%, #1a2332 50%, #2d3748 100%)',
-     color: 'white',
-     fontFamily: 'system-ui, -apple-system, sans-serif',
-     overflow: 'hidden'
-   }}>
+   <div className="h-full w-full overflow-y-auto">
      {renderCurrentSection()}
    </div>
  );
@@ -982,104 +972,6 @@ const MainPortal: React.FC<MainPortalProps> = ({
 
  return (
    <>
-     {/* Header Bar */}
-     <div style={{
-       height: '70px',
-       background: 'rgba(0, 0, 0, 0.3)',
-       borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-       display: 'flex',
-       alignItems: 'center',
-       justifyContent: 'space-between',
-       padding: '0 30px',
-       backdropFilter: 'blur(10px)'
-     }}>
-       <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-         <button
-           onClick={onBack}
-           style={{
-             background: 'rgba(255, 255, 255, 0.1)',
-             border: '1px solid rgba(255, 255, 255, 0.2)',
-             color: 'white',
-             padding: '10px 20px',
-             borderRadius: '8px',
-             cursor: 'pointer',
-             fontSize: '14px',
-             fontWeight: '500',
-             transition: 'all 0.3s ease'
-           }}
-           onMouseEnter={(e) => {
-             e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
-           }}
-           onMouseLeave={(e) => {
-             e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-           }}
-         >
-           ← Back to Game
-         </button>
-
-         <div style={{
-           fontSize: '24px',
-           fontWeight: 'bold',
-           background: 'linear-gradient(45deg, #4caf50, #2196f3)',
-           WebkitBackgroundClip: 'text',
-           WebkitTextFillColor: 'transparent',
-           backgroundClip: 'text'
-         }}>
-           KeyJam Online
-         </div>
-       </div>
-
-       <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
-         <div style={{ display: 'flex', gap: '20px', fontSize: '14px', color: '#ccc' }}>
-           <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-             <div style={{ 
-               width: '8px', 
-               height: '8px', 
-               borderRadius: '50%', 
-               background: '#4caf50' 
-             }} />
-             {onlineStats.playersOnline.toLocaleString()} Online
-           </div>
-           <div>🎮 {onlineStats.gamesInProgress} Games</div>
-           <div>🏟️ {onlineStats.availableArenas} Arenas</div>
-         </div>
-
-         <div style={{
-           display: 'flex',
-           alignItems: 'center',
-           gap: '15px',
-           padding: '8px 16px',
-           background: 'rgba(255, 255, 255, 0.05)',
-           borderRadius: '12px',
-           border: '1px solid rgba(255, 255, 255, 0.1)'
-         }}>
-           <div style={{
-             width: '32px',
-             height: '32px',
-             borderRadius: '50%',
-             background: 'linear-gradient(45deg, #4caf50, #2196f3)',
-             display: 'flex',
-             alignItems: 'center',
-             justifyContent: 'center',
-             fontSize: '14px'
-           }}>
-             👤
-           </div>
-           <div>
-             <div style={{ fontSize: '14px', fontWeight: '600' }}>
-               {playerData.username}
-             </div>
-             <div style={{
-               fontSize: '12px',
-               color: getRankColor(playerData.rank),
-               fontWeight: '500'
-             }}>
-               {playerData.rank} • {playerData.elo} ELO
-             </div>
-           </div>
-         </div>
-       </div>
-     </div>
 
      <div style={{ display: 'flex', height: 'calc(100vh - 70px)' }}>
        {/* Main Content */}
