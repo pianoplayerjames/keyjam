@@ -4,7 +4,7 @@ import { Canvas } from '@react-three/fiber';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import { useReplayStore } from '../stores/replayStore';
 import { ReplayEngine } from './ReplayEngine';
-import FallingLetter from '../FallingLetter';
+import FallingLetter from '../FallingNotes';
 import Fretboard from '../Fretboard';
 import GradientBackground from '../GradientBackground';
 import SparklesEffect from '../SparklesEffect';
