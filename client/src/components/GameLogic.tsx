@@ -107,6 +107,7 @@ const GameLogic = () => {
             isBeingHeld: false
           }
           newlySpawnedNotes.push(newLetter)
+          replayRecorder.recordEvent('note_spawn', { letter: newLetter });
           incrementTotalNotes()
         }
       })
@@ -164,7 +165,12 @@ const GameLogic = () => {
             incrementTotalNotesProcessed()
             newLetter.wasProcessed = true
             const healthPenalty = 10
-            setHealth(health - healthPenalty)
+            const newHealth = health - healthPenalty;
+            setHealth(newHealth)
+            replayRecorder.recordEvent('note_miss', {
+                noteId: newLetter.id,
+                health: newHealth
+            });
           }
           newLetter.isMissed = true
         }

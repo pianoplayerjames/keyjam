@@ -4,6 +4,7 @@ import { useGameStore } from './stores/gameStore';
 interface ScoreChartProps {
   onReplay: () => void;
   onBackToMenu: () => void;
+  onWatchReplay: () => void;
   isVisible: boolean;
 }
 
@@ -51,12 +52,15 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
 
     if (value > 0) {
       animationRef.current = requestAnimationFrame(animate);
+    } else {
+        setCount(value);
     }
 
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
+      startTimeRef.current = null;
     };
   }, [value, duration, onComplete]);
 
@@ -75,6 +79,7 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
 const ScoreChart: React.FC<ScoreChartProps> = ({
   onReplay,
   onBackToMenu,
+  onWatchReplay,
   isVisible
 }) => {
   const {
@@ -85,11 +90,12 @@ const ScoreChart: React.FC<ScoreChartProps> = ({
     goodNotes,
     almostNotes,
     missedNotes,
-    accuracy,
+    calculateAccuracy,
   } = useGameStore();
 
   const [animationStage, setAnimationStage] = useState(0);
   const [showGrade, setShowGrade] = useState(false);
+  const accuracy = calculateAccuracy();
 
   const calculateGrade = (acc: number): { grade: string; color: string; description: string } => {
     if (acc >= 95) return { grade: 'S', color: '#FFD700', description: 'Perfect!' };
@@ -103,19 +109,21 @@ const ScoreChart: React.FC<ScoreChartProps> = ({
   const grade = calculateGrade(accuracy);
 
   useEffect(() => {
-    if (!isVisible) return;
+    if (isVisible) {
+        setAnimationStage(0);
+        setShowGrade(false);
+        const stages = [
+          () => setAnimationStage(1),
+          () => setAnimationStage(2),
+          () => setAnimationStage(3),
+          () => setAnimationStage(4),
+          () => setShowGrade(true)
+        ];
 
-    const stages = [
-      () => setAnimationStage(1),
-      () => setAnimationStage(2),
-      () => setAnimationStage(3),
-      () => setAnimationStage(4),
-      () => setShowGrade(true)
-    ];
-
-    stages.forEach((stage, index) => {
-      setTimeout(stage, index * 600);
-    });
+        stages.forEach((stage, index) => {
+          setTimeout(stage, index * 600);
+        });
+    }
   }, [isVisible]);
 
   if (!isVisible) return null;
@@ -161,10 +169,6 @@ const ScoreChart: React.FC<ScoreChartProps> = ({
               70% { transform: scale(0.9); }
               100% { transform: scale(1); opacity: 1; }
             }
-            @keyframes pulse {
-              0%, 100% { transform: scale(1); }
-              50% { transform: scale(1.05); }
-            }
             .grade-display {
               animation: bounceIn 1s ease-out;
             }
@@ -177,13 +181,9 @@ const ScoreChart: React.FC<ScoreChartProps> = ({
               opacity: 1;
               transform: translateX(0);
             }
-            .pulse-border {
-              animation: pulse 2s infinite;
-            }
           `}
         </style>
 
-        {/* Main Score */}
         <div style={{
           textAlign: 'center',
           marginBottom: '20px',
@@ -207,14 +207,12 @@ const ScoreChart: React.FC<ScoreChartProps> = ({
           </div>
         </div>
 
-        {/* Stats Grid */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
           gap: '15px',
           marginBottom: '20px'
         }}>
-          {/* Combo Stats */}
           <div className={`stat-row ${animationStage >= 2 ? 'show' : ''}`} style={{
             background: 'rgba(255, 107, 107, 0.1)',
             border: '2px solid #ff6b6b',
@@ -228,7 +226,6 @@ const ScoreChart: React.FC<ScoreChartProps> = ({
             </div>
           </div>
 
-          {/* Notes Hit */}
           <div className={`stat-row ${animationStage >= 3 ? 'show' : ''}`} style={{
             background: 'rgba(78, 205, 196, 0.1)',
             border: '2px solid #4ecdc4',
@@ -246,7 +243,6 @@ const ScoreChart: React.FC<ScoreChartProps> = ({
           </div>
         </div>
 
-        {/* Detailed Stats */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(2, 1fr)',
@@ -310,7 +306,6 @@ const ScoreChart: React.FC<ScoreChartProps> = ({
           </div>
         </div>
 
-        {/* Accuracy & Grade Combined */}
         <div className={`stat-row ${animationStage >= 4 ? 'show' : ''}`} style={{
           background: 'rgba(156, 39, 176, 0.1)',
           border: '2px solid #9c27b0',
@@ -322,7 +317,6 @@ const ScoreChart: React.FC<ScoreChartProps> = ({
           justifyContent: 'space-between',
           gap: '20px'
         }}>
-          {/* Accuracy Section */}
           <div style={{ flex: 1, textAlign: 'center' }}>
             <h3 style={{ margin: '0 0 10px 0', color: '#9c27b0', fontSize: '1.2em' }}>🎯 ACCURACY</h3>
             <div style={{ fontSize: '2.2em', fontWeight: 'bold', color: grade.color }}>
@@ -332,7 +326,6 @@ const ScoreChart: React.FC<ScoreChartProps> = ({
             </div>
           </div>
 
-          {/* Grade Section */}
           {showGrade && (
             <div className="grade-display" style={{
               flex: '0 0 auto',
@@ -341,8 +334,6 @@ const ScoreChart: React.FC<ScoreChartProps> = ({
               border: `3px solid ${grade.color}`,
               borderRadius: '15px',
               padding: '15px 20px',
-              position: 'relative',
-              overflow: 'hidden'
             }}>
               <div style={{
                 fontSize: '2.5em',
@@ -364,7 +355,6 @@ const ScoreChart: React.FC<ScoreChartProps> = ({
           )}
         </div>
 
-        {/* Action Buttons */}
         <div style={{
           display: 'flex',
           gap: '15px',
@@ -383,21 +373,26 @@ const ScoreChart: React.FC<ScoreChartProps> = ({
               cursor: 'pointer',
               fontWeight: 'bold',
               transition: 'all 0.3s ease',
-              boxShadow: '0 4px 15px rgba(76, 175, 80, 0.4)',
-              minWidth: '130px'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#45a049';
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 6px 20px rgba(76, 175, 80, 0.6)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#4caf50';
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 15px rgba(76, 175, 80, 0.4)';
             }}
           >
             🔄 Play Again
+          </button>
+          
+          <button
+            onClick={onWatchReplay}
+            style={{
+              fontSize: '1.2em',
+              padding: '12px 30px',
+              backgroundColor: '#2196f3',
+              color: 'white',
+              border: 'none',
+              borderRadius: '10px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              transition: 'all 0.3s ease',
+            }}
+          >
+            🎬 Watch Replay
           </button>
 
           <button
@@ -411,18 +406,6 @@ const ScoreChart: React.FC<ScoreChartProps> = ({
               borderRadius: '10px',
               cursor: 'pointer',
               fontWeight: 'bold',
-              transition: 'all 0.3s ease',
-              minWidth: '130px'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'white';
-              e.currentTarget.style.color = 'black';
-              e.currentTarget.style.transform = 'translateY(-2px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-              e.currentTarget.style.color = 'white';
-              e.currentTarget.style.transform = 'translateY(0)';
             }}
           >
             🏠 Back to Menu

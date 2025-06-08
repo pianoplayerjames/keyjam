@@ -1,10 +1,10 @@
 import { useEffect } from 'react'
 import { useGameStore } from '../stores/gameStore'
 import { ComplexityManager } from '../ComplexityManager'
+import { replayRecorder } from '../replays/ReplayRecorder';
 
 const letters = '12345'
 const channelPositions = [-2, -1, 0, 1, 2]
-const channelColors = ['#ff4f7b', '#ffc107', '#4caf50', '#2196f3', '#9c27b0']
 
 const calculateHitAccuracy = (
   notePosition: number, 
@@ -92,7 +92,7 @@ const KeyboardHandler = () => {
       if (event.repeat || isGameOver || gameComplete) return
       
       const pressedLetter = event.key.toLowerCase()
-      console.log('Key pressed:', pressedLetter)
+      replayRecorder.recordEvent('keydown', { key: pressedLetter });
       
       const channelIndex = letters.indexOf(pressedLetter)
       if (channelIndex === -1) return
@@ -124,8 +124,6 @@ const KeyboardHandler = () => {
                overlaps
       })
 
-      console.log('Hittable notes:', hittableNotes.length)
-
       if (hittableNotes.length > 0) {
         const notesWithDistance = hittableNotes.map(note => ({
           note,
@@ -138,8 +136,6 @@ const KeyboardHandler = () => {
         
         const noteCenter = closestLetter.position[2] - 0.8
         const hitResult = calculateHitAccuracy(noteCenter, hitZoneCenter, complexity)
-        
-        console.log('Hit result:', hitResult)
         
         const newCombo = combo + 1
         const newScore = score + hitResult.score
@@ -168,11 +164,12 @@ const KeyboardHandler = () => {
         setShowTimingDisplay(true)
         setTimeout(() => setShowTimingDisplay(false), 1500)
         
-        addStamp({
+        const stamp = {
           id: Math.random(),
           position: [closestLetter.position[0], 0.1, noteCenter],
           color: hitResult.color
-        })
+        };
+        addStamp(stamp)
 
         setHitFeedback({
           text: hitResult.feedback,
@@ -191,6 +188,16 @@ const KeyboardHandler = () => {
           setHealth(health - missPenalty)
         }
 
+        replayRecorder.recordEvent('note_hit', {
+            noteId: closestLetter.id,
+            hitResult: hitResult,
+            score: newScore,
+            combo: newCombo,
+            health: newHealth,
+            timingOffset: hitResult.timingOffset,
+            stamp: stamp
+        });
+
         const isLongNote = (closestLetter.duration ?? 0) > 0.5
         if (isLongNote && hitResult.accuracy !== 'miss') {
           setFallingLetters(prev => prev.map(l => 
@@ -203,8 +210,6 @@ const KeyboardHandler = () => {
         }
 
       } else {
-        console.log('No hittable notes found')
-        
         const upcomingNotes = fallingLetters.filter(l =>
           l.letter === pressedLetter &&
           !l.isMissed && !l.isHit && !l.isBeingHeld &&
@@ -231,14 +236,19 @@ const KeyboardHandler = () => {
         })
         
         setCombo(0)
-        const missPenalty = 3 + (complexity / 25)
-        setHealth(health - missPenalty)
+        const missPenalty = 3 + (complexity / 25);
+        const newHealth = health - missPenalty;
+        setHealth(newHealth)
+        replayRecorder.recordEvent('note_miss', {
+            key: pressedLetter,
+            health: newHealth,
+        });
       }
     }
 
     const handleKeyUp = (event: KeyboardEvent) => {
       const releasedLetter = event.key.toLowerCase()
-      console.log('Key released:', releasedLetter)
+      replayRecorder.recordEvent('keyup', { key: releasedLetter });
       
       const newHeldKeys = new Set(heldKeys)
       newHeldKeys.delete(releasedLetter)
