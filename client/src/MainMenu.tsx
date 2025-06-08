@@ -8,10 +8,10 @@ import DifficultyMenu from './menus/DifficultyMenu';
 import TimeSelectionMenu from './menus/TimeSelectionMenu';
 import ScoreSelectionMenu from './menus/ScoreSelectionMenu';
 import ReplayBrowser from './replays/ReplayBrowser';
+import ArcadeMenu from './menus/ArcadeMenu';
 import PulsingBackground from './PulsingBackground';
 import { useMenuStore } from './stores/menuStore';
 import { useGameStore } from './stores/gameStore';
-import SongSelectionMenu from './menus/SongSelectionMenu';
 
 const MainMenu = () => {
   const { menuState, setMenuState, isTransitioning } = useMenuStore();
@@ -79,24 +79,10 @@ const MainMenu = () => {
         );
       case 'arcade':
         return (
-          <div className="relative w-screen h-screen overflow-hidden">
-            <Canvas
-              camera={{ position: [0, 2.5, 5], fov: 75 }}
-              className="absolute inset-0"
-            >
-              <Suspense fallback={null}>
-                <PulsingBackground />
-                <ambientLight intensity={0.8} />
-                <directionalLight position={[10, 10, 5]} intensity={0.5} />
-              </Suspense>
-            </Canvas>
-            <div className="absolute inset-0 z-10">
-              <SongSelectionMenu
-                onBack={handleBackClick}
-                onSelectSong={handleSelectSong}
-              />
-            </div>
-          </div>
+          <ArcadeMenu
+            onBack={handleBackClick}
+            onSelectSong={handleSelectSong}
+          />
         );
       case 'online':
         return (
@@ -323,8 +309,6 @@ const MainMenu = () => {
                   ))}
                 </div>
               </main>
-              
-
             </div>
           </div>
         );

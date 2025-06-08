@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { songs } from '../songs/song-data';
 
 interface SongSelectionMenuProps {
@@ -6,29 +6,24 @@ interface SongSelectionMenuProps {
   onSelectSong: (songId: string) => void;
 }
 
+const DifficultyStars: React.FC<{ value: number }> = ({ value }) => {
+    const totalStars = 10;
+    const filledStars = Math.round((value / 100) * totalStars);
+    const starColor = value > 70 ? 'text-red-500' : value > 40 ? 'text-yellow-400' : 'text-cyan-400';
+
+    return (
+        <div className="flex justify-center items-center">
+            {[...Array(totalStars)].map((_, i) => (
+                <span key={i} className={`text-3xl ${i < filledStars ? starColor : 'text-gray-600'}`}>★</span>
+            ))}
+        </div>
+    );
+};
+
 const SongSelectionMenu: React.FC<SongSelectionMenuProps> = ({ onBack, onSelectSong }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const listRef = useRef<HTMLDivElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-
   const selectedSong = songs[selectedIndex];
 
-  useEffect(() => {
-    if (listRef.current) {
-      const listHeight = listRef.current.offsetHeight;
-      const itemHeight = 72; // h-18 in tailwind
-      const offset = (listHeight / 2) - (itemHeight / 2);
-      listRef.current.scrollTop = (selectedIndex * (itemHeight + 8)) - offset; // 8 is gap-2
-    }
-  }, [selectedIndex]);
-  
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!menuRef.current) return;
-    const rect = menuRef.current.getBoundingClientRect();
-    setMousePosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-  };
-  
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     const scrollAmount = Math.sign(e.deltaY);
@@ -37,73 +32,86 @@ const SongSelectionMenu: React.FC<SongSelectionMenuProps> = ({ onBack, onSelectS
 
   return (
     <div 
-        ref={menuRef}
-        onMouseMove={handleMouseMove}
-        className="absolute inset-0 flex flex-col items-center justify-center text-white bg-black overflow-hidden"
+        className="absolute inset-0 flex flex-col items-center justify-center text-white bg-gray-900 overflow-hidden font-sans"
+        onWheel={handleWheel}
     >
-      <style>
-        {'.song-list::-webkit-scrollbar { display: none; } .song-list { -ms-overflow-style: none; scrollbar-width: none; }'}
-      </style>
-
-      {/* Updated Dynamic Background */}
+      {/* Dynamic Background */}
       <div 
         key={`${selectedSong.id}-bg`}
-        className="absolute inset-0 bg-cover bg-center opacity-25 blur-xl scale-110 transition-all duration-700 ease-in-out"
+        className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out"
         style={{
-          backgroundImage: `url(${selectedSong.albumArt})`
+          backgroundImage: `url(${selectedSong.albumArt})`,
+          filter: 'blur(16px) brightness(0.5)',
+          transform: 'scale(1.1)',
         }}
       />
-      
-      <button onClick={onBack} className="absolute top-6 left-8 text-gray-300 hover:text-white transition-colors text-lg z-20">
-        ← Back
+      {/* Grid Overlay */}
+      <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '2rem 2rem' }} />
+
+      <button onClick={onBack} className="absolute top-6 left-8 text-gray-300 hover:text-white transition-colors text-lg z-20 flex items-center gap-2">
+        <span className="text-xl">←</span> Back
       </button>
 
-      <div className="w-full h-full flex pt-20">
-        <div 
-          ref={listRef}
-          onWheel={handleWheel}
-          className="w-1/2 song-list space-y-2 p-8 overflow-y-scroll transition-all duration-300 ease-out"
-        >
-          {songs.map((song, index) => {
-            const isSelected = selectedIndex === index;
-            const yParallax = (mousePosition.y / window.innerHeight - 0.5) * -15;
-            const xParallax = (mousePosition.x / window.innerWidth - 0.5) * -10;
-
-            return (
-              <div
-                key={song.id}
-                onClick={() => onSelectSong(song.id)}
-                onMouseEnter={() => setSelectedIndex(index)}
-                className={`group h-18 w-full text-white font-bold uppercase p-3 relative bg-black bg-opacity-30 border-l-4 transition-all duration-200 ease-in-out flex items-center
-                    ${ isSelected
-                      ? 'border-cyan-400 bg-opacity-60 shadow-lg'
-                      : 'border-pink-500 hover:border-cyan-400 hover:bg-opacity-50'
-                    }`
-                }
-                style={{
-                  clipPath: 'polygon(0 0, 100% 0, 95% 100%, 0% 100%)',
-                  transform: `translate(${xParallax}px, ${yParallax}px)`
-                }}
-              >
-                <div className="flex flex-col justify-center">
-                    <p className="tracking-wider text-xl">{song.title}</p>
-                    <p className="text-sm normal-case font-light opacity-70 tracking-normal">{song.artist}</p>
+      {/* Main Content */}
+      <div className="relative z-10 flex flex-col items-center justify-center w-full h-full pt-24 pb-12">
+        
+        {/* Song Info Section */}
+        <div className="text-center h-48 transition-all duration-300" key={selectedSong.id}>
+            <div className="animate-slide-up">
+                <h2 className="text-6xl font-extrabold tracking-tight" style={{ textShadow: '0 4px 10px rgba(0,0,0,0.5)' }}>{selectedSong.title}</h2>
+                <h3 className="text-3xl text-gray-400 font-light" style={{ textShadow: '0 2px 5px rgba(0,0,0,0.5)' }}>{selectedSong.artist}</h3>
+                <div className="mt-4">
+                    <DifficultyStars value={selectedSong.difficulty} />
                 </div>
-              </div>
-            );
-          })}
+            </div>
         </div>
 
-        <div className="w-1/2 flex items-center justify-center p-8">
-            <div className='relative w-full aspect-square max-w-lg'>
-                <div className={`absolute inset-0 bg-gradient-to-br ${selectedSong.backgroundGradient} rounded-2xl blur-lg opacity-60 transition-all duration-500`} key={`${selectedSong.id}-blur`}></div>
-                <img 
-                    key={selectedSong.id}
-                    src={selectedSong.albumArt}
-                    alt={`${selectedSong.title} album art`}
-                    className="absolute inset-0 w-full h-full object-cover rounded-2xl shadow-2xl animate-slide-in-right"
-                />
-            </div>
+        {/* 3D Cover Flow Carousel */}
+        <div className="flex-1 flex items-center w-full perspective-1500">
+          <div 
+            className="relative w-full h-80 transition-transform duration-500 ease-out flex items-center justify-center"
+            style={{ transform: `translateX(${-selectedIndex * 30}%)` }}
+          >
+            {songs.map((song, index) => {
+              const distance = index - selectedIndex;
+              const isSelected = distance === 0;
+
+              const scale = isSelected ? 1 : 0.7;
+              const rotationY = distance * 35; // degrees
+              const zIndex = songs.length - Math.abs(distance);
+              const brightness = isSelected ? 1 : 0.4;
+              const offsetX = distance * 60; // percentage based offset
+
+              return (
+                <div
+                  key={song.id}
+                  onClick={() => isSelected ? onSelectSong(song.id) : setSelectedIndex(index)}
+                  className="absolute w-1/4 h-full cursor-pointer transition-all duration-500 ease-out"
+                  style={{
+                    left: '37.5%', // Center the element
+                    transform: `translateX(${offsetX}%) rotateY(${rotationY}deg) scale(${scale})`,
+                    zIndex: zIndex,
+                  }}
+                >
+                    <img 
+                        src={song.albumArt} 
+                        alt={song.title}
+                        className="w-full h-full object-cover rounded-xl border-4 transition-all duration-500"
+                        style={{
+                            borderColor: isSelected ? '#38bdf8' : 'rgba(255,255,255,0.3)',
+                            filter: `brightness(${brightness})`,
+                            boxShadow: isSelected ? '0 10px 40px rgba(56, 189, 248, 0.6)' : '0 10px 20px rgba(0,0,0,0.4)',
+                        }}
+                    />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Instructions */}
+        <div className="text-center h-16">
+            <p className="text-xl text-gray-300 animate-pulse">Use mouse wheel to scroll, click to select</p>
         </div>
       </div>
     </div>
