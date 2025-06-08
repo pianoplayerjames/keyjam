@@ -1,4 +1,3 @@
-// client/src/stores/gameStore.ts
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 import { ComplexityManager } from '../ComplexityManager'
@@ -39,15 +38,12 @@ interface HitFeedbackState {
 }
 
 interface GameState {
-  // Game Configuration
   gameConfig: GameConfig
   setGameConfig: (config: GameConfig) => void
   
-  // Game State
   gameState: 'menu' | 'in-transition' | 'game'
   setGameState: (state: 'menu' | 'in-transition' | 'game') => void
   
-  // Score & Performance
   score: number
   combo: number
   maxCombo: number
@@ -60,7 +56,6 @@ interface GameState {
   incrementCombo: () => void
   resetCombo: () => void
   
-  // Timing & Difficulty
   complexity: number
   timeLeft: number
   targetScore: number
@@ -68,7 +63,6 @@ interface GameState {
   setTimeLeft: (time: number) => void
   setTargetScore: (target: number) => void
   
-  // Game Objects
   fallingLetters: Letter[]
   heldKeys: Set<string>
   stamps: StampState[]
@@ -77,7 +71,6 @@ interface GameState {
   addStamp: (stamp: StampState) => void
   removeStamp: (id: number) => void
   
-  // Feedback
   hitFeedback: HitFeedbackState
   timingOffset: number
   showTimingDisplay: boolean
@@ -85,7 +78,6 @@ interface GameState {
   setTimingOffset: (offset: number) => void
   setShowTimingDisplay: (show: boolean) => void
   
-  // Statistics
   totalNotes: number
   perfectNotes: number
   goodNotes: number
@@ -106,13 +98,11 @@ interface GameState {
   incrementMissedNotes: () => void
   incrementTotalNotesProcessed: () => void
   
-  // Game Status
   isGameOver: boolean
   gameComplete: boolean
   setIsGameOver: (gameOver: boolean) => void
   setGameComplete: (complete: boolean) => void
   
-  // Actions
   resetGame: () => void
   calculateAccuracy: () => number
 }
@@ -133,15 +123,12 @@ const initialHitFeedback: HitFeedbackState = {
 
 export const useGameStore = create<GameState>()(
   subscribeWithSelector((set, get) => ({
-    // Game Configuration
     gameConfig: initialGameConfig,
     setGameConfig: (config) => set({ gameConfig: config }),
     
-    // Game State
     gameState: 'menu',
     setGameState: (state) => set({ gameState: state }),
     
-    // Score & Performance
     score: 0,
     combo: 0,
     maxCombo: 0,
@@ -167,7 +154,6 @@ export const useGameStore = create<GameState>()(
     },
     resetCombo: () => set({ combo: 0 }),
     
-    // Timing & Difficulty
     complexity: 30,
     timeLeft: 120,
     targetScore: 1000,
@@ -175,24 +161,19 @@ export const useGameStore = create<GameState>()(
     setTimeLeft: (time) => set({ timeLeft: Math.max(0, time) }),
     setTargetScore: (target) => set({ targetScore: target }),
     
-    // Game Objects
     fallingLetters: [],
     heldKeys: new Set(),
     stamps: [],
-// In your gameStore.ts, make sure this function is correct:
-setFallingLetters: (letters) => {
-  console.log('setFallingLetters called with:', typeof letters === 'function' ? 'function' : letters)
-  set((state) => {
-    const newLetters = typeof letters === 'function' ? letters(state.fallingLetters) : letters
-    console.log('Setting falling letters to:', newLetters)
-    return { fallingLetters: newLetters }
-  })
-},
+    setFallingLetters: (letters) => {
+      set((state) => {
+        const newLetters = typeof letters === 'function' ? letters(state.fallingLetters) : letters
+        return { fallingLetters: newLetters }
+      })
+    },
     setHeldKeys: (keys) => set({ heldKeys: keys }),
     addStamp: (stamp) => set((state) => ({ stamps: [...state.stamps, stamp] })),
     removeStamp: (id) => set((state) => ({ stamps: state.stamps.filter(s => s.id !== id) })),
     
-    // Feedback
     hitFeedback: initialHitFeedback,
     timingOffset: 0,
     showTimingDisplay: false,
@@ -200,7 +181,6 @@ setFallingLetters: (letters) => {
     setTimingOffset: (offset) => set({ timingOffset: offset }),
     setShowTimingDisplay: (show) => set({ showTimingDisplay: show }),
     
-    // Statistics
     totalNotes: 0,
     perfectNotes: 0,
     goodNotes: 0,
@@ -221,13 +201,17 @@ setFallingLetters: (letters) => {
     incrementMissedNotes: () => set((state) => ({ missedNotes: state.missedNotes + 1 })),
     incrementTotalNotesProcessed: () => set((state) => ({ totalNotesProcessed: state.totalNotesProcessed + 1 })),
     
-    // Game Status
     isGameOver: false,
     gameComplete: false,
-    setIsGameOver: (gameOver) => set({ isGameOver: gameOver }),
+    setIsGameOver: (gameOver) => {
+      if (gameOver) {
+        set({ isGameOver: true, fallingLetters: [], stamps: [] });
+      } else {
+        set({ isGameOver: false });
+      }
+    },
     setGameComplete: (complete) => set({ gameComplete: complete }),
     
-    // Actions
     resetGame: () => set({
       score: 0,
       combo: 0,
@@ -258,7 +242,6 @@ setFallingLetters: (letters) => {
   }))
 )
 
-// Computed values
 export const useAccuracy = () => useGameStore((state) => state.calculateAccuracy())
 export const useIsTimeMode = () => useGameStore((state) => 
   state.gameConfig.subMode === 'time' || state.gameConfig.timeLimit !== -1

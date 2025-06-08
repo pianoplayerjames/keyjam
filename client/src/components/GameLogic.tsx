@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useGameStore } from '../stores/gameStore'
 import { useReplayStore } from '../stores/replayStore'
@@ -27,6 +27,7 @@ const GameLogic = () => {
     incrementTotalNotesProcessed,
     incrementTotalNotes,
     setComplexity,
+    setIsGameOver,
     addScore,
     heldKeys,
   } = useGameStore()
@@ -43,13 +44,20 @@ const GameLogic = () => {
   if (!initComplexity.current && gameConfig.difficulty > 0) {
     setComplexity(gameConfig.difficulty)
     initComplexity.current = true
-    console.log('Setting complexity to:', gameConfig.difficulty)
   }
 
   if (generatedPattern.current.length === 0 && complexity > 0) {
     generatedPattern.current = ComplexityManager.generatePattern(complexity, 8)
-    console.log('Generated pattern with', generatedPattern.current.length, 'notes at complexity', complexity)
   }
+
+  useEffect(() => {
+    const isTimeBasedGame = gameConfig.subMode === 'time' || gameConfig.mode === 'career';
+    const hasTimeLimit = gameConfig.timeLimit !== -1;
+
+    if (isTimeBasedGame && hasTimeLimit && timeLeft <= 0 && !isGameOver) {
+        setIsGameOver(true);
+    }
+  }, [timeLeft, gameConfig, isGameOver, setIsGameOver]);
 
   useFrame((state, delta) => {
     if (isGameOver) return
@@ -176,13 +184,6 @@ const GameLogic = () => {
     })
 
     setFallingLetters(filteredLetters)
-
-    if (frameCount.current % 120 === 0) {
-      console.log('GameLogic Debug:', {
-        complexity,
-        fallingLettersCount: filteredLetters.length,
-      })
-    }
   })
 
   return null

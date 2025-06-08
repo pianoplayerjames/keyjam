@@ -1,4 +1,3 @@
-// client/src/Game.tsx
 import { useEffect, Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { Stats } from '@react-three/drei'
@@ -16,10 +15,12 @@ import ComplexityUI from './ComplexityUI'
 import HitZoneIndicator from './HitZoneIndicator'
 import TimingDisplay from './TimingDisplay'
 import Stamp from './Stamp'
-import { useGameStore } from './stores/gameStore'
-import { useReplayStore } from './stores/replayStore'
+import ScoreChart from './ScoreChart'
 import GameLogic from './components/GameLogic'
 import KeyboardHandler from './components/KeyboardHandler'
+import { useGameStore } from './stores/gameStore'
+import { useReplayStore } from './stores/replayStore'
+import { replayRecorder } from './replays/ReplayRecorder'
 
 interface GameProps {
   onBackToMenu: () => void
@@ -32,22 +33,38 @@ const Game = ({ onBackToMenu }: GameProps) => {
     combo,
     health,
     complexity,
-    timeLeft,
     fallingLetters,
     stamps,
     isGameOver,
+    maxCombo,
+    totalNotes,
+    calculateAccuracy,
     removeStamp,
     resetGame
   } = useGameStore()
 
-  const { setIsRecording } = useReplayStore()
+  const { saveReplay, setIsRecording } = useReplayStore()
 
-  // Start recording when game starts
   useEffect(() => {
-    if (!isGameOver) {
-      setIsRecording(true)
+    if (isGameOver) {
+      const metadata = {
+        finalScore: score,
+        maxCombo: maxCombo,
+        totalNotes: totalNotes,
+        accuracy: calculateAccuracy(),
+        gameConfig: gameConfig
+      };
+      const replayData = replayRecorder.stopRecording(metadata);
+      if (replayData.events.length > 0) {
+        saveReplay(replayData);
+      }
+      setIsRecording(false);
     }
-  }, [isGameOver, setIsRecording])
+  }, [isGameOver, saveReplay, setIsRecording, score, maxCombo, totalNotes, calculateAccuracy, gameConfig]);
+
+  const handleReplay = () => {
+    resetGame();
+  };
 
   const renderUI = () => {
     if (gameConfig.subMode === 'time' || gameConfig.mode === 'career') {
@@ -59,29 +76,17 @@ const Game = ({ onBackToMenu }: GameProps) => {
 
   return (
     <>
+      <ScoreChart 
+        isVisible={isGameOver}
+        onReplay={handleReplay}
+        onBackToMenu={onBackToMenu}
+      />
+
       <KeyboardHandler />
       
-      {renderUI()}
+      {!isGameOver && renderUI()}
       
-      {/* Debug Info */}
-      <div style={{
-        position: 'absolute',
-        top: '10px',
-        right: '10px',
-        background: 'rgba(0, 0, 0, 0.8)',
-        color: 'white',
-        padding: '10px',
-        borderRadius: '5px',
-        fontSize: '12px',
-        zIndex: 1000
-      }}>
-        <div>Notes: {fallingLetters.length}</div>
-        <div>Complexity: {complexity}</div>
-        <div>Score: {score}</div>
-        <div>Combo: {combo}</div>
-      </div>
-      
-      <ComplexityUI showDetails={true} />
+      {!isGameOver && <ComplexityUI />}
       
       <Canvas camera={{ position: [0, 2.5, 5], fov: 75 }}>
         <GameLogic />
