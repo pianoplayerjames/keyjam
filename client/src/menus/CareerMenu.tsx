@@ -66,88 +66,131 @@ const CareerMenu = ({ onBack }: CareerMenuProps) => {
   }
 
   return (
-    <div className="flex flex-col items-center min-h-screen text-white p-8 bg-transparent">
-      <button 
-        onClick={onBack}
-        className="absolute top-8 left-8 flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
-      >
-        <span className="text-xl">←</span> Back
-      </button>
-      <div className="w-full max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
-            CAREER MODE
-          </h1>
+    <div className="h-full overflow-y-auto">
+      <div className="max-w-7xl mx-auto p-8">
+        {/* Header with Continue Button */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-5xl font-bold mb-2 bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
+              CAREER MODE
+            </h1>
+            <p className="text-gray-300 text-lg">Progress through difficulty ranks and master the rhythm</p>
+          </div>
+          
+          <div className="text-right">
+            <button
+              onClick={handleContinue}
+              className="bg-gradient-to-r from-green-500 to-cyan-600 hover:from-green-600 hover:to-cyan-700 
+                        px-8 py-4 rounded-xl text-xl font-bold transform transition-all duration-300 
+                        hover:scale-105 hover:shadow-2xl mb-4"
+            >
+              CONTINUE CAREER
+            </button>
+            <div className="text-right text-sm text-gray-400">
+              <div>Current Rank: <span className="text-cyan-400 font-bold">{career.currentRank}</span></div>
+              <div>Progress: <span className="text-purple-400 font-bold">{career.overallCompletion.toFixed(0)}%</span></div>
+            </div>
+          </div>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-1 bg-black bg-opacity-40 rounded-xl p-6 border border-gray-700 flex flex-col gap-6">
-                <div>
-                    <h2 className="text-2xl font-bold text-green-400 mb-4 text-center">CURRENT STATUS</h2>
-                    <div className="text-center bg-gray-800 bg-opacity-50 rounded-lg p-4">
-                        <div className="text-5xl mb-2">{career.currentRankIcon}</div>
-                        <h3 className="text-3xl font-bold mb-1">{career.currentRank}</h3>
-                    </div>
-                </div>
-                <div>
-                    <h3 className="font-bold text-lg mb-2 text-center">Progress to {career.nextRank}</h3>
-                    <div className="bg-gray-700 rounded-full h-4 overflow-hidden">
-                        <div 
-                            className="bg-gradient-to-r from-cyan-400 to-blue-500 h-4"
-                            style={{ width: `${career.progressToNextRank}%` }}
-                        />
-                    </div>
-                    <p className="text-right text-sm mt-1">{career.progressToNextRank.toFixed(0)}%</p>
-                </div>
-                <div>
-                    <h3 className="font-bold text-lg mb-2 text-center">Overall Completion</h3>
-                     <div className="bg-gray-700 rounded-full h-4 overflow-hidden">
-                        <div 
-                            className="bg-gradient-to-r from-pink-500 to-purple-600 h-4"
-                            style={{ width: `${career.overallCompletion}%` }}
-                        />
-                    </div>
-                    <p className="text-right text-sm mt-1">{career.overallCompletion.toFixed(0)}%</p>
-                </div>
-                <button
-                    onClick={handleContinue}
-                    className="w-full bg-gradient-to-r from-green-500 to-cyan-600 hover:from-green-600 hover:to-cyan-700 
-                                mt-4 px-8 py-4 rounded-xl text-xl font-bold transform transition-all duration-300 
-                                hover:scale-105 hover:shadow-2xl"
-                >
-                    CONTINUE CAREER
-                </button>
+
+        {/* Progress Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-black bg-opacity-40 rounded-xl p-6 border border-gray-700 text-center">
+            <div className="text-4xl mb-2">{career.currentRankIcon}</div>
+            <h3 className="text-xl font-bold text-cyan-400">{career.currentRank}</h3>
+            <p className="text-gray-400 text-sm">Current Rank</p>
+          </div>
+          
+          <div className="bg-black bg-opacity-40 rounded-xl p-6 border border-gray-700">
+            <h3 className="text-lg font-bold text-purple-400 mb-3">Progress to {career.nextRank}</h3>
+            <div className="bg-gray-700 rounded-full h-4 overflow-hidden mb-2">
+              <div 
+                className="bg-gradient-to-r from-cyan-400 to-blue-500 h-4 transition-all duration-500"
+                style={{ width: `${career.progressToNextRank}%` }}
+              />
             </div>
-            <div className="lg:col-span-2 bg-black bg-opacity-40 rounded-xl p-6 border border-gray-700">
-                <h2 className="text-2xl font-bold text-center text-cyan-400 mb-4">CHAPTERS</h2>
-                <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
-                    {career.chapters.map((chapter, chapterIndex) => (
-                        <div key={chapter.name} className={`p-4 rounded-lg transition-all ${chapter.unlocked ? 'bg-gray-800 bg-opacity-50' : 'bg-gray-900 bg-opacity-70'}`}>
-                            <div className="flex justify-between items-center">
-                                <h3 className={`text-xl font-bold ${chapter.unlocked ? 'text-white' : 'text-gray-500'}`}>{chapter.name}</h3>
-                                {chapter.unlocked ? 
-                                  <p className="text-sm font-bold text-cyan-400">{chapter.completion.toFixed(0)}% Complete</p> :
-                                  <p className="text-sm font-bold text-gray-600">LOCKED 🔒</p>
-                                }
-                            </div>
-                            {chapter.unlocked && (
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-3">
-                                    {chapter.levels.map((level, levelIndex) => (
-                                        <button 
-                                            key={level.name} 
-                                            onClick={() => handleStartLevel(chapterIndex, levelIndex)}
-                                            disabled={!level.unlocked}
-                                            className={`p-2 rounded text-center text-sm transition-all ${level.unlocked ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-800 cursor-not-allowed'}`}
-                                        >
-                                            <p className={`${level.unlocked ? 'text-gray-300' : 'text-gray-600'}`}>{level.name}</p>
-                                            <p className={`font-bold ${getRankColor(level.rank)}`}>{level.rank || '-'}</p>
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
+            <p className="text-right text-sm text-gray-400">{career.progressToNextRank.toFixed(0)}%</p>
+          </div>
+
+          <div className="bg-black bg-opacity-40 rounded-xl p-6 border border-gray-700">
+            <h3 className="text-lg font-bold text-pink-400 mb-3">Overall Completion</h3>
+            <div className="bg-gray-700 rounded-full h-4 overflow-hidden mb-2">
+              <div 
+                className="bg-gradient-to-r from-pink-500 to-purple-600 h-4 transition-all duration-500"
+                style={{ width: `${career.overallCompletion}%` }}
+              />
+            </div>
+            <p className="text-right text-sm text-gray-400">{career.overallCompletion.toFixed(0)}%</p>
+          </div>
+        </div>
+
+        {/* Chapters Grid */}
+        <div className="space-y-6">
+          <h2 className="text-3xl font-bold text-center text-cyan-400">CHAPTERS</h2>
+          
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            {career.chapters.map((chapter, chapterIndex) => (
+              <div 
+                key={chapter.name} 
+                className={`p-6 rounded-lg transition-all ${
+                  chapter.unlocked 
+                    ? 'bg-gray-800 bg-opacity-50 hover:bg-opacity-70 border border-gray-600' 
+                    : 'bg-gray-900 bg-opacity-70 border border-gray-700'
+                }`}
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className={`text-2xl font-bold ${chapter.unlocked ? 'text-white' : 'text-gray-500'}`}>
+                    {chapter.name}
+                  </h3>
+                  {chapter.unlocked ? 
+                    <div className="text-right">
+                      <p className="text-sm font-bold text-cyan-400">{chapter.completion.toFixed(0)}% Complete</p>
+                      <div className="w-32 h-3 bg-gray-700 rounded-full mt-1">
+                        <div 
+                          className="h-3 bg-cyan-400 rounded-full transition-all duration-500"
+                          style={{ width: `${chapter.completion}%` }}
+                        />
+                      </div>
+                    </div> :
+                    <p className="text-sm font-bold text-gray-600 flex items-center gap-2">
+                      <span>🔒</span> LOCKED
+                    </p>
+                  }
+                </div>
+                
+                {chapter.unlocked && (
+                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+                    {chapter.levels.map((level, levelIndex) => (
+                      <button 
+                        key={level.name} 
+                        onClick={() => handleStartLevel(chapterIndex, levelIndex)}
+                        disabled={!level.unlocked}
+                        className={`p-4 rounded-lg text-center text-sm transition-all duration-200 ${
+                          level.unlocked 
+                            ? 'bg-gray-700 hover:bg-gray-600 hover:scale-105 border border-gray-600 hover:border-gray-400' 
+                            : 'bg-gray-800 cursor-not-allowed border border-gray-700'
+                        }`}
+                      >
+                        <div className={`font-semibold mb-2 ${level.unlocked ? 'text-gray-300' : 'text-gray-600'}`}>
+                          {level.name}
                         </div>
+                        <div className={`font-bold text-2xl mb-1 ${getRankColor(level.rank)}`}>
+                          {level.rank || (level.unlocked ? '-' : '🔒')}
+                        </div>
+                        {level.unlocked && (
+                          <div className="text-xs text-gray-500 space-y-1">
+                            <div>Difficulty: {level.difficulty}</div>
+                            <div>Lanes: {level.lanes}</div>
+                            {level.timeLimit > 0 && <div>Time: {Math.floor(level.timeLimit / 60)}:{(level.timeLimit % 60).toString().padStart(2, '0')}</div>}
+                          </div>
+                        )}
+                      </button>
                     ))}
-                </div>
-            </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
