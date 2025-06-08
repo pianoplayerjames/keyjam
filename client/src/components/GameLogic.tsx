@@ -4,6 +4,7 @@ import { useGameStore } from '../stores/gameStore'
 import { useReplayStore } from '../stores/replayStore'
 import { ComplexityManager, type PatternNote } from '../ComplexityManager'
 import { replayRecorder } from '../replays/ReplayRecorder'
+import { songs } from '../songs/song-data';
 
 const letters = '12345'
 const channelPositions = [-2, -1, 0, 1, 2]
@@ -41,13 +42,29 @@ const GameLogic = () => {
   const timerRef = useRef(0)
   const initComplexity = useRef(false)
 
-  if (!initComplexity.current && gameConfig.difficulty > 0) {
-    setComplexity(gameConfig.difficulty)
-    initComplexity.current = true
+  if (!initComplexity.current && (gameConfig.difficulty > 0 || gameConfig.mode === 'arcade')) {
+    if (gameConfig.mode === 'arcade' && gameConfig.songId) {
+        const song = songs.find(s => s.id === gameConfig.songId);
+        if (song) {
+            setComplexity(song.difficulty);
+        }
+    } else {
+        setComplexity(gameConfig.difficulty);
+    }
+    initComplexity.current = true;
   }
 
   if (generatedPattern.current.length === 0 && complexity > 0) {
-    generatedPattern.current = ComplexityManager.generatePattern(complexity, 8)
+    if (gameConfig.mode === 'arcade' && gameConfig.songId) {
+        const song = songs.find(s => s.id === gameConfig.songId);
+        if (song) {
+            generatedPattern.current = song.pattern;
+        } else {
+            generatedPattern.current = ComplexityManager.generatePattern(complexity, 8);
+        }
+    } else {
+        generatedPattern.current = ComplexityManager.generatePattern(complexity, 8);
+    }
   }
 
   useEffect(() => {
@@ -80,7 +97,8 @@ const GameLogic = () => {
     }
 
     const config = ComplexityManager.getConfig(complexity)
-    const bpm = 120 * config.bpmMultiplier
+    const song = gameConfig.mode === 'arcade' && gameConfig.songId ? songs.find(s => s.id === gameConfig.songId) : null;
+    const bpm = song ? song.bpm : 120 * config.bpmMultiplier;
     const beatInterval = 60 / bpm
     const spawnInterval = beatInterval / 2
     

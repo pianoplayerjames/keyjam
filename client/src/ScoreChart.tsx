@@ -82,16 +82,14 @@ const ScoreChart: React.FC<ScoreChartProps> = ({
   onWatchReplay,
   isVisible
 }) => {
-  const {
-    score: finalScore,
-    maxCombo,
-    totalNotes,
-    perfectNotes,
-    goodNotes,
-    almostNotes,
-    missedNotes,
-    calculateAccuracy,
-  } = useGameStore();
+  const finalScore = useGameStore((state) => state.score);
+  const maxCombo = useGameStore((state) => state.maxCombo);
+  const totalNotes = useGameStore((state) => state.totalNotes);
+  const perfectNotes = useGameStore((state) => state.perfectNotes);
+  const goodNotes = useGameStore((state) => state.goodNotes);
+  const almostNotes = useGameStore((state) => state.almostNotes);
+  const missedNotes = useGameStore((state) => state.missedNotes);
+  const calculateAccuracy = useGameStore((state) => state.calculateAccuracy);
 
   const [animationStage, setAnimationStage] = useState(0);
   const [showGrade, setShowGrade] = useState(false);

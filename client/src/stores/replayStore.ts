@@ -1,4 +1,3 @@
-// client/src/stores/replayStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ReplayData } from '../replays/ReplayRecorder';
@@ -47,7 +46,7 @@ export const useReplayStore = create<ReplayState>()(
         savedReplays: state.savedReplays.filter(r => r.id !== id)
       })),
       playReplay: (replay) => {
-        get().stopReplay(); // Stop any existing replay first
+        get().stopReplay();
         const newEngine = new ReplayEngine(replay);
         set({
             currentReplay: replay,

@@ -1,10 +1,9 @@
-// client/src/App.tsx
-import { useEffect, Suspense } from 'react';
+import { useEffect, Suspense, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import Game from './Game';
 import MainMenu from './MainMenu';
 import Transition from './Transition';
-import PulsingBackground from './PulsingBackground'; // Changed
+import PulsingBackground from './PulsingBackground';
 import { useGameStore } from './stores/gameStore';
 import { useMenuStore } from './stores/menuStore';
 import { useReplayStore } from './stores/replayStore';
@@ -21,8 +20,15 @@ const SimpleLoading = () => (
 );
 
 function App() {
-  const { gameState, gameConfig, setGameConfig, setGameState } = useGameStore();
-  const { menuState, isTransitioning, setIsTransitioning, setMenuState } = useMenuStore();
+  const gameState = useGameStore((state) => state.gameState);
+  const gameConfig = useGameStore((state) => state.gameConfig);
+  const setGameConfig = useGameStore((state) => state.setGameConfig);
+  const setGameState = useGameStore((state) => state.setGameState);
+
+  const isTransitioning = useMenuStore((state) => state.isTransitioning);
+  const setIsTransitioning = useMenuStore((state) => state.setIsTransitioning);
+  const setMenuState = useMenuStore((state) => state.setMenuState);
+  
   const isPlayingReplay = useReplayStore((state) => state.isPlaying);
 
   const handleStartGame = (config: typeof gameConfig) => {
@@ -48,7 +54,6 @@ function App() {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden" style={{ visibility: isPlayingReplay ? 'hidden' : 'visible' }}>
-      {/* Conditionally render ReplayPlayer on top of everything */}
       {isPlayingReplay && <ReplayPlayer />}
 
       <Canvas
@@ -56,7 +61,7 @@ function App() {
         className="absolute inset-0"
       >
         <Suspense fallback={<SimpleLoading />}>
-          <PulsingBackground /> {/* Changed */}
+          <PulsingBackground />
           <ambientLight intensity={0.8} />
           <directionalLight position={[10, 10, 5]} intensity={0.5} />
           
@@ -70,9 +75,7 @@ function App() {
       </Canvas>
 
       {gameState === 'menu' && (
-        <MainMenu
-          onStartGame={handleStartGame}
-        />
+        <MainMenu />
       )}
     </div>
   );

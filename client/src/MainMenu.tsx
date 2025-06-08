@@ -1,4 +1,3 @@
-// client/src/MainMenu.tsx
 import { useState, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import CareerMenu from './menus/CareerMenu';
@@ -9,26 +8,25 @@ import DifficultyMenu from './menus/DifficultyMenu';
 import TimeSelectionMenu from './menus/TimeSelectionMenu';
 import ScoreSelectionMenu from './menus/ScoreSelectionMenu';
 import ReplayBrowser from './replays/ReplayBrowser';
-import PulsingBackground from './PulsingBackground'; // Changed
+import PulsingBackground from './PulsingBackground';
 import { useMenuStore } from './stores/menuStore';
 import { useGameStore } from './stores/gameStore';
+import SongSelectionMenu from './menus/SongSelectionMenu';
 
 const MainMenu = () => {
   const { menuState, setMenuState, isTransitioning } = useMenuStore();
-  const { setGameConfig, setGameState } = useGameStore();
+  const { gameConfig, setGameConfig, setGameState } = useGameStore();
   
   const [localGameConfig, setLocalGameConfig] = useState({
-    mode: '',
-    subMode: '',
-    difficulty: 30,
-    timeLimit: 120,
-    scoreTarget: 1000
+    ...gameConfig,
+    songId: ''
   });
 
   const menuOptions = [
-    { text: 'Career Mode', description: 'Progress through difficulty ranks', color: 'from-pink-500 to-purple-600', target: 'career', icon: '🚀' },
-    { text: 'Online', description: 'Play with other players', color: 'from-green-500 to-emerald-600', target: 'online', icon: '🌐' },
-    { text: 'Practise', description: 'Free practice mode', color: 'from-blue-500 to-cyan-600', target: 'practise', icon: '🎯' },
+    { text: 'Career', description: 'Progress through difficulty ranks', color: 'from-pink-500 to-purple-600', target: 'career', icon: '🚀' },
+    { text: 'Arcade', description: 'Select your own songs', color: 'from-teal-500 to-cyan-600', target: 'arcade', icon: '🎵' },
+    { text: 'Online', description: 'Play with other players around the world', color: 'from-green-500 to-emerald-600', target: 'online', icon: '🌐' },
+    { text: 'Training', description: 'Improve at your own pace', color: 'from-blue-500 to-cyan-600', target: 'practise', icon: '🎯' },
     { text: 'Replays', description: 'Watch saved replays', color: 'from-orange-500 to-red-600', target: 'replays', icon: '🎬' },
     { text: 'Settings', description: 'Game settings', color: 'from-gray-500 to-gray-700', target: 'settings', icon: '⚙️' }
   ];
@@ -50,6 +48,11 @@ const MainMenu = () => {
     setGameConfig(localGameConfig);
     setGameState('in-transition');
   };
+  
+  const handleSelectSong = (songId: string) => {
+      handleConfigUpdate({ mode: 'arcade', subMode: 'arcade', songId: songId });
+      handleGameStart();
+  };
 
   const renderCurrentMenu = () => {
     switch (menuState) {
@@ -61,7 +64,7 @@ const MainMenu = () => {
               className="absolute inset-0"
             >
               <Suspense fallback={null}>
-                <PulsingBackground /> {/* Changed */}
+                <PulsingBackground />
                 <ambientLight intensity={0.8} />
                 <directionalLight position={[10, 10, 5]} intensity={0.5} />
               </Suspense>
@@ -74,6 +77,27 @@ const MainMenu = () => {
             </div>
           </div>
         );
+      case 'arcade':
+        return (
+          <div className="relative w-screen h-screen overflow-hidden">
+            <Canvas
+              camera={{ position: [0, 2.5, 5], fov: 75 }}
+              className="absolute inset-0"
+            >
+              <Suspense fallback={null}>
+                <PulsingBackground />
+                <ambientLight intensity={0.8} />
+                <directionalLight position={[10, 10, 5]} intensity={0.5} />
+              </Suspense>
+            </Canvas>
+            <div className="absolute inset-0 z-10">
+              <SongSelectionMenu
+                onBack={handleBackClick}
+                onSelectSong={handleSelectSong}
+              />
+            </div>
+          </div>
+        );
       case 'online':
         return (
           <div className="relative w-screen h-screen overflow-hidden">
@@ -82,7 +106,7 @@ const MainMenu = () => {
               className="absolute inset-0"
             >
               <Suspense fallback={null}>
-                <PulsingBackground /> {/* Changed */}
+                <PulsingBackground />
                 <ambientLight intensity={0.8} />
                 <directionalLight position={[10, 10, 5]} intensity={0.5} />
               </Suspense>
@@ -111,7 +135,7 @@ const MainMenu = () => {
               className="absolute inset-0"
             >
               <Suspense fallback={null}>
-                <PulsingBackground /> {/* Changed */}
+                <PulsingBackground />
                 <ambientLight intensity={0.8} />
                 <directionalLight position={[10, 10, 5]} intensity={0.5} />
               </Suspense>
@@ -136,7 +160,7 @@ const MainMenu = () => {
               className="absolute inset-0"
             >
               <Suspense fallback={null}>
-                <PulsingBackground /> {/* Changed */}
+                <PulsingBackground />
                 <ambientLight intensity={0.8} />
                 <directionalLight position={[10, 10, 5]} intensity={0.5} />
               </Suspense>
@@ -161,7 +185,7 @@ const MainMenu = () => {
               className="absolute inset-0"
             >
               <Suspense fallback={null}>
-                <PulsingBackground /> {/* Changed */}
+                <PulsingBackground />
                 <ambientLight intensity={0.8} />
                 <directionalLight position={[10, 10, 5]} intensity={0.5} />
               </Suspense>
@@ -182,7 +206,7 @@ const MainMenu = () => {
               className="absolute inset-0"
             >
               <Suspense fallback={null}>
-                <PulsingBackground /> {/* Changed */}
+                <PulsingBackground />
                 <ambientLight intensity={0.8} />
                 <directionalLight position={[10, 10, 5]} intensity={0.5} />
               </Suspense>
@@ -203,7 +227,7 @@ const MainMenu = () => {
               className="absolute inset-0"
             >
               <Suspense fallback={null}>
-                <PulsingBackground /> {/* Changed */}
+                <PulsingBackground />
                 <ambientLight intensity={0.8} />
                 <directionalLight position={[10, 10, 5]} intensity={0.5} />
               </Suspense>
@@ -225,7 +249,7 @@ const MainMenu = () => {
               className="absolute inset-0"
             >
               <Suspense fallback={null}>
-                <PulsingBackground /> {/* Changed */}
+                <PulsingBackground />
                 <ambientLight intensity={0.8} />
                 <directionalLight position={[10, 10, 5]} intensity={0.5} />
               </Suspense>
@@ -252,12 +276,10 @@ const MainMenu = () => {
               </Suspense>
             </Canvas>
 
-            {/* Decorative Elements */}
             <div className="absolute top-0 left-0 w-1/3 h-1 bg-cyan-400 animate-pulse" />
             <div className="absolute bottom-0 right-0 w-1/3 h-1 bg-pink-500 animate-pulse" />
             
             <div className="absolute inset-0 z-10 p-8 flex flex-col justify-between">
-              {/* Top Header */}
               <header className="flex justify-between items-start">
                 <img 
                   src="/logo.png" 
@@ -267,7 +289,6 @@ const MainMenu = () => {
                 <ReplayStatsDisplay />
               </header>
 
-              {/* Main Content */}
               <main className="flex-1 flex items-center -mt-16">
                 <div className="w-full md:w-1/2 lg:w-1/3 flex flex-col items-start gap-4">
                   {menuOptions.map((option, index) => (
@@ -329,7 +350,6 @@ const ReplayStatsDisplay = () => {
 
   useState(() => {
     try {
-      // In a real app, this might come from a store or an API call.
       const storedReplays = localStorage.getItem('rhythm-game-replays');
       const replays = storedReplays ? JSON.parse(storedReplays).state.savedReplays : [];
 

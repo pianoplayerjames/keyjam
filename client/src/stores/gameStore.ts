@@ -23,6 +23,7 @@ interface GameConfig {
   difficulty: number
   timeLimit: number
   scoreTarget: number
+  songId?: string;
 }
 
 interface StampState {
@@ -112,7 +113,8 @@ const initialGameConfig: GameConfig = {
   subMode: '',
   difficulty: 30,
   timeLimit: 120,
-  scoreTarget: 1000
+  scoreTarget: 1000,
+  songId: undefined,
 }
 
 const initialHitFeedback: HitFeedbackState = {

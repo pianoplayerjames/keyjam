@@ -1,11 +1,10 @@
-// client/src/Game.tsx
 import { useEffect, Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { Stats } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import FallingLetter from './FallingNotes'
 import Fretboard from './Fretboard'
-import PulsingBackground from './PulsingBackground' // Changed
+import PulsingBackground from './PulsingBackground'
 import SparklesEffect from './SparklesEffect'
 import FeedbackText3D from './FeedbackText3D'
 import { Veronica } from './Veronica'
@@ -27,23 +26,19 @@ interface GameProps {
 }
 
 const Game = ({ onBackToMenu }: GameProps) => {
-  const {
-    gameConfig,
-    score,
-    combo,
-    health,
-    complexity,
-    fallingLetters,
-    stamps,
-    isGameOver,
-    maxCombo,
-    totalNotes,
-    calculateAccuracy,
-    removeStamp,
-    resetGame
-  } = useGameStore()
+  const gameConfig = useGameStore((state) => state.gameConfig);
+  const score = useGameStore((state) => state.score);
+  const maxCombo = useGameStore((state) => state.maxCombo);
+  const totalNotes = useGameStore((state) => state.totalNotes);
+  const calculateAccuracy = useGameStore((state) => state.calculateAccuracy);
+  const fallingLetters = useGameStore((state) => state.fallingLetters);
+  const stamps = useGameStore((state) => state.stamps);
+  const isGameOver = useGameStore((state) => state.isGameOver);
+  const removeStamp = useGameStore((state) => state.removeStamp);
+  const resetGame = useGameStore((state) => state.resetGame);
 
-  const { saveReplay, setIsRecording } = useReplayStore()
+  const saveReplay = useReplayStore((state) => state.saveReplay);
+  const setIsRecording = useReplayStore((state) => state.setIsRecording);
 
   useEffect(() => {
     if (isGameOver) {
@@ -66,6 +61,13 @@ const Game = ({ onBackToMenu }: GameProps) => {
     resetGame();
   };
 
+  const handleWatchReplay = () => {
+    const { savedReplays, playReplay } = useReplayStore.getState();
+    if (savedReplays.length > 0) {
+      playReplay(savedReplays[0]);
+    }
+  };
+
   const renderUI = () => {
     if (gameConfig.subMode === 'time' || gameConfig.mode === 'career') {
       return <TimeUI />
@@ -80,6 +82,7 @@ const Game = ({ onBackToMenu }: GameProps) => {
         isVisible={isGameOver}
         onReplay={handleReplay}
         onBackToMenu={onBackToMenu}
+        onWatchReplay={handleWatchReplay}
       />
 
       <KeyboardHandler />
@@ -92,7 +95,7 @@ const Game = ({ onBackToMenu }: GameProps) => {
         <GameLogic />
         <Suspense fallback={null}>
           <color attach="background" args={['#191919']} />
-          <PulsingBackground /> {/* Changed */}
+          <PulsingBackground />
           <ambientLight intensity={0.8} />
 
           <Veronica position={[-4.5, -1.5, 0]} scale={1.5} rotation={[0, 0.5, 0]} />

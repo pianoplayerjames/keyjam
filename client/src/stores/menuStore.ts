@@ -1,4 +1,3 @@
-// client/src/stores/menuStore.ts
 import { create } from 'zustand'
 
 interface MenuState {
