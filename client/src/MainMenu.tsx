@@ -9,7 +9,7 @@ import TimeSelectionMenu from './menus/TimeSelectionMenu';
 import ScoreSelectionMenu from './menus/ScoreSelectionMenu';
 import ReplayBrowser from './replays/ReplayBrowser';
 import ArcadeMenu from './menus/ArcadeMenu';
-import PulsingBackground from './PulsingBackground';
+import { AnimatedBackground } from './components/AnimatedBackground';
 import { useMenuStore } from './stores/menuStore';
 import { useGameStore } from './stores/gameStore';
 
@@ -216,7 +216,7 @@ const MainMenu = () => {
           className="absolute inset-0"
         >
           <Suspense fallback={null}>
-            <PulsingBackground />
+            <AnimatedBackground />
             <ambientLight intensity={0.8} />
             <directionalLight position={[10, 10, 5]} intensity={0.5} />
           </Suspense>
@@ -256,15 +256,15 @@ const MainMenu = () => {
           className="absolute inset-0"
         >
           <Suspense fallback={null}>
-            <PulsingBackground />
+            <AnimatedBackground />
             <ambientLight intensity={0.8} />
             <directionalLight position={[10, 10, 5]} intensity={0.5} />
           </Suspense>
         </Canvas>
       </div>
 
-      {/* Enhanced Header Bar with Stats */}
-      <div className="relative z-10 bg-white bg-opacity-5 border-b border-white border-opacity-10 backdrop-blur-sm">
+      {/* Enhanced Header Bar with Stats - NO BLUR */}
+      <div className="relative z-10 bg-white bg-opacity-5 border-b border-white border-opacity-10">
         <div className="px-8 py-4">
           <div className="flex items-center justify-between">
             {/* Logo Section */}
@@ -342,8 +342,8 @@ const MainMenu = () => {
         </div>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="relative z-10 bg-white bg-opacity-5 border-b border-white border-opacity-10 backdrop-blur-sm">
+      {/* Tab Navigation - NO BLUR */}
+      <div className="relative z-10 bg-white bg-opacity-5 border-b border-white border-opacity-10">
         <div className="px-8">
           <div className="flex overflow-x-auto">
             {tabs.map((tab) => (
@@ -372,8 +372,8 @@ const MainMenu = () => {
         </div>
       </div>
 
-      {/* Full Width Main Content Area */}
-      <div className="relative z-10 h-[calc(100vh-160px)] backdrop-blur-sm overflow-hidden">
+      {/* Full Width Main Content Area - NO BLUR */}
+      <div className="relative z-10 h-[calc(100vh-160px)] overflow-hidden">
         {renderTabContent()}
       </div>
     </div>

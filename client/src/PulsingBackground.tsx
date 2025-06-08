@@ -2,7 +2,6 @@ import { useFrame, extend } from '@react-three/fiber'
 import { shaderMaterial } from '@react-three/drei'
 import * as THREE from 'three'
 import { useRef, useMemo } from 'react'
-import { useGameStore } from './stores/gameStore'
 
 const GradientMaterial = shaderMaterial(
   // Uniforms
@@ -194,28 +193,21 @@ const comboColors = [
     { colorA: '#00e5ff', colorB: '#1de9b6', colorC: '#76ff03' },
 ];
 
-const GradientBackground = () => {
+interface PulsingBackgroundProps {
+  combo?: number;
+}
+
+const PulsingBackground = ({ combo = 0 }: PulsingBackgroundProps) => {
     const ref = useRef<THREE.ShaderMaterial>(null!)
-    const combo = useGameStore((state) => state.combo)
-    const gameState = useGameStore((state) => state.gameState);
-
-    const inMenu = gameState === 'menu';
     
-    // Lighter blue color scheme for the menu
-    const menuColors = { colorA: '#B3E5FC', colorB: '#4FC3F7', colorC: '#03A9F4' };
-
-    // Determine colors and combo for the shader
-    const { colorA, colorB, colorC } = inMenu
-        ? menuColors
-        : comboColors[Math.floor(combo / 10) % comboColors.length];
-        
-    const shaderCombo = inMenu ? 25 : combo; // Use a fixed combo value in menu to show grid
-    const intensity = 0.8 + Math.min(shaderCombo / 30.0, 1.0);
+    // Determine colors based on combo
+    const { colorA, colorB, colorC } = comboColors[Math.floor(combo / 10) % comboColors.length];
+    const intensity = 0.8 + Math.min(combo / 30.0, 1.0);
 
     useFrame(({ clock }) => {
         if (ref.current) {
             ref.current.uniforms.u_time.value = clock.getElapsedTime()
-            ref.current.uniforms.u_combo.value = shaderCombo
+            ref.current.uniforms.u_combo.value = combo
             ref.current.uniforms.u_intensity.value = intensity
             
             // Smooth color transitions
@@ -234,4 +226,4 @@ const GradientBackground = () => {
     )
 }
 
-export default GradientBackground;
+export default PulsingBackground;

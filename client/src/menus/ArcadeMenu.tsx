@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, Suspense } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { Text, Box, Sphere } from '@react-three/drei';
-import * as THREE from 'three';
+import { Canvas } from '@react-three/fiber';
+import { AnimatedBackground } from '../components/AnimatedBackground';
 import { songs } from '../songs/song-data';
 
 interface ArcadeMenuProps {
@@ -58,79 +57,6 @@ const generateMockLeaderboard = (songId: string): LeaderboardEntry[] => {
       pp: Math.floor((baseScore / 10000) * (accuracy / 100) * (1 + selectedMods.length * 0.1))
     };
   }).sort((a, b) => b.score - a.score).map((entry, index) => ({ ...entry, rank: index + 1 }));
-};
-
-// Three.js animated background component (optimized with useMemo)
-const AnimatedBackground: React.FC = () => {
-  const meshRef = useRef<THREE.Mesh>(null!);
-  const particlesRef = useRef<THREE.Points>(null!);
-  
-  // Memoize particle data to prevent recreation
-  const { positions, velocities } = React.useMemo(() => {
-    const particleCount = 150;
-    const positions = new Float32Array(particleCount * 3);
-    const velocities = new Float32Array(particleCount * 3);
-    
-    for (let i = 0; i < particleCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 20;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 20;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 20;
-      
-      velocities[i * 3] = (Math.random() - 0.5) * 0.02;
-      velocities[i * 3 + 1] = (Math.random() - 0.5) * 0.02;
-      velocities[i * 3 + 2] = (Math.random() - 0.5) * 0.02;
-    }
-    
-    return { positions, velocities };
-  }, []);
-
-  useFrame((state, delta) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x += delta * 0.1;
-      meshRef.current.rotation.y += delta * 0.05;
-    }
-    
-    if (particlesRef.current) {
-      const positions = particlesRef.current.geometry.attributes.position.array as Float32Array;
-      for (let i = 0; i < 150; i++) {
-        positions[i * 3] += velocities[i * 3];
-        positions[i * 3 + 1] += velocities[i * 3 + 1];
-        positions[i * 3 + 2] += velocities[i * 3 + 2];
-        
-        if (Math.abs(positions[i * 3]) > 10) velocities[i * 3] *= -1;
-        if (Math.abs(positions[i * 3 + 1]) > 10) velocities[i * 3 + 1] *= -1;
-        if (Math.abs(positions[i * 3 + 2]) > 10) velocities[i * 3 + 2] *= -1;
-      }
-      particlesRef.current.geometry.attributes.position.needsUpdate = true;
-    }
-  });
-
-  return (
-    <>
-      <mesh ref={meshRef} position={[0, 0, -15]}>
-        <torusKnotGeometry args={[3, 1, 128, 16]} />
-        <meshBasicMaterial color="#ff1493" wireframe transparent opacity={0.1} />
-      </mesh>
-      
-      <points ref={particlesRef}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            array={positions}
-            count={150}
-            itemSize={3}
-          />
-        </bufferGeometry>
-        <pointsMaterial
-          size={0.05}
-          color="#00ffff"
-          transparent
-          opacity={0.6}
-          sizeAttenuation
-        />
-      </points>
-    </>
-  );
 };
 
 const ArcadeMenu: React.FC<ArcadeMenuProps> = ({ onBack, onSelectSong }) => {
