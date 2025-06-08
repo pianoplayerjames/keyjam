@@ -52,6 +52,544 @@ interface Friend {
   avatar: string;
 }
 
+// Enhanced Arena Timetable Component
+const EnhancedArenaTimetable = ({
+  timeSlots,
+  selectedTimeSlot,
+  onTimeSlotSelect,
+  upcomingArenas,
+  onJoinArena,
+  getArenaTypeColor,
+  getStatusColor,
+  formatTime
+}) => {
+  // Group arenas by time slots for better organization
+  const getArenasForTimeSlot = (slotIndex) => {
+    const slot = timeSlots[slotIndex];
+    const slotStart = slot.getTime();
+    const slotEnd = slotStart + 30 * 60 * 1000; // 30 minutes
+    
+    return upcomingArenas.filter(arena => {
+      const arenaTime = arena.startTime.getTime();
+      return arenaTime >= slotStart && arenaTime < slotEnd;
+    });
+  };
+
+  // Generate hourly time slots (24 hours)
+  const generateHourlySlots = () => {
+    const slots = [];
+    const now = new Date();
+    const startOfDay = new Date(now);
+    startOfDay.setHours(0, 0, 0, 0);
+    
+    for (let hour = 0; hour < 24; hour++) {
+      const slotTime = new Date(startOfDay);
+      slotTime.setHours(hour);
+      slots.push(slotTime);
+    }
+    
+    return slots;
+  };
+
+  const hourlySlots = generateHourlySlots();
+  const currentHour = new Date().getHours();
+
+  return (
+    <div style={{
+      background: 'rgba(255, 255, 255, 0.02)',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+      padding: '25px 30px'
+    }}>
+      {/* Header */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '25px'
+      }}>
+        <div>
+          <h2 style={{
+            margin: '0 0 5px 0',
+            fontSize: '24px',
+            fontWeight: '700',
+            background: 'linear-gradient(45deg, #4caf50, #2196f3)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}>
+            🏟️ Hourly Arenas
+          </h2>
+          <p style={{
+            margin: 0,
+            fontSize: '14px',
+            color: '#999'
+          }}>
+            Browse upcoming tournaments and battles by time
+          </p>
+        </div>
+        
+        <div style={{
+          display: 'flex',
+          gap: '15px',
+          alignItems: 'center'
+        }}>
+          <div style={{
+            background: 'rgba(76, 175, 80, 0.1)',
+            border: '1px solid #4caf50',
+            borderRadius: '8px',
+            padding: '8px 15px',
+            fontSize: '14px',
+            color: '#4caf50',
+            fontWeight: '600'
+          }}>
+            🕐 Live Schedule
+          </div>
+          
+          <button
+            onClick={() => {}} // Add navigation to arena creation
+            style={{
+              background: 'linear-gradient(45deg, #4caf50, #45a049)',
+              border: 'none',
+              color: 'white',
+              padding: '10px 20px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            ➕ Create Arena
+          </button>
+        </div>
+      </div>
+
+      {/* Time Grid */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '120px 1fr',
+        gap: '20px',
+        height: '500px'
+      }}>
+        {/* Time Slots Sidebar */}
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.05)',
+          borderRadius: '12px',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.05)',
+            padding: '15px',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+            textAlign: 'center'
+          }}>
+            <div style={{
+              fontSize: '12px',
+              color: '#4caf50',
+              fontWeight: '600',
+              textTransform: 'uppercase'
+            }}>
+              Time Slots
+            </div>
+          </div>
+          
+          <div style={{
+            height: '435px',
+            overflowY: 'auto',
+            padding: '5px'
+          }}>
+            {hourlySlots.map((slot, index) => {
+              const hour = slot.getHours();
+              const isCurrentHour = hour === currentHour;
+              const arenasInSlot = upcomingArenas.filter(arena => {
+                return arena.startTime.getHours() === hour;
+              });
+              
+              return (
+                <button
+                  key={index}
+                  onClick={() => onTimeSlotSelect(index)}
+                  style={{
+                    width: '100%',
+                    padding: '12px 8px',
+                    margin: '2px 0',
+                    background: selectedTimeSlot === index 
+                      ? 'linear-gradient(45deg, #4caf50, #45a049)' 
+                      : isCurrentHour
+                        ? 'rgba(76, 175, 80, 0.1)'
+                        : arenasInSlot.length > 0 
+                          ? 'rgba(255, 255, 255, 0.05)' 
+                          : 'transparent',
+                    border: selectedTimeSlot === index 
+                      ? '2px solid #4caf50' 
+                      : isCurrentHour
+                        ? '1px solid #4caf50'
+                        : '1px solid transparent',
+                    borderRadius: '8px',
+                    color: selectedTimeSlot === index ? '#000' : '#fff',
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                    fontWeight: selectedTimeSlot === index ? '700' : '500',
+                    textAlign: 'center',
+                    transition: 'all 0.2s ease',
+                    position: 'relative'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedTimeSlot !== index) {
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedTimeSlot !== index) {
+                      e.currentTarget.style.background = isCurrentHour
+                        ? 'rgba(76, 175, 80, 0.1)'
+                        : arenasInSlot.length > 0 
+                          ? 'rgba(255, 255, 255, 0.05)' 
+                          : 'transparent';
+                    }
+                  }}
+                >
+                  <div style={{ fontWeight: '600' }}>
+                    {slot.toLocaleTimeString('en-US', { 
+                      hour: '2-digit', 
+                      minute: '2-digit',
+                      hour12: false 
+                    })}
+                  </div>
+                  
+                  {isCurrentHour && (
+                    <div style={{
+                      fontSize: '8px',
+                      color: selectedTimeSlot === index ? '#000' : '#4caf50',
+                      fontWeight: '600'
+                    }}>
+                      NOW
+                    </div>
+                  )}
+                  
+                  {arenasInSlot.length > 0 && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '5px',
+                      right: '5px',
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      background: selectedTimeSlot === index ? '#000' : '#4caf50'
+                    }} />
+                  )}
+                  
+                  {arenasInSlot.length > 0 && (
+                    <div style={{
+                      fontSize: '9px',
+                      color: selectedTimeSlot === index ? '#000' : '#4caf50',
+                      fontWeight: '600'
+                    }}>
+                      {arenasInSlot.length} arena{arenasInSlot.length !== 1 ? 's' : ''}
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Arenas Display */}
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.05)',
+          borderRadius: '12px',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
+          {/* Arena Header */}
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.05)',
+            padding: '15px 20px',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <div>
+              <div style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                color: '#fff',
+                marginBottom: '2px'
+              }}>
+                {selectedTimeSlot < hourlySlots.length 
+                  ? formatTime(hourlySlots[selectedTimeSlot])
+                  : formatTime(timeSlots[selectedTimeSlot])
+                } Arenas
+              </div>
+              <div style={{
+                fontSize: '12px',
+                color: '#999'
+              }}>
+                {getArenasForTimeSlot(selectedTimeSlot).length} arena{getArenasForTimeSlot(selectedTimeSlot).length !== 1 ? 's' : ''} available
+              </div>
+            </div>
+            
+            <div style={{
+              display: 'flex',
+              gap: '15px',
+              alignItems: 'center',
+              fontSize: '11px',
+              color: '#ccc'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4caf50' }} />
+                Waiting
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ff9800' }} />
+                Starting
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f44336' }} />
+                Live
+              </div>
+            </div>
+          </div>
+
+          {/* Arena Cards Container */}
+          <div style={{
+            flex: 1,
+            overflowY: 'auto',
+            padding: '15px 20px'
+          }}>
+            {getArenasForTimeSlot(selectedTimeSlot).length === 0 ? (
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%',
+                color: '#666',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '48px', marginBottom: '15px' }}>🏟️</div>
+                <h3 style={{ margin: '0 0 8px 0', fontSize: '18px' }}>No Arenas Scheduled</h3>
+                <p style={{ margin: 0, fontSize: '14px' }}>
+                  No tournaments or battles at{' '}
+                  {selectedTimeSlot < hourlySlots.length 
+                    ? formatTime(hourlySlots[selectedTimeSlot])
+                    : formatTime(timeSlots[selectedTimeSlot])
+                  }
+                </p>
+                <button
+                  style={{
+                    marginTop: '20px',
+                    background: '#4caf50',
+                    border: 'none',
+                    color: 'white',
+                    padding: '10px 20px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: '600'
+                  }}
+                >
+                  Create Arena for This Time
+                </button>
+              </div>
+            ) : (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+                gap: '15px'
+              }}>
+                {getArenasForTimeSlot(selectedTimeSlot).map((arena) => (
+                  <div
+                    key={arena.id}
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      border: `1px solid ${getArenaTypeColor(arena.type)}`,
+                      borderRadius: '12px',
+                      padding: '18px',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = `0 8px 25px ${getArenaTypeColor(arena.type)}40`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                    onClick={() => onJoinArena(arena.id)}
+                  >
+                    {/* Arena Type Indicator */}
+                    <div style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: '3px',
+                      background: `linear-gradient(90deg, ${getArenaTypeColor(arena.type)}, ${getArenaTypeColor(arena.type)}88)`
+                    }} />
+
+                    {/* Arena Header */}
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
+                      marginBottom: '12px'
+                    }}>
+                      <div style={{ flex: 1 }}>
+                        <h3 style={{
+                          margin: '0 0 6px 0',
+                          fontSize: '16px',
+                          fontWeight: '600',
+                          color: '#fff'
+                        }}>
+                          {arena.name}
+                        </h3>
+                        
+                        <div style={{
+                          display: 'flex',
+                          gap: '8px',
+                          alignItems: 'center',
+                          marginBottom: '6px'
+                        }}>
+                          <span style={{
+                            background: getArenaTypeColor(arena.type),
+                            color: 'white',
+                            padding: '2px 8px',
+                            borderRadius: '10px',
+                            fontSize: '10px',
+                            fontWeight: '600',
+                            textTransform: 'uppercase'
+                          }}>
+                            {arena.type}
+                          </span>
+                          <span style={{
+                            background: getStatusColor(arena.status),
+                            color: 'white',
+                            padding: '2px 8px',
+                            borderRadius: '10px',
+                            fontSize: '10px',
+                            fontWeight: '600',
+                            textTransform: 'uppercase'
+                          }}>
+                            {arena.status}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#4caf50',
+                        textAlign: 'right'
+                      }}>
+                        {formatTime(arena.startTime)}
+                      </div>
+                    </div>
+
+                    {/* Arena Stats Grid */}
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(3, 1fr)',
+                      gap: '12px',
+                      marginBottom: '12px'
+                    }}>
+                      <div style={{
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        borderRadius: '8px',
+                        padding: '8px',
+                        textAlign: 'center'
+                      }}>
+                        <div style={{
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#2196f3',
+                          marginBottom: '2px'
+                        }}>
+                          {arena.players}/{arena.maxPlayers}
+                        </div>
+                        <div style={{ fontSize: '10px', color: '#999' }}>Players</div>
+                      </div>
+
+                      <div style={{
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        borderRadius: '8px',
+                        padding: '8px',
+                        textAlign: 'center'
+                      }}>
+                        <div style={{
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#ff9800',
+                          marginBottom: '2px'
+                        }}>
+                          {arena.difficulty}
+                        </div>
+                        <div style={{ fontSize: '10px', color: '#999' }}>Difficulty</div>
+                      </div>
+
+                      <div style={{
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        borderRadius: '8px',
+                        padding: '8px',
+                        textAlign: 'center'
+                      }}>
+                        <div style={{
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#4caf50',
+                          marginBottom: '2px'
+                        }}>
+                          {arena.duration}m
+                        </div>
+                        <div style={{ fontSize: '10px', color: '#999' }}>Duration</div>
+                      </div>
+                    </div>
+
+                    {/* Host Info */}
+                    <div style={{
+                      fontSize: '12px',
+                      color: '#ccc',
+                      marginBottom: '8px'
+                    }}>
+                      Hosted by <span style={{ color: '#4caf50', fontWeight: '600' }}>{arena.host}</span>
+                    </div>
+
+                    {/* Prize Pool (if exists) */}
+                    {arena.prizePool && (
+                      <div style={{
+                        background: 'linear-gradient(45deg, rgba(255, 215, 0, 0.1), rgba(255, 193, 7, 0.1))',
+                        border: '1px solid #ffd700',
+                        borderRadius: '6px',
+                        padding: '6px 8px',
+                        fontSize: '11px',
+                        color: '#ffd700',
+                        fontWeight: '600',
+                        textAlign: 'center'
+                      }}>
+                        💰 ${arena.prizePool.toLocaleString()} Prize Pool
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const OnlinePortal: React.FC<OnlinePortalProps> = ({ onBack, onStartGame }) => {
   const [currentSection, setCurrentSection] = useState<PortalSection>('main');
   const [playerData, setPlayerData] = useState<PlayerData | null>(null);
@@ -317,548 +855,313 @@ const OnlinePortal: React.FC<OnlinePortalProps> = ({ onBack, onStartGame }) => {
             playerData={playerData}
             onBack={() => setCurrentSection('main')}
             onStartPartyGame={(config) => onStartGame(config)}
-          />
-        );
-      default:
-        return (
-          <MainPortal
-            playerData={playerData}
-            onlineStats={onlineStats}
-            upcomingArenas={upcomingArenas}
-            friends={friends}
-            timeSlots={timeSlots}
-            selectedTimeSlot={selectedTimeSlot}
-            onTimeSlotSelect={setSelectedTimeSlot}
-            onNavigate={setCurrentSection}
-            onBack={onBack}
-            onJoinArena={(arenaId) => onStartGame({ mode: 'online', arenaId })}
-            getArenaTypeColor={getArenaTypeColor}
-            getStatusColor={getStatusColor}
-            formatTime={formatTime}
-          />
-        );
-    }
-  };
+         />
+       );
+     default:
+       return (
+         <MainPortal
+           playerData={playerData}
+           onlineStats={onlineStats}
+           upcomingArenas={upcomingArenas}
+           friends={friends}
+           timeSlots={timeSlots}
+           selectedTimeSlot={selectedTimeSlot}
+           onTimeSlotSelect={setSelectedTimeSlot}
+           onNavigate={setCurrentSection}
+           onBack={onBack}
+           onJoinArena={(arenaId) => onStartGame({ mode: 'online', arenaId })}
+           getArenaTypeColor={getArenaTypeColor}
+           getStatusColor={getStatusColor}
+           formatTime={formatTime}
+         />
+       );
+   }
+ };
 
-  return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100vw',
-      height: '100vh',
-      background: 'linear-gradient(135deg, #0a0f1c 0%, #1a2332 50%, #2d3748 100%)',
-      color: 'white',
-      fontFamily: 'system-ui, -apple-system, sans-serif',
-      overflow: 'hidden'
-    }}>
-      {renderCurrentSection()}
-    </div>
-  );
+ return (
+   <div style={{
+     position: 'fixed',
+     top: 0,
+     left: 0,
+     width: '100vw',
+     height: '100vh',
+     background: 'linear-gradient(135deg, #0a0f1c 0%, #1a2332 50%, #2d3748 100%)',
+     color: 'white',
+     fontFamily: 'system-ui, -apple-system, sans-serif',
+     overflow: 'hidden'
+   }}>
+     {renderCurrentSection()}
+   </div>
+ );
 };
 
 // Loading Screen Component
 const LoadingScreen: React.FC = () => (
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '100vh',
-    flexDirection: 'column',
-    gap: '20px'
-  }}>
-    <div style={{
-      width: '60px',
-      height: '60px',
-      border: '4px solid rgba(255, 255, 255, 0.1)',
-      borderTop: '4px solid #4caf50',
-      borderRadius: '50%',
-      animation: 'spin 1s linear infinite'
-    }} />
-    <div style={{ fontSize: '18px', color: '#ccc' }}>Connecting to KeyJam Online...</div>
-    <style>
-      {`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}
-    </style>
-  </div>
+ <div style={{
+   display: 'flex',
+   alignItems: 'center',
+   justifyContent: 'center',
+   height: '100vh',
+   flexDirection: 'column',
+   gap: '20px'
+ }}>
+   <div style={{
+     width: '60px',
+     height: '60px',
+     border: '4px solid rgba(255, 255, 255, 0.1)',
+     borderTop: '4px solid #4caf50',
+     borderRadius: '50%',
+     animation: 'spin 1s linear infinite'
+   }} />
+   <div style={{ fontSize: '18px', color: '#ccc' }}>Connecting to KeyJam Online...</div>
+   <style>
+     {`
+       @keyframes spin {
+         0% { transform: rotate(0deg); }
+         100% { transform: rotate(360deg); }
+       }
+     `}
+   </style>
+ </div>
 );
 
 // Main Portal Component
 interface MainPortalProps {
-  playerData: PlayerData;
-  onlineStats: any;
-  upcomingArenas: Arena[];
-  friends: Friend[];
-  timeSlots: Date[];
-  selectedTimeSlot: number;
-  onTimeSlotSelect: (slot: number) => void;
-  onNavigate: (section: PortalSection) => void;
-  onBack: () => void;
-  onJoinArena: (arenaId: string) => void;
-  getArenaTypeColor: (type: Arena['type']) => string;
-  getStatusColor: (status: Arena['status']) => string;
-  formatTime: (date: Date) => string;
+ playerData: PlayerData;
+ onlineStats: any;
+ upcomingArenas: Arena[];
+ friends: Friend[];
+ timeSlots: Date[];
+ selectedTimeSlot: number;
+ onTimeSlotSelect: (slot: number) => void;
+ onNavigate: (section: PortalSection) => void;
+ onBack: () => void;
+ onJoinArena: (arenaId: string) => void;
+ getArenaTypeColor: (type: Arena['type']) => string;
+ getStatusColor: (status: Arena['status']) => string;
+ formatTime: (date: Date) => string;
 }
 
 const MainPortal: React.FC<MainPortalProps> = ({
-  playerData,
-  onlineStats,
-  upcomingArenas,
-  friends,
-  timeSlots,
-  selectedTimeSlot,
-  onTimeSlotSelect,
-  onNavigate,
-  onBack,
-  onJoinArena,
-  getArenaTypeColor,
-  getStatusColor,
-  formatTime
+ playerData,
+ onlineStats,
+ upcomingArenas,
+ friends,
+ timeSlots,
+ selectedTimeSlot,
+ onTimeSlotSelect,
+ onNavigate,
+ onBack,
+ onJoinArena,
+ getArenaTypeColor,
+ getStatusColor,
+ formatTime
 }) => {
-  const getRankColor = (rank: string) => {
-    switch (rank.toLowerCase()) {
-      case 'bronze': return '#cd7f32';
-      case 'silver': return '#c0c0c0';
-      case 'gold': return '#ffd700';
-      case 'platinum': return '#e5e4e2';
-      case 'diamond': return '#b9f2ff';
-      case 'master': return '#ff6b35';
-      case 'grandmaster': return '#ff1744';
-      default: return '#666';
-    }
-  };
+ const getRankColor = (rank: string) => {
+   switch (rank.toLowerCase()) {
+     case 'bronze': return '#cd7f32';
+     case 'silver': return '#c0c0c0';
+     case 'gold': return '#ffd700';
+     case 'platinum': return '#e5e4e2';
+     case 'diamond': return '#b9f2ff';
+     case 'master': return '#ff6b35';
+     case 'grandmaster': return '#ff1744';
+     default: return '#666';
+   }
+ };
 
-  const getStatusIcon = (status: Friend['status']) => {
-    switch (status) {
-      case 'online': return '🟢';
-      case 'away': return '🟡';
-      case 'in-game': return '🎮';
-      case 'offline': return '⚫';
-      default: return '⚫';
-    }
-  };
+ const getStatusIcon = (status: Friend['status']) => {
+   switch (status) {
+     case 'online': return '🟢';
+     case 'away': return '🟡';
+     case 'in-game': return '🎮';
+     case 'offline': return '⚫';
+     default: return '⚫';
+   }
+ };
 
-  const currentTimeSlot = timeSlots[selectedTimeSlot];
-  const arenasInTimeSlot = upcomingArenas.filter(arena => {
-    const slotStart = currentTimeSlot.getTime();
-    const slotEnd = slotStart + 30 * 60 * 1000;
-    const arenaTime = arena.startTime.getTime();
-    return arenaTime >= slotStart && arenaTime < slotEnd;
-  });
+ return (
+   <>
+     {/* Header Bar */}
+     <div style={{
+       height: '70px',
+       background: 'rgba(0, 0, 0, 0.3)',
+       borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+       display: 'flex',
+       alignItems: 'center',
+       justifyContent: 'space-between',
+       padding: '0 30px',
+       backdropFilter: 'blur(10px)'
+     }}>
+       <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+         <button
+           onClick={onBack}
+           style={{
+             background: 'rgba(255, 255, 255, 0.1)',
+             border: '1px solid rgba(255, 255, 255, 0.2)',
+             color: 'white',
+             padding: '10px 20px',
+             borderRadius: '8px',
+             cursor: 'pointer',
+             fontSize: '14px',
+             fontWeight: '500',
+             transition: 'all 0.3s ease'
+           }}
+           onMouseEnter={(e) => {
+             e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+           }}
+           onMouseLeave={(e) => {
+             e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+           }}
+         >
+           ← Back to Game
+         </button>
 
-  return (
-    <>
-      {/* Header Bar */}
-      <div style={{
-        height: '70px',
-        background: 'rgba(0, 0, 0, 0.3)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 30px',
-        backdropFilter: 'blur(10px)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <button
-            onClick={onBack}
-            style={{
-              background: 'rgba(255, 255, 255, 0.1)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              color: 'white',
-              padding: '10px 20px',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: '500',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-            }}
-          >
-            ← Back to Game
-          </button>
+         <div style={{
+           fontSize: '24px',
+           fontWeight: 'bold',
+           background: 'linear-gradient(45deg, #4caf50, #2196f3)',
+           WebkitBackgroundClip: 'text',
+           WebkitTextFillColor: 'transparent',
+           backgroundClip: 'text'
+         }}>
+           KeyJam Online
+         </div>
+       </div>
 
-          <div style={{
-            fontSize: '24px',
-            fontWeight: 'bold',
-            background: 'linear-gradient(45deg, #4caf50, #2196f3)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text'
-          }}>
-            KeyJam Online
-          </div>
-        </div>
+       <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
+         <div style={{ display: 'flex', gap: '20px', fontSize: '14px', color: '#ccc' }}>
+           <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+             <div style={{ 
+               width: '8px', 
+               height: '8px', 
+               borderRadius: '50%', 
+               background: '#4caf50' 
+             }} />
+             {onlineStats.playersOnline.toLocaleString()} Online
+           </div>
+           <div>🎮 {onlineStats.gamesInProgress} Games</div>
+           <div>🏟️ {onlineStats.availableArenas} Arenas</div>
+         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
-          <div style={{ display: 'flex', gap: '20px', fontSize: '14px', color: '#ccc' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <div style={{ 
-                width: '8px', 
-                height: '8px', 
-                borderRadius: '50%', 
-                background: '#4caf50' 
-              }} />
-              {onlineStats.playersOnline.toLocaleString()} Online
-            </div>
-            <div>🎮 {onlineStats.gamesInProgress} Games</div>
-            <div>🏟️ {onlineStats.availableArenas} Arenas</div>
-          </div>
+         <div style={{
+           display: 'flex',
+           alignItems: 'center',
+           gap: '15px',
+           padding: '8px 16px',
+           background: 'rgba(255, 255, 255, 0.05)',
+           borderRadius: '12px',
+           border: '1px solid rgba(255, 255, 255, 0.1)'
+         }}>
+           <div style={{
+             width: '32px',
+             height: '32px',
+             borderRadius: '50%',
+             background: 'linear-gradient(45deg, #4caf50, #2196f3)',
+             display: 'flex',
+             alignItems: 'center',
+             justifyContent: 'center',
+             fontSize: '14px'
+           }}>
+             👤
+           </div>
+           <div>
+             <div style={{ fontSize: '14px', fontWeight: '600' }}>
+               {playerData.username}
+             </div>
+             <div style={{
+               fontSize: '12px',
+               color: getRankColor(playerData.rank),
+               fontWeight: '500'
+             }}>
+               {playerData.rank} • {playerData.elo} ELO
+             </div>
+           </div>
+         </div>
+       </div>
+     </div>
 
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '15px',
-            padding: '8px 16px',
-            background: 'rgba(255, 255, 255, 0.05)',
-            borderRadius: '12px',
-            border: '1px solid rgba(255, 255, 255, 0.1)'
-          }}>
-            <div style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              background: 'linear-gradient(45deg, #4caf50, #2196f3)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '14px'
-            }}>
-              👤
-            </div>
-            <div>
-              <div style={{ fontSize: '14px', fontWeight: '600' }}>
-                {playerData.username}
-              </div>
-              <div style={{
-                fontSize: '12px',
-                color: getRankColor(playerData.rank),
-                fontWeight: '500'
-              }}>
-                {playerData.rank} • {playerData.elo} ELO
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+     <div style={{ display: 'flex', height: 'calc(100vh - 70px)' }}>
+       {/* Main Content */}
+       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+         {/* Enhanced Arena Timetable */}
+         <EnhancedArenaTimetable
+           timeSlots={timeSlots}
+           selectedTimeSlot={selectedTimeSlot}
+           onTimeSlotSelect={onTimeSlotSelect}
+           upcomingArenas={upcomingArenas}
+           onJoinArena={onJoinArena}
+           getArenaTypeColor={getArenaTypeColor}
+           getStatusColor={getStatusColor}
+           formatTime={formatTime}
+         />
 
-      <div style={{ display: 'flex', height: 'calc(100vh - 70px)' }}>
-        {/* Main Content */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-          {/* Arena Timetable */}
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.02)',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-            padding: '20px 30px'
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '20px'
-            }}>
-              <h2 style={{
-                margin: 0,
-                fontSize: '20px',
-                fontWeight: '600'
-              }}>
-                🏟️ Upcoming Arenas
-              </h2>
-              <button
-                onClick={() => onNavigate('arenas')}
-                style={{
-                  background: '#4caf50',
-                  border: 'none',
-                  color: 'white',
-                  padding: '8px 16px',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500'
-                }}
-              >
-                Browse All
-              </button>
-            </div>
-
-            {/* Time Slots */}
-            <div style={{
-              display: 'flex',
-              gap: '8px',
-              overflowX: 'auto',
-              paddingBottom: '10px',
-              marginBottom: '20px'
-            }}>
-              {timeSlots.slice(0, 24).map((slot, index) => {
-                const hasArenas = upcomingArenas.some(arena => {
-                  const slotStart = slot.getTime();
-                  const slotEnd = slotStart + 30 * 60 * 1000;
-                  const arenaTime = arena.startTime.getTime();
-                  return arenaTime >= slotStart && arenaTime < slotEnd;
-                });
-
-                return (
-                  <button
-                    key={index}
-                    onClick={() => onTimeSlotSelect(index)}
-                    style={{
-                      minWidth: '80px',
-                      padding: '12px 8px',
-                      background: selectedTimeSlot === index 
-                        ? 'rgba(76, 175, 80, 0.3)' 
-                        : hasArenas 
-                          ? 'rgba(255, 255, 255, 0.1)' 
-                          : 'rgba(255, 255, 255, 0.05)',
-                      border: selectedTimeSlot === index 
-                        ? '2px solid #4caf50' 
-                        : '1px solid rgba(255, 255, 255, 0.1)',
-                      borderRadius: '8px',
-                      color: 'white',
-                      cursor: 'pointer',
-                      fontSize: '12px',
-                      fontWeight: '500',
-                      textAlign: 'center',
-                      transition: 'all 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (selectedTimeSlot !== index) {
-                        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (selectedTimeSlot !== index) {
-                        e.currentTarget.style.background = hasArenas 
-                          ? 'rgba(255, 255, 255, 0.1)' 
-                          : 'rgba(255, 255, 255, 0.05)';
-                      }
-                    }}
-                  >
-                    <div>{formatTime(slot)}</div>
-                    {hasArenas && (
-                      <div style={{
-                        width: '6px',
-                        height: '6px',
-                        borderRadius: '50%',
-                        background: '#4caf50',
-                        margin: '4px auto 0'
-                      }} />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Arena Cards for Selected Time Slot */}
-            <div style={{
-              display: 'flex',
-              gap: '15px',
-              overflowX: 'auto',
-              minHeight: '120px',
-              alignItems: 'flex-start'
-            }}>
-              {arenasInTimeSlot.length === 0 ? (
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '100%',
-                  height: '120px',
-                  color: '#666',
-                  fontSize: '14px'
-                }}>
-                  No arenas scheduled for {formatTime(currentTimeSlot)}
-                </div>
-              ) : (
-                arenasInTimeSlot.map((arena) => (
-                  <div
-                    key={arena.id}
-                    style={{
-                      minWidth: '280px',
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      border: `1px solid ${getArenaTypeColor(arena.type)}`,
-                      borderRadius: '12px',
-                      padding: '16px',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                      e.currentTarget.style.transform = 'translateY(0)';
-                    }}
-                    onClick={() => onJoinArena(arena.id)}
-                  >
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'flex-start',
-                      marginBottom: '12px'
-                    }}>
-                      <div>
-                        <div style={{
-                          fontSize: '16px',
-                          fontWeight: '600',
-                          marginBottom: '4px'
-                        }}>
-                          {arena.name}
-                        </div>
-                        <div style={{
-                          display: 'flex',
-                          gap: '8px',
-                          alignItems: 'center'
-                        }}>
-                          <span style={{
-                            background: getArenaTypeColor(arena.type),
-                            color: 'white',
-                            padding: '2px 8px',
-                            borderRadius: '10px',
-                            fontSize: '11px',
-                            fontWeight: '600',
-                            textTransform: 'uppercase'
-                          }}>
-                            {arena.type}
-                          </span>
-                          <span style={{
-                            background: getStatusColor(arena.status),
-                            color: 'white',
-                            padding: '2px 8px',
-                            borderRadius: '10px',
-                            fontSize: '11px',
-                            fontWeight: '600',
-                            textTransform: 'uppercase'
-                          }}>
-                            {arena.status}
-                          </span>
-                        </div>
-                      </div>
-                      <div style={{
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        color: '#ccc'
-                      }}>
-                        {formatTime(arena.startTime)}
-                      </div>
-                    </div>
-
-                    <div style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(3, 1fr)',
-                      gap: '12px',
-                      fontSize: '12px'
-                    }}>
-                      <div>
-                        <div style={{ color: '#ccc' }}>Players</div>
-                        <div style={{ fontWeight: '600' }}>
-                          {arena.players}/{arena.maxPlayers}
-                        </div>
-                      </div>
-                      <div>
-                        <div style={{ color: '#ccc' }}>Difficulty</div>
-                        <div style={{ fontWeight: '600' }}>{arena.difficulty}</div>
-                      </div>
-                      <div>
-                        <div style={{ color: '#ccc' }}>Duration</div>
-                        <div style={{ fontWeight: '600' }}>{arena.duration}m</div>
-                      </div>
-                    </div>
-
-                    {arena.prizePool && (
-                      <div style={{
-                        marginTop: '8px',
-                        padding: '6px',
-                        background: 'rgba(255, 215, 0, 0.1)',
-                        borderRadius: '6px',
-                        fontSize: '11px',
-                        color: '#ffd700',
-                        fontWeight: '600'
-                      }}>
-                        💰 Prize Pool: ${arena.prizePool.toLocaleString()}
-                      </div>
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div style={{
-            padding: '30px',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '20px'
-          }}>
-            {[
-              {
-                title: 'Quick Match',
-                description: 'Jump into a game instantly',
-                icon: '⚡',
-                color: '#4caf50',
-                action: () => onStartGame({ mode: 'quick' })
-              },
-              {
-                title: 'Leaderboards',
-                description: 'See global rankings',
-                icon: '🏆',
-                color: '#ff9800',
-                action: () => onNavigate('leaderboards')
-              },
-              {
-                title: 'Create Arena',
-                description: 'Host your own tournament',
-                icon: '🏟️',
-                color: '#2196f3',
-                action: () => onNavigate('arenas')
-              },
-              {
-                title: 'Party Up',
-                description: 'Play with friends',
-                icon: '🎉',
-                color: '#9c27b0',
-                action: () => onNavigate('party')
-              }
-            ].map((action, index) => (
-              <button
-                key={index}
-                onClick={action.action}
-                style={{
-                  background: `linear-gradient(135deg, ${action.color}20, ${action.color}40)`,
-                  border: `1px solid ${action.color}`,
-                  borderRadius: '16px',
-                  padding: '24px',
-                  color: 'white',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  textAlign: 'left'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-4px)';
-                  e.currentTarget.style.boxShadow = `0 8px 25px ${action.color}40`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
-                <div style={{
-                  fontSize: '32px',
-                  marginBottom: '12px'
-                }}>
-                  {action.icon}
-                </div>
-<div style={{
+         {/* Quick Actions */}
+         <div style={{
+           padding: '30px',
+           display: 'grid',
+           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+           gap: '20px'
+         }}>
+           {[
+             {
+               title: 'Quick Match',
+               description: 'Jump into a game instantly',
+               icon: '⚡',
+               color: '#4caf50',
+               action: () => onStartGame({ mode: 'quick' })
+             },
+             {
+               title: 'Leaderboards',
+               description: 'See global rankings',
+               icon: '🏆',
+               color: '#ff9800',
+               action: () => onNavigate('leaderboards')
+             },
+             {
+               title: 'Create Arena',
+               description: 'Host your own tournament',
+               icon: '🏟️',
+               color: '#2196f3',
+               action: () => onNavigate('arenas')
+             },
+             {
+               title: 'Party Up',
+               description: 'Play with friends',
+               icon: '🎉',
+               color: '#9c27b0',
+               action: () => onNavigate('party')
+             }
+           ].map((action, index) => (
+             <button
+               key={index}
+               onClick={action.action}
+               style={{
+                 background: `linear-gradient(135deg, ${action.color}20, ${action.color}40)`,
+                 border: `1px solid ${action.color}`,
+                 borderRadius: '16px',
+                 padding: '24px',
+                 color: 'white',
+                 cursor: 'pointer',
+                 transition: 'all 0.3s ease',
+                 textAlign: 'left'
+               }}
+               onMouseEnter={(e) => {
+                 e.currentTarget.style.transform = 'translateY(-4px)';
+                 e.currentTarget.style.boxShadow = `0 8px 25px ${action.color}40`;
+               }}
+               onMouseLeave={(e) => {
+                 e.currentTarget.style.transform = 'translateY(0)';
+                 e.currentTarget.style.boxShadow = 'none';
+               }}
+             >
+               <div style={{
+                 fontSize: '32px',
+                 marginBottom: '12px'
+               }}>
+                 {action.icon}
+               </div>
+               <div style={{
                  fontSize: '18px',
                  fontWeight: '600',
                  marginBottom: '6px'
@@ -1183,6 +1486,82 @@ const MainPortal: React.FC<MainPortalProps> = ({
        </div>
      </div>
    </>
+ );
+};
+
+// Component to show replay statistics on main menu
+const ReplayStatsDisplay = () => {
+ const [replayStats, setReplayStats] = useState<{
+   totalReplays: number;
+   bestScore: number;
+   bestAccuracy: number;
+   totalPlayTime: number;
+ } | null>(null);
+
+ useEffect(() => {
+   try {
+     const replays = JSON.parse(localStorage.getItem('rhythm_game_replays') || '[]');
+     if (replays.length > 0) {
+       const bestScore = Math.max(...replays.map((r: any) => r.metadata.finalScore));
+       const bestAccuracy = Math.max(...replays.map((r: any) => r.metadata.accuracy));
+       const totalPlayTime = replays.reduce((sum: number, r: any) => sum + r.duration, 0);
+       
+       setReplayStats({
+         totalReplays: replays.length,
+         bestScore,
+         bestAccuracy,
+         totalPlayTime
+       });
+     }
+   } catch (error) {
+     console.error('Failed to load replay stats:', error);
+   }
+ }, []);
+
+ if (!replayStats || replayStats.totalReplays === 0) return null;
+
+ const formatPlayTime = (ms: number) => {
+   const minutes = Math.floor(ms / 60000);
+   const hours = Math.floor(minutes / 60);
+   if (hours > 0) {
+     return `${hours}h ${minutes % 60}m`;
+   }
+   return `${minutes}m`;
+ };
+
+ return (
+   <div style={{
+     marginTop: '8px',
+     padding: '6px',
+     background: 'rgba(0, 0, 0, 0.3)',
+     borderRadius: '8px',
+     border: '1px solid #666'
+   }}>
+     <h3 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '4px', textAlign: 'center', color: '#ccc' }}>📊 Your Stats</h3>
+     <div style={{
+       display: 'grid',
+       gridTemplateColumns: 'repeat(2, 1fr)',
+       gap: '4px',
+       textAlign: 'center'
+     }}>
+       <div>
+         <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#2196f3' }}>{replayStats.totalReplays}</div>
+         <div style={{ fontSize: '10px', color: '#999' }}>Replays</div>
+       </div>
+       <div>
+         <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#ffd700' }}>{replayStats.bestScore.toLocaleString()}</div>
+         <div style={{ fontSize: '10px', color: '#999' }}>Best Score</div>
+       </div>
+       <div>
+         <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#4caf50' }}>{replayStats.bestAccuracy.toFixed(1)}%</div>
+         <div style={{ fontSize: '10px', color: '#999' }}>Best Accuracy</div>
+       </div>
+       <div>
+         <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#9c27b0' }}>{formatPlayTime(replayStats.totalPlayTime)}</div>
+         <div style={{ fontSize: '10px', color: '#999' }}>Play Time</div>
+       </div>
+     </div>
+   </div>
  );
 };
 
