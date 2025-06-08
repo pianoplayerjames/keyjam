@@ -22,7 +22,7 @@ const PractiseMenu = ({ onBack, onSelectMode }: PractiseMenuProps) => {
   ];
 
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center text-white bg-black bg-opacity-30">
+<div className="absolute inset-0 flex flex-col items-center justify-center text-white bg-transparent">
       <button 
         onClick={onBack}
         className="absolute top-8 left-8 flex items-center gap-2 text-gray-300 hover:text-white transition-colors text-lg"

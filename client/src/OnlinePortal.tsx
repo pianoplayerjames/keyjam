@@ -136,7 +136,6 @@ const OnlinePortal: React.FC<OnlinePortalProps> = ({ onBack, onStartGame }) => {
       left: 0,
       width: '100vw',
       height: '100vh',
-      background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%)',
       color: 'white',
       fontFamily: 'Arial, sans-serif',
       overflow: 'hidden'
@@ -273,7 +272,7 @@ const MainHub: React.FC<MainHubProps> = ({ playerData, onlineStats, onNavigate, 
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text'
         }}>
-          🌐 ONLINE PORTAL
+          🌐 KeyJam Online
         </div>
 
         <div style={{ display: 'flex', gap: '20px', fontSize: '14px', color: '#ccc' }}>

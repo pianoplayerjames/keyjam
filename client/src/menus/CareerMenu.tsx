@@ -5,7 +5,7 @@ interface CareerMenuProps {
 
 const CareerMenu = ({ onBack, onStart }: CareerMenuProps) => {
   return (
-    <div className="flex flex-col items-center min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-pink-900 text-white p-8">
+<div className="flex flex-col items-center min-h-screen text-white p-8 bg-transparent">
       <button 
         onClick={onBack}
         className="absolute top-8 left-8 flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
