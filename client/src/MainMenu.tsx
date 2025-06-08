@@ -26,11 +26,11 @@ const MainMenu = () => {
   });
 
   const menuOptions = [
-    { text: 'Career Mode', description: 'Progress through difficulty ranks', color: 'from-pink-500 to-purple-600', target: 'career' },
-    { text: 'Online', description: 'Play with other players', color: 'from-green-500 to-emerald-600', target: 'online' },
-    { text: 'Practise', description: 'Free practice mode', color: 'from-blue-500 to-cyan-600', target: 'practise' },
-    { text: 'Replays', description: 'Watch saved replays', color: 'from-orange-500 to-red-600', target: 'replays' },
-    { text: 'Settings', description: 'Game settings', color: 'from-purple-500 to-indigo-600', target: 'settings' }
+    { text: 'Career Mode', description: 'Progress through difficulty ranks', color: 'from-pink-500 to-purple-600', target: 'career', icon: '🚀' },
+    { text: 'Online', description: 'Play with other players', color: 'from-green-500 to-emerald-600', target: 'online', icon: '🌐' },
+    { text: 'Practise', description: 'Free practice mode', color: 'from-blue-500 to-cyan-600', target: 'practise', icon: '🎯' },
+    { text: 'Replays', description: 'Watch saved replays', color: 'from-orange-500 to-red-600', target: 'replays', icon: '🎬' },
+    { text: 'Settings', description: 'Game settings', color: 'from-gray-500 to-gray-700', target: 'settings', icon: '⚙️' }
   ];
 
   const handleMenuClick = (target: string) => {
@@ -70,10 +70,6 @@ const MainMenu = () => {
             <div className="absolute inset-0 z-10">
               <CareerMenu 
                 onBack={handleBackClick}
-                onStart={() => {
-                  handleConfigUpdate({ mode: 'career', difficulty: 3 });
-                  handleGameStart();
-                }}
               />
             </div>
           </div>
@@ -174,10 +170,6 @@ const MainMenu = () => {
             <div className="absolute inset-0 z-10">
               <ScoreSelectionMenu 
                 onBack={() => setMenuState('practise')}
-                onSelectScore={(scoreTarget) => {
-                  handleConfigUpdate({ scoreTarget });
-                  setMenuState('difficulty');
-                }}
               />
             </div>
           </div>
@@ -199,10 +191,6 @@ const MainMenu = () => {
             <div className="absolute inset-0 z-10">
               <DifficultyMenu 
                 onBack={() => setMenuState(localGameConfig.subMode === 'time' ? 'time-selection' : 'score-selection')}
-                onSelectDifficulty={(difficulty) => {
-                  handleConfigUpdate({ difficulty });
-                  handleGameStart();
-                }}
               />
             </div>
           </div>
@@ -252,72 +240,70 @@ const MainMenu = () => {
         );
       default:
         return (
-          <div className="relative w-screen h-screen overflow-hidden">
+          <div className="relative w-screen h-screen overflow-hidden font-sans">
             <Canvas 
               camera={{ position: [0, 2.5, 5], fov: 75 }} 
               className="absolute inset-0"
             >
               <Suspense fallback={null}>
-                <PulsingBackground /> {/* Changed */}
+                <PulsingBackground />
                 <ambientLight intensity={0.8} />
                 <directionalLight position={[10, 10, 5]} intensity={0.5} />
               </Suspense>
             </Canvas>
 
-            <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
-              <div className="flex flex-col items-center justify-center flex-1 max-w-4xl mx-auto px-8">
-                <div className="mb-16 text-center">
-                  <img 
-                    src="/logo.png" 
-                    alt="Game Logo" 
-                    className="w-80 h-auto mx-auto animate-pulse"
-                  />
-                </div>
+            {/* Decorative Elements */}
+            <div className="absolute top-0 left-0 w-1/3 h-1 bg-cyan-400 animate-pulse" />
+            <div className="absolute bottom-0 right-0 w-1/3 h-1 bg-pink-500 animate-pulse" />
+            
+            <div className="absolute inset-0 z-10 p-8 flex flex-col justify-between">
+              {/* Top Header */}
+              <header className="flex justify-between items-start">
+                <img 
+                  src="/logo.png" 
+                  alt="Game Logo" 
+                  className="w-52 h-auto animate-tilt"
+                />
+                <ReplayStatsDisplay />
+              </header>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
+              {/* Main Content */}
+              <main className="flex-1 flex items-center -mt-16">
+                <div className="w-full md:w-1/2 lg:w-1/3 flex flex-col items-start gap-4">
                   {menuOptions.map((option, index) => (
                     <button
                       key={option.text}
                       onClick={() => handleMenuClick(option.target)}
                       disabled={isTransitioning}
                       className={`
-                        group relative overflow-hidden rounded-xl p-6 
-                        bg-black bg-opacity-30 backdrop-blur-sm
-                        border border-white border-opacity-20
-                        transform transition-all duration-300 hover:scale-105 hover:shadow-2xl
-                        hover:bg-opacity-40 hover:border-opacity-40
-                        disabled:opacity-50 disabled:cursor-not-allowed
-                        animate-slide-up text-white
+                        group w-full text-left text-white text-3xl font-extrabold uppercase
+                        pl-6 pr-16 py-2 relative bg-black bg-opacity-40
+                        border-l-4 ${option.target === 'online' ? 'border-green-400' : 'border-pink-500'}
+                        transition-all duration-300 ease-in-out
+                        hover:pl-10 hover:bg-opacity-70 hover:shadow-2xl hover:shadow-cyan-500/20
+                        focus:outline-none focus:ring-4 ring-white ring-opacity-50
+                        animate-slide-up
                       `}
-                      style={{ 
-                        animationDelay: `${index * 150}ms`,
-                        background: 'rgba(0, 0, 0, 0.3)',
-                        backdropFilter: 'blur(10px)'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'rgba(0, 0, 0, 0.5)';
-                        e.currentTarget.style.transform = 'scale(1.05)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'rgba(0, 0, 0, 0.3)';
-                        e.currentTarget.style.transform = 'scale(1)';
+                      style={{
+                        animationDelay: `${150 * index}ms`,
+                        clipPath: 'polygon(0 0, 100% 0, 95% 100%, 0% 100%)',
                       }}
                     >
-                      <div className="relative z-10">
-                        <h3 className="text-2xl font-bold mb-2">{option.text}</h3>
-                        <p className="text-sm opacity-90">{option.description}</p>
+                      <div className="flex items-center gap-4">
+                        <span className="text-4xl opacity-50 group-hover:opacity-100 transition-opacity text-cyan-300">
+                          {option.icon}
+                        </span>
+                        <div>
+                          <p className="tracking-wider">{option.text}</p>
+                          <p className="text-sm normal-case font-light opacity-70 tracking-normal">{option.description}</p>
+                        </div>
                       </div>
-                      <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
                     </button>
                   ))}
                 </div>
+              </main>
+              
 
-                <div className="mt-12 text-center">
-                  <p className="text-gray-300 text-sm">Use keys 1, 2, 3, 4, 5 to play</p>
-                </div>
-
-                <ReplayStatsDisplay />
-              </div>
             </div>
           </div>
         );
@@ -343,8 +329,11 @@ const ReplayStatsDisplay = () => {
 
   useState(() => {
     try {
-      const replays = JSON.parse(localStorage.getItem('rhythm_game_replays') || '[]');
-      if (replays.length > 0) {
+      // In a real app, this might come from a store or an API call.
+      const storedReplays = localStorage.getItem('rhythm-game-replays');
+      const replays = storedReplays ? JSON.parse(storedReplays).state.savedReplays : [];
+
+      if (replays && replays.length > 0) {
         const bestScore = Math.max(...replays.map((r: any) => r.metadata.finalScore));
         const bestAccuracy = Math.max(...replays.map((r: any) => r.metadata.accuracy));
         const totalPlayTime = replays.reduce((sum: number, r: any) => sum + r.duration, 0);
@@ -373,24 +362,24 @@ const ReplayStatsDisplay = () => {
   };
 
   return (
-    <div className="mt-8 p-6 bg-black bg-opacity-30 rounded-xl border border-gray-700 backdrop-blur-sm">
-      <h3 className="text-lg font-bold mb-4 text-center text-gray-300">📊 Your Stats</h3>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-        <div>
-          <div className="text-2xl font-bold text-blue-400">{replayStats.totalReplays}</div>
-          <div className="text-xs text-gray-400">Replays</div>
+    <div className="p-4 bg-black bg-opacity-60 rounded-lg border-2 border-purple-500 text-white w-64 backdrop-blur-sm">
+      <h3 className="text-base font-bold mb-3 text-center text-purple-300 tracking-widest border-b border-purple-800 pb-2">HALL OF FAME</h3>
+      <div className="space-y-2 text-xs">
+        <div className="flex justify-between items-baseline">
+          <span className="font-semibold text-gray-400">Total Replays</span>
+          <span className="font-bold text-lg text-purple-400">{replayStats.totalReplays}</span>
         </div>
-        <div>
-          <div className="text-2xl font-bold text-yellow-400">{replayStats.bestScore.toLocaleString()}</div>
-          <div className="text-xs text-gray-400">Best Score</div>
+        <div className="flex justify-between items-baseline">
+          <span className="font-semibold text-gray-400">Best Score</span>
+          <span className="font-bold text-lg text-yellow-400">{replayStats.bestScore.toLocaleString()}</span>
         </div>
-        <div>
-          <div className="text-2xl font-bold text-green-400">{replayStats.bestAccuracy.toFixed(1)}%</div>
-          <div className="text-xs text-gray-400">Best Accuracy</div>
+        <div className="flex justify-between items-baseline">
+          <span className="font-semibold text-gray-400">Top Accuracy</span>
+          <span className="font-bold text-lg text-green-400">{replayStats.bestAccuracy.toFixed(1)}%</span>
         </div>
-        <div>
-          <div className="text-2xl font-bold text-purple-400">{formatPlayTime(replayStats.totalPlayTime)}</div>
-          <div className="text-xs text-gray-400">Play Time</div>
+        <div className="flex justify-between items-baseline">
+          <span className="font-semibold text-gray-400">Total Playtime</span>
+          <span className="font-bold text-lg text-cyan-400">{formatPlayTime(replayStats.totalPlayTime)}</span>
         </div>
       </div>
     </div>

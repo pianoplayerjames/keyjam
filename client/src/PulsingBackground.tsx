@@ -150,7 +150,7 @@ const GradientMaterial = shaderMaterial(
         );
         
         // Add dynamic effects
-        float effect_intensity = u_intensity * (1.0 + combo_factor);
+        float effect_intensity = u_intensity * (1.0 + combo_factor * 0.5);
         
         // Energy waves
         float wave_effect = waves(uv, u_time) * effect_intensity;
@@ -172,7 +172,7 @@ const GradientMaterial = shaderMaterial(
         final_color += particle_effect * vec3(1.0, 1.0, 1.0);
         
         // Add some overall glow based on combo
-        final_color *= (1.0 + combo_factor * 0.5);
+        final_color *= (1.0 + combo_factor * 0.2);
         
         // Vignette effect
         float vignette = 1.0 - length(uv - 0.5) * 0.8;
@@ -197,16 +197,25 @@ const comboColors = [
 const GradientBackground = () => {
     const ref = useRef<THREE.ShaderMaterial>(null!)
     const combo = useGameStore((state) => state.combo)
+    const gameState = useGameStore((state) => state.gameState);
 
-    const colorIndex = Math.floor(combo / 10) % comboColors.length;
-    const { colorA, colorB, colorC } = comboColors[colorIndex];
+    const inMenu = gameState === 'menu';
+    
+    // Lighter blue color scheme for the menu
+    const menuColors = { colorA: '#B3E5FC', colorB: '#4FC3F7', colorC: '#03A9F4' };
 
-    const intensity = 1.0 + Math.min(combo / 20.0, 2.0);
+    // Determine colors and combo for the shader
+    const { colorA, colorB, colorC } = inMenu
+        ? menuColors
+        : comboColors[Math.floor(combo / 10) % comboColors.length];
+        
+    const shaderCombo = inMenu ? 25 : combo; // Use a fixed combo value in menu to show grid
+    const intensity = 0.8 + Math.min(shaderCombo / 30.0, 1.0);
 
     useFrame(({ clock }) => {
         if (ref.current) {
             ref.current.uniforms.u_time.value = clock.getElapsedTime()
-            ref.current.uniforms.u_combo.value = combo
+            ref.current.uniforms.u_combo.value = shaderCombo
             ref.current.uniforms.u_intensity.value = intensity
             
             // Smooth color transitions
