@@ -48,36 +48,34 @@ function App() {
   }
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden">
+    <div className="relative w-screen h-screen overflow-hidden" style={{ visibility: isPlayingReplay ? 'hidden' : 'visible' }}>
       {/* Conditionally render ReplayPlayer on top of everything */}
       {isPlayingReplay && <ReplayPlayer />}
 
-      <div style={{ display: isPlayingReplay ? 'none' : 'block' }}>
-        <Canvas 
-          camera={{ position: [0, 2.5, 5], fov: 75 }} 
-          className="absolute inset-0"
-        >
-          <Suspense fallback={<SimpleLoading />}>
-            <GradientBackground />
-            <FloatingShapes />
-            <ambientLight intensity={0.8} />
-            <directionalLight position={[10, 10, 5]} intensity={0.5} />
-            
-            {gameState === 'in-transition' && (
-              <Transition 
-                onTransitionComplete={handleTransitionComplete}
-                gameMode={gameConfig.mode}
-              />
-            )}
-          </Suspense>
-        </Canvas>
+      <Canvas
+        camera={{ position: [0, 2.5, 5], fov: 75 }}
+        className="absolute inset-0"
+      >
+        <Suspense fallback={<SimpleLoading />}>
+          <GradientBackground />
+          <FloatingShapes />
+          <ambientLight intensity={0.8} />
+          <directionalLight position={[10, 10, 5]} intensity={0.5} />
+          
+          {gameState === 'in-transition' && (
+            <Transition
+              onTransitionComplete={handleTransitionComplete}
+              gameMode={gameConfig.mode}
+            />
+          )}
+        </Suspense>
+      </Canvas>
 
-        {gameState === 'menu' && (
-          <MainMenu 
-            onStartGame={handleStartGame}
-          />
-        )}
-      </div>
+      {gameState === 'menu' && (
+        <MainMenu
+          onStartGame={handleStartGame}
+        />
+      )}
     </div>
   );
 }
