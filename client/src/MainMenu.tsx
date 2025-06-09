@@ -104,23 +104,23 @@ const MainMenu = () => {
   const tabs = [
     { 
       id: 'career' as const, 
-      label: 'Career', 
+      label: 'Solo Career', 
       icon: '🚀', 
       color: 'from-pink-500 to-purple-600',
-      description: 'Progress through difficulty ranks'
+      description: 'From Rookie To Grandmaster'
     },
     { 
       id: 'arcade' as const, 
-      label: 'Arcade', 
+      label: 'Arcade Mode', 
       icon: '🎵', 
       color: 'from-teal-500 to-cyan-600',
       description: 'Select your own songs'
     },
     { 
       id: 'online' as const, 
-      label: 'Online', 
-      icon: '🌐', 
-      color: 'from-green-500 to-emerald-600',
+      label: 'Online Multiplayer', 
+      icon: '🌎', 
+      color: 'bg-white',
       description: 'Play with others worldwide'
     },
     { 
@@ -128,14 +128,14 @@ const MainMenu = () => {
       label: 'Training', 
       icon: '🎯', 
       color: 'from-blue-500 to-cyan-600',
-      description: 'Improve at your own pace'
+      description: 'Tutorials & Skill Games'
     },
     { 
       id: 'replays' as const, 
       label: 'Replays', 
       icon: '🎬', 
       color: 'from-orange-500 to-red-600',
-      description: 'Watch saved replays'
+      description: 'Study Your Mistakes'
     },
     { 
       id: 'settings' as const, 
@@ -197,8 +197,8 @@ const MainMenu = () => {
       <div className="relative z-10 flex flex-col h-screen">
         
         {/* Enhanced Top Bar */}
-        <div className="flex-shrink-0 bg-gradient-to-r from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl border-b border-white/10 shadow-2xl">
-          <div className="px-6 py-4">
+        <div className="flex-shrink-0 bg-slate-800/50 py-1 border-white/10 shadow-2xl">
+          <div className="px-6 py-0">
             <div className="flex items-center justify-between">
               
               {/* Left Section - Logo & Branding */}
@@ -213,58 +213,40 @@ const MainMenu = () => {
                     <div className="absolute -inset-1 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full opacity-0 group-hover:opacity-20 blur-md transition-opacity duration-300"></div>
                   </div>
                   <div>
-                    <div className="text-white font-bold text-xl bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
+                    <div className="font-bold text-xl bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
                       KeyJam
                     </div>
-                    <div className="text-xs text-gray-400 font-medium">Online Portal</div>
+                    <div className="text-xs text-gray-400">V11.8.2 / Season 1</div>
                   </div>
                 </div>
 
                 {/* Live Stats with Animations */}
                 <div className="hidden xl:flex items-center gap-4 ml-8">
-                  <div className="flex items-center gap-2 px-3 py-2 bg-green-500/10 rounded-lg border border-green-500/20">
+                  <div className="flex items-center gap-2 px-3 py-2">
                     <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
                     <span className="text-green-400 text-sm font-semibold">1,247</span>
-                    <span className="text-gray-400 text-xs">Online</span>
+                    <span className="text-gray-400 text-xs">Online Now</span>
                   </div>
                   
-                  <div className="flex items-center gap-2 px-3 py-2 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                  <div className="flex items-center gap-2 px-3 py-1">
                     <span className="text-blue-400 text-lg">🎮</span>
-                    <span className="text-blue-400 text-sm font-semibold">89</span>
+                    <span className="text-blue-400 text-sm font-semibold">34,636</span>
                     <span className="text-gray-400 text-xs">Active Games</span>
                   </div>
                   
-                  <div className="flex items-center gap-2 px-3 py-2 bg-purple-500/10 rounded-lg border border-purple-500/20">
-                    <span className="text-purple-400 text-lg">🏟️</span>
+                  <div className="flex items-center gap-2 px-3 py-1">
+                    <span className="text-purple-400 text-lg">🏆</span>
                     <span className="text-purple-400 text-sm font-semibold">23</span>
-                    <span className="text-gray-400 text-xs">Arenas</span>
+                    <span className="text-gray-400 text-xs">Live Arenas</span>
                   </div>
                 </div>
-              </div>
-
-              {/* Center Section - Quick Actions */}
-              <div className="hidden lg:flex items-center gap-3">
-                <button className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-lg text-white font-semibold text-sm transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-green-500/25">
-                  <span className="mr-2">⚡</span>
-                  Quick Match
-                </button>
-                
-                <button className="px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 rounded-lg text-white font-semibold text-sm transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-blue-500/25">
-                  <span className="mr-2">🏆</span>
-                  Tournaments
-                </button>
-
-                <button className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 rounded-lg text-white font-semibold text-sm transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-purple-500/25">
-                  <span className="mr-2">👥</span>
-                  Create Party
-                </button>
               </div>
 
               {/* Right Section - User Profile & Status */}
               <div className="flex items-center gap-4">
                 
                 {/* Performance Stats */}
-                <div className="hidden md:flex items-center gap-4 bg-white/5 rounded-xl px-4 py-2 border border-white/10 backdrop-blur-sm">
+                <div className="hidden md:flex items-center gap-4 px-4 py-1 rounded bg-slate-900 border border-black/50 shadow-sm backdrop-blur-sm">
                   <div className="text-center">
                     <div className="text-sm font-bold text-green-400">{calculateWinRate()}%</div>
                     <div className="text-xs text-gray-400">Win Rate</div>
@@ -276,7 +258,7 @@ const MainMenu = () => {
                   </div>
                   <div className="w-px h-8 bg-white/20"></div>
                   <div className="text-center">
-                    <div className="text-sm font-bold text-purple-400">Lv.{playerData.level}</div>
+                    <div className="text-sm font-bold text-purple-400">{playerData.level}</div>
                     <div className="text-xs text-gray-400">Level</div>
                   </div>
                   {playerStats && (
@@ -304,7 +286,7 @@ const MainMenu = () => {
                 </button>
 
                 {/* User Profile Card */}
-                <div className="flex items-center gap-3 bg-gradient-to-r from-white/5 to-white/10 rounded-xl px-4 py-2 border border-white/20 backdrop-blur-sm hover:from-white/10 hover:to-white/15 transition-all duration-300 cursor-pointer group">
+                <div className="flex items-center gap-3 px-2 py-1 backdrop-blur-sm hover:from-white/10 hover:to-white/15 transition-all duration-300 cursor-pointer group">
                   <div className="relative">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg group-hover:scale-110 transition-transform duration-200">
                       👤
@@ -355,7 +337,7 @@ const MainMenu = () => {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex-shrink-0 border-b border-white border-opacity-10">
+        <div className="flex-shrink-0 border-b border-black bg-slate-500/70 border-opacity-10">
           <div className="px-8">
             <div className="flex overflow-x-auto">
               {tabs.map((tab) => (

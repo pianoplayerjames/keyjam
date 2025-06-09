@@ -23,6 +23,24 @@ interface ArenaTimetableViewProps {
   height: number;
 }
 
+const getArenaIcon = (type: Arena['type']): string => {
+  const iconMap = {
+    'tournament': '🏆',
+    'ranked': '🎯',
+    'casual': '🎮',
+    'speed': '⚡',
+    'party': '🎉',
+    'battle-royale': '👑',
+    'team-battle': '⚔️',
+    'practice': '📚',
+    'blitz': '💨',
+    'championship': '🥇',
+    'seasonal': '🌟',
+    'custom': '🎨'
+  };
+  return iconMap[type] || '🎮';
+};
+
 export const ArenaTimetableView: React.FC<ArenaTimetableViewProps> = ({ 
   upcomingArenas, 
   onJoinArena, 
@@ -42,7 +60,6 @@ export const ArenaTimetableView: React.FC<ArenaTimetableViewProps> = ({
   const hourWidth = 400;
   const timelineTotalWidth = timelineHours * hourWidth;
 
-  // Update current time every minute
   useEffect(() => {
     const updateTime = () => setCurrentTime(new Date());
     updateTime();
@@ -50,7 +67,6 @@ export const ArenaTimetableView: React.FC<ArenaTimetableViewProps> = ({
     return () => clearInterval(interval);
   }, []);
 
-  // Initial centering on current time
   useEffect(() => {
     if (viewportRef.current) {
       const viewportCenter = viewportRef.current.clientWidth / 2;
@@ -107,7 +123,6 @@ export const ArenaTimetableView: React.FC<ArenaTimetableViewProps> = ({
     setIsDragging(false);
   };
 
-  // Global mouse event handlers for dragging
   useEffect(() => {
     if (isDragging) {
       const handleGlobalMouseMove = (e: MouseEvent) => {
@@ -163,7 +178,6 @@ export const ArenaTimetableView: React.FC<ArenaTimetableViewProps> = ({
         width: `${timelineTotalWidth}px`, 
         transform: `translate(${offset.x}px, ${offset.y}px)` 
       }}>
-        {/* Sticky Header */}
         <div style={{ 
           position: 'sticky', 
           top: 0, 
@@ -190,7 +204,6 @@ export const ArenaTimetableView: React.FC<ArenaTimetableViewProps> = ({
             ))}
           </div>
           
-          {/* Current Time Indicator */}
           <div style={{ 
             position: 'absolute', 
             left: `${currentTimePosition}px`, 
@@ -203,7 +216,6 @@ export const ArenaTimetableView: React.FC<ArenaTimetableViewProps> = ({
             boxShadow: '0 0 10px #ff1493, 0 0 20px #ff1493'
           }} />
           
-          {/* Current Time Label */}
           <div style={{
             position: 'absolute',
             left: `${currentTimePosition}px`,
@@ -229,7 +241,6 @@ export const ArenaTimetableView: React.FC<ArenaTimetableViewProps> = ({
         </div>
         
         <div style={{ position: 'relative', height: `${contentTotalHeight - 45}px` }}>
-          {/* Minute Lines */}
           {Array.from({ length: timelineHours * 2 }).map((_, i) => (
             <div 
               key={`line-${i}`} 
@@ -243,7 +254,6 @@ export const ArenaTimetableView: React.FC<ArenaTimetableViewProps> = ({
             />
           ))}
           
-          {/* Extended Current Time Indicator Line */}
           <div style={{ 
             position: 'absolute', 
             left: `${currentTimePosition}px`, 
@@ -257,83 +267,121 @@ export const ArenaTimetableView: React.FC<ArenaTimetableViewProps> = ({
             opacity: 0.7
           }} />
           
-          {/* Arenas */}
-{laidOutArenas.map(arena => {
-  const startOffsetMinutes = (arena.startTime.getTime() - timelineStart.getTime()) / 60000;
-  const leftPx = startOffsetMinutes * (hourWidth / 60);
-  const widthPx = arena.duration * (hourWidth / 60) - 4;
-  const bgColor = arena.status === 'finished' ? '#424242' : getArenaTypeColor(arena.type);
-  
-  return (
-    <div 
-      key={arena.id} 
-      onClick={(e) => {
-        e.stopPropagation();
-        // Use onViewArena if available, otherwise fallback to onJoinArena
-        if (onViewArena) {
-          onViewArena(arena);
-        } else {
-          onJoinArena(arena.id);
-        }
-      }} 
-      title={arena.name} 
-      style={{ 
-        position: 'absolute', 
-        top: `${arena.lane * laneHeight + 5}px`, 
-        left: `${leftPx}px`, 
-        width: `${widthPx}px`, 
-        height: '50px', 
-        background: bgColor, 
-        borderRadius: '5px', 
-        padding: '8px', 
-        color: 'white', 
-        cursor: 'pointer', 
-        zIndex: 1,
-        pointerEvents: 'auto',
-        transition: 'transform 0.2s ease, box-shadow 0.2s ease'
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'scale(1.02)';
-        e.currentTarget.style.boxShadow = `0 4px 15px ${bgColor}44`;
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = 'scale(1)';
-        e.currentTarget.style.boxShadow = 'none';
-      }}
-    >
+          {laidOutArenas.map(arena => {
+            const startOffsetMinutes = (arena.startTime.getTime() - timelineStart.getTime()) / 60000;
+            const leftPx = startOffsetMinutes * (hourWidth / 60);
+            const widthPx = arena.duration * (hourWidth / 60) - 4;
+            const bgColor = arena.status === 'finished' ? '#424242' : getArenaTypeColor(arena.type);
+            
+            return (
+              <div 
+                key={arena.id} 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onViewArena) {
+                    onViewArena(arena);
+                  } else {
+                    onJoinArena(arena.id);
+                  }
+                }} 
+                title={arena.name} 
+                style={{ 
+                  position: 'absolute', 
+                  top: `${arena.lane * laneHeight + 5}px`, 
+                  left: `${leftPx}px`, 
+                  width: `${widthPx}px`, 
+                  height: '50px', 
+                  background: bgColor, 
+                  borderRadius: '8px', 
+                  padding: '6px', 
+                  color: 'white', 
+                  cursor: 'pointer', 
+                  zIndex: 1,
+                  pointerEvents: 'auto',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                  overflow: 'hidden'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.02)';
+                  e.currentTarget.style.boxShadow = `0 4px 15px ${bgColor}44`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              >
                 <div style={{ 
                   fontWeight: 'bold', 
                   whiteSpace: 'nowrap', 
                   textOverflow: 'ellipsis', 
                   overflow: 'hidden',
-                  fontSize: '12px',
-                  marginBottom: '2px'
-                }}>
-                  {arena.name}
-                </div>
-                <div style={{
-                  fontSize: '10px',
+                  fontSize: '11px',
+                  marginBottom: '2px',
                   display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
+                  alignItems: 'center',
+                  gap: '4px'
                 }}>
-                  <span>{arena.players}/{arena.maxPlayers}</span>
-                  {arena.prizePool && (
-                    <span style={{ color: '#ffd700' }}>
-                      💰${(arena.prizePool / 1000).toFixed(0)}k
-                    </span>
-                  )}
+                  <span style={{ fontSize: '12px', flexShrink: 0 }}>{getArenaIcon(arena.type)}</span>
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{arena.name}</span>
                 </div>
+                
                 <div style={{
                   fontSize: '9px',
-                  opacity: 0.8,
-                  marginTop: '1px'
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '2px',
+                  gap: '4px'
                 }}>
-                  {arena.startTime.toLocaleTimeString('en-US', { 
-                    hour: '2-digit', 
-                    minute: '2-digit',
-                    hour12: false
-                  })}
+                  <div style={{
+                    background: 'rgba(0, 0, 0, 0.1)',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '2px'
+                  }}>
+                    <span>👥</span>
+                    <span>{arena.players}/{arena.maxPlayers}</span>
+                  </div>
+                  
+                  {arena.prizePool && (
+                    <div style={{
+                      background: 'rgba(255, 215, 0, 0.2)',
+                      padding: '2px 6px',
+                      borderRadius: '4px',
+                      color: '#ffd700',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '2px'
+                    }}>
+                      <span>💰</span>
+                      <span>${(arena.prizePool / 1000).toFixed(0)}k</span>
+                    </div>
+                  )}
+                </div>
+                
+                <div style={{
+                  position: 'absolute',
+                  bottom: '6px',
+                  right: '6px',
+                  background: 'rgba(0, 0, 0, 0.1)',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  fontSize: '9px',
+                  color: '#ccc',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '2px'
+                }}>
+                  <span>🕐</span>
+                  <span>
+                    {arena.startTime.toLocaleTimeString('en-US', { 
+                      hour: '2-digit', 
+                      minute: '2-digit',
+                      hour12: false
+                    })}
+                  </span>
                 </div>
               </div>
             );
@@ -400,7 +448,6 @@ export const ResizableTimetable: React.FC<ResizableTimetableProps> = ({
         height={timetableHeight}
       />
       
-      {/* Resize Handle */}
       <div 
         ref={resizeRef}
         onMouseDown={handleMouseDown}
@@ -431,7 +478,6 @@ export const ResizableTimetable: React.FC<ResizableTimetableProps> = ({
           }
         }}
       >
-        {/* Resize Indicator */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -444,7 +490,6 @@ export const ResizableTimetable: React.FC<ResizableTimetableProps> = ({
           opacity: isResizing ? 1 : 0.7,
           pointerEvents: 'none'
         }}>
-          {/* Drag Icon */}
           <div style={{
             display: 'flex',
             flexDirection: 'column',
@@ -461,7 +506,6 @@ export const ResizableTimetable: React.FC<ResizableTimetableProps> = ({
             ))}
           </div>
           
-          {/* Height Display */}
           <span style={{
             fontSize: '11px',
             color: '#fff',
@@ -472,7 +516,6 @@ export const ResizableTimetable: React.FC<ResizableTimetableProps> = ({
             {timetableHeight}px
           </span>
           
-          {/* Progress Bar */}
           <div style={{
             width: '60px',
             height: '4px',
@@ -489,7 +532,6 @@ export const ResizableTimetable: React.FC<ResizableTimetableProps> = ({
             }} />
           </div>
           
-          {/* Size Labels */}
           <div style={{
             fontSize: '9px',
             color: '#aaa',
