@@ -72,7 +72,7 @@ export const TopBar: React.FC<TopBarProps> = ({ playerData, playerStats }) => {
               <div className="hidden xl:flex items-center gap-4 ml-8">
                 <div className="flex items-center gap-2 px-3 py-2">
                   <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
-                  <span className="text-green-400 text-sm font-semibold">1,247</span>
+                  <span className="text-green-400 text-sm font-semibold">182,247</span>
                   <span className="text-gray-400 text-xs">Online Now</span>
                 </div>
                 
@@ -84,7 +84,7 @@ export const TopBar: React.FC<TopBarProps> = ({ playerData, playerStats }) => {
                 
                 <div className="flex items-center gap-2 px-3 py-1">
                   <span className="text-purple-400 text-lg">🏆</span>
-                  <span className="text-purple-400 text-sm font-semibold">23</span>
+                  <span className="text-purple-400 text-sm font-semibold">243</span>
                   <span className="text-gray-400 text-xs">Live Arenas</span>
                 </div>
               </div>
@@ -148,11 +148,6 @@ export const TopBar: React.FC<TopBarProps> = ({ playerData, playerStats }) => {
                     <span className="text-gray-400 text-xs">•</span>
                     <span className="text-cyan-400 text-xs font-semibold">{playerData.elo} ELO</span>
                   </div>
-                </div>
-                <div className="text-gray-400 group-hover:text-white transition-colors duration-200">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
                 </div>
               </div>
             </div>

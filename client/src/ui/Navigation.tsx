@@ -49,13 +49,6 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
       icon: '🎬', 
       color: 'bg-gradient-to-r from-orange-500 to-red-600',
       description: 'Study Your Mistakes'
-    },
-    { 
-      id: 'settings', 
-      label: 'Settings', 
-      icon: '⚙️', 
-      color: 'bg-gradient-to-r from-gray-600 to-slate-700',
-      description: 'Game settings'
     }
   ];
 

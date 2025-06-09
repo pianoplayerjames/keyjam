@@ -1,6 +1,4 @@
-import React from 'react';
 
-// Mock friend data for demonstration
 const friends = [
   { id: 1, name: 'RhythmGod', avatar: '🤖', status: 'online' },
   { id: 2, name: 'BeatMaster', avatar: '🧑', status: 'online' },
@@ -9,6 +7,11 @@ const friends = [
   { id: 5, name: 'NoteNinja', avatar: '🦊', status: 'online' },
   { id: 6, name: 'MelodyMaster', avatar: '🐙', status: 'in-game' },
   { id: 7, name: 'TimingPro', avatar: '🦖', status: 'online' },
+{ id: 8, name: 'RhythmGod', avatar: '🤖', status: 'online' },
+  { id: 9, name: 'BeatMaster', avatar: '🧑', status: 'online' },
+  { id: 10, name: 'ComboKing', avatar: '🦄', status: 'away' },
+  { id: 11, name: 'SoundWave', avatar: '🐼', status: 'offline' },
+  { id: 12, name: 'NoteNinja', avatar: '🦊', status: 'online' }
 ];
 
 const getStatusColor = (status: 'online' | 'away' | 'in-game' | 'offline') => {
