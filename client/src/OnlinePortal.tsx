@@ -156,12 +156,12 @@ const OnlinePortal: React.FC<OnlinePortalProps> = ({ onBack, onStartGame }) => {
        const startTime = new Date(now.getTime() + i * 10 * 60 * 1000);
        
        const arenaNames = { 
-         tournament: ['World Championship', 'Masters Cup', 'Elite Tournament', 'Pro League'],
+         tournament: ['World Championship Qualifiers', 'Masters Cup', 'Elite Tournament', 'Pro League'],
          ranked: ['Ranked Climb', 'ELO Battle', 'Competitive Match', 'Ladder Challenge'], 
          casual: ['Fun Mode', 'Practice Arena', 'Chill Session', 'Social Play'],
          speed: ['Bullet Mayhem', 'Lightning Round', 'Quick Fire', 'Speed Demon'],
-         party: ['Team Battle', 'Group Play', 'Squad Match', 'Friends Only'],
-         'battle-royale': ['Last Player Standing', 'Survival Arena', 'BR Championship', 'Ultimate Showdown'],
+         party: ['Team Battle', 'Group Play', 'Squad Match'],
+         'battle-royale': ['Last Player Standing', 'Survival Arena', 'Battle Royale Championship', 'Ultimate Showdown'],
          'team-battle': ['5v5 Showdown', 'Team Championship', 'Squad Wars', 'Alliance Battle'],
          practice: ['Training Ground', 'Skill Builder', 'Warm-up Arena', 'Drill Session'],
          blitz: ['Blitz Battle', 'Quick Match', 'Fast Track', 'Rapid Fire'],
@@ -171,14 +171,14 @@ const OnlinePortal: React.FC<OnlinePortalProps> = ({ onBack, onStartGame }) => {
        };
        
        const durations = {
-         tournament: 120, ranked: 45, casual: 30, speed: 15, party: 60,
-         'battle-royale': 90, 'team-battle': 75, practice: 20, blitz: 10,
+         tournament: 120, ranked: 45, casual: 30, speed: 25, party: 60,
+         'battle-royale': 90, 'team-battle': 75, practice: 20, blitz: 25,
          championship: 150, seasonal: 100, custom: 40
        };
        
        const maxPlayers = {
-         tournament: 64, ranked: 8, casual: 12, speed: 16, party: 6,
-         'battle-royale': 100, 'team-battle': 10, practice: 20, blitz: 8,
+         tournament: 25000, ranked: 2500, casual: 2500, speed: 2500, party: 100,
+         'battle-royale': 100, 'team-battle': 100, practice: 2500, blitz: 2500,
          championship: 32, seasonal: 50, custom: 24
        };
        
