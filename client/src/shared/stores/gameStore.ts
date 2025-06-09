@@ -148,100 +148,95 @@ interface GameState {
   version: number;
 }
 
-// Update the initialCareerState in client/src/shared/stores/gameStore.ts
-
 const initialCareerState: CareerState = {
-  currentRank: 'Rookie',
-  currentRankIcon: '🎓',
-  nextRank: 'Amateur',
+  currentRank: 'Nobody',
+  currentRankIcon: '🎯',
+  nextRank: 'Street Performer',
   progressToNextRank: 0,
   overallCompletion: 0,
   chapters: [
     {
-      name: 'Tutorial',
+      name: 'First Steps',
       unlocked: true,
       completion: 0,
       levels: [
-        { name: 'First Press', rank: null, unlocked: true, difficulty: 1, timeLimit: -1, scoreTarget: 100, lanes: 1, tutorial: { type: 'waitForInput' } },
-        { name: 'Basic Timing', rank: null, unlocked: false, difficulty: 3, timeLimit: 120, scoreTarget: 500, lanes: 2, tutorial: { type: 'standard' } },
-        { name: 'Hit the Beat', rank: null, unlocked: false, difficulty: 5, timeLimit: 90, scoreTarget: 750, lanes: 3, tutorial: { type: 'standard' } },
+        { name: 'Your First Note', rank: null, unlocked: true, difficulty: 1, timeLimit: -1, scoreTarget: 100, lanes: 1, tutorial: { type: 'waitForInput' } },
+        { name: 'Finding the Beat', rank: null, unlocked: false, difficulty: 3, timeLimit: 60, scoreTarget: 300, lanes: 2, tutorial: { type: 'standard' } },
+        { name: 'Two Fingers Dancing', rank: null, unlocked: false, difficulty: 5, timeLimit: 90, scoreTarget: 500, lanes: 2 },
+        { name: 'Rhythm Basics', rank: null, unlocked: false, difficulty: 8, timeLimit: 120, scoreTarget: 750, lanes: 3 },
+        { name: 'Three Lane Challenge', rank: null, unlocked: false, difficulty: 12, timeLimit: 120, scoreTarget: 1000, lanes: 3 },
+        { name: 'Your First Crowd', rank: null, unlocked: false, difficulty: 15, timeLimit: 150, scoreTarget: 1500, lanes: 4 },
+        { name: 'Street Corner Solo', rank: null, unlocked: false, difficulty: 18, timeLimit: 180, scoreTarget: 2000, lanes: 4 },
+        { name: 'FINAL TEST: Street Battle', rank: null, unlocked: false, difficulty: 22, timeLimit: 240, scoreTarget: 3000, lanes: 4, isChapterFinal: true }
       ]
     },
     { 
-      name: 'The Beginning', 
+      name: 'Underground Scene', 
       unlocked: false, 
       completion: 0, 
       levels: [
-        { name: 'First Steps', rank: null, unlocked: false, difficulty: 8, timeLimit: 90, scoreTarget: 1000, lanes: 4 },
-        { name: 'Rhythm Basics', rank: null, unlocked: false, difficulty: 12, timeLimit: 120, scoreTarget: 1500, lanes: 4 },
-        { name: 'Simple Patterns', rank: null, unlocked: false, difficulty: 16, timeLimit: 120, scoreTarget: 2000, lanes: 5 },
-        { name: 'Getting Comfortable', rank: null, unlocked: false, difficulty: 20, timeLimit: 150, scoreTarget: 2500, lanes: 5 },
+        { name: 'Open Mic Night', rank: null, unlocked: false, difficulty: 25, timeLimit: 180, scoreTarget: 3500, lanes: 4 },
+        { name: 'Coffee Shop Regular', rank: null, unlocked: false, difficulty: 28, timeLimit: 180, scoreTarget: 4000, lanes: 4 },
+        { name: 'Battle of the Bands', rank: null, unlocked: false, difficulty: 32, timeLimit: 200, scoreTarget: 5000, lanes: 5 },
+        { name: 'Local Venue Star', rank: null, unlocked: false, difficulty: 35, timeLimit: 220, scoreTarget: 6000, lanes: 5 },
+        { name: 'Club Circuit', rank: null, unlocked: false, difficulty: 38, timeLimit: 240, scoreTarget: 7500, lanes: 5 },
+        { name: 'Music Festival Rookie', rank: null, unlocked: false, difficulty: 42, timeLimit: 260, scoreTarget: 9000, lanes: 5 },
+        { name: 'Underground Legend', rank: null, unlocked: false, difficulty: 45, timeLimit: 280, scoreTarget: 11000, lanes: 5 },
+        { name: 'FINAL TEST: Record Label Scout', rank: null, unlocked: false, difficulty: 50, timeLimit: 300, scoreTarget: 15000, lanes: 6, isChapterFinal: true }
       ]
     },
     { 
-      name: 'Ascension', 
+      name: 'Rising Star', 
       unlocked: false, 
       completion: 0, 
       levels: [
-        { name: 'Chord Training', rank: null, unlocked: false, difficulty: 25, timeLimit: 150, scoreTarget: 3000, lanes: 5 },
-        { name: 'Off-beat Hits', rank: null, unlocked: false, difficulty: 30, timeLimit: 150, scoreTarget: 4000, lanes: 5 },
-        { name: 'Pattern Recognition', rank: null, unlocked: false, difficulty: 35, timeLimit: 180, scoreTarget: 5000, lanes: 5 },
-        { name: 'Next Level', rank: null, unlocked: false, difficulty: 40, timeLimit: 180, scoreTarget: 6000, lanes: 6 },
+        { name: 'First Record Deal', rank: null, unlocked: false, difficulty: 53, timeLimit: 250, scoreTarget: 18000, lanes: 6 },
+        { name: 'Studio Sessions', rank: null, unlocked: false, difficulty: 56, timeLimit: 270, scoreTarget: 20000, lanes: 6 },
+        { name: 'Radio Play Debut', rank: null, unlocked: false, difficulty: 60, timeLimit: 290, scoreTarget: 25000, lanes: 6 },
+        { name: 'Music Video Star', rank: null, unlocked: false, difficulty: 63, timeLimit: 310, scoreTarget: 30000, lanes: 6 },
+        { name: 'Talk Show Performance', rank: null, unlocked: false, difficulty: 66, timeLimit: 330, scoreTarget: 35000, lanes: 7 },
+        { name: 'Award Show Nominee', rank: null, unlocked: false, difficulty: 69, timeLimit: 350, scoreTarget: 40000, lanes: 7 },
+        { name: 'Chart Climbing', rank: null, unlocked: false, difficulty: 72, timeLimit: 370, scoreTarget: 45000, lanes: 7 },
+        { name: 'Fan Following Growing', rank: null, unlocked: false, difficulty: 75, timeLimit: 390, scoreTarget: 50000, lanes: 7 },
+        { name: 'FINAL TEST: Major Label Showcase', rank: null, unlocked: false, difficulty: 78, timeLimit: 420, scoreTarget: 60000, lanes: 8, isChapterFinal: true }
       ] 
     },
     {
-      name: 'Mastery',
+      name: 'National Fame',
       unlocked: false,
       completion: 0,
       levels: [
-        { name: 'Complex Rhythms', rank: null, unlocked: false, difficulty: 45, timeLimit: 200, scoreTarget: 8000, lanes: 6 },
-        { name: 'Multi-Lane Madness', rank: null, unlocked: false, difficulty: 50, timeLimit: 200, scoreTarget: 10000, lanes: 7 },
-        { name: 'Precision Required', rank: null, unlocked: false, difficulty: 55, timeLimit: 220, scoreTarget: 12000, lanes: 7 },
-        { name: 'Advanced Techniques', rank: null, unlocked: false, difficulty: 60, timeLimit: 240, scoreTarget: 15000, lanes: 8 },
+        { name: 'Chart Topper', rank: null, unlocked: false, difficulty: 80, timeLimit: 350, scoreTarget: 70000, lanes: 8 },
+        { name: 'Stadium Concerts', rank: null, unlocked: false, difficulty: 82, timeLimit: 380, scoreTarget: 80000, lanes: 8 },
+        { name: 'Platinum Album', rank: null, unlocked: false, difficulty: 84, timeLimit: 400, scoreTarget: 90000, lanes: 8 },
+        { name: 'Celebrity Collaborations', rank: null, unlocked: false, difficulty: 86, timeLimit: 420, scoreTarget: 100000, lanes: 8 },
+        { name: 'Magazine Cover Star', rank: null, unlocked: false, difficulty: 88, timeLimit: 440, scoreTarget: 110000, lanes: 8 },
+        { name: 'Prime Time Special', rank: null, unlocked: false, difficulty: 90, timeLimit: 460, scoreTarget: 120000, lanes: 8 },
+        { name: 'FINAL TEST: Arena World Tour', rank: null, unlocked: false, difficulty: 92, timeLimit: 500, scoreTarget: 150000, lanes: 8, isChapterFinal: true }
       ]
     },
     {
-      name: 'Lightning Speed',
+      name: 'Global Superstar',
       unlocked: false,
       completion: 0,
       levels: [
-        { name: 'Speed Demon', rank: null, unlocked: false, difficulty: 65, timeLimit: 180, scoreTarget: 18000, lanes: 8 },
-        { name: 'Rapid Fire', rank: null, unlocked: false, difficulty: 70, timeLimit: 200, scoreTarget: 22000, lanes: 8 },
-        { name: 'Blur of Notes', rank: null, unlocked: false, difficulty: 75, timeLimit: 220, scoreTarget: 25000, lanes: 8 },
-        { name: 'Supersonic', rank: null, unlocked: false, difficulty: 80, timeLimit: 240, scoreTarget: 30000, lanes: 8 },
+        { name: 'International Breakthrough', rank: null, unlocked: false, difficulty: 93, timeLimit: 400, scoreTarget: 170000, lanes: 8 },
+        { name: 'Global Chart Domination', rank: null, unlocked: false, difficulty: 94, timeLimit: 430, scoreTarget: 190000, lanes: 8 },
+        { name: 'Olympic Opening Ceremony', rank: null, unlocked: false, difficulty: 95, timeLimit: 450, scoreTarget: 210000, lanes: 8 },
+        { name: 'Grammy Performer', rank: null, unlocked: false, difficulty: 96, timeLimit: 470, scoreTarget: 230000, lanes: 8 },
+        { name: 'Royal Command Performance', rank: null, unlocked: false, difficulty: 97, timeLimit: 490, scoreTarget: 250000, lanes: 8 },
+        { name: 'FINAL TEST: Hall of Fame Induction', rank: null, unlocked: false, difficulty: 98, timeLimit: 520, scoreTarget: 300000, lanes: 8, isChapterFinal: true }
       ]
     },
     {
-      name: 'Conquest',
+      name: 'Living Legend',
       unlocked: false,
       completion: 0,
       levels: [
-        { name: 'Unforgiving', rank: null, unlocked: false, difficulty: 82, timeLimit: 200, scoreTarget: 35000, lanes: 8 },
-        { name: 'Merciless', rank: null, unlocked: false, difficulty: 84, timeLimit: 220, scoreTarget: 40000, lanes: 8 },
-        { name: 'Ruthless', rank: null, unlocked: false, difficulty: 86, timeLimit: 240, scoreTarget: 45000, lanes: 8 },
-        { name: 'Domination', rank: null, unlocked: false, difficulty: 88, timeLimit: 300, scoreTarget: 50000, lanes: 8 },
-      ]
-    },
-    {
-      name: 'Transcendence', 
-      unlocked: false,
-      completion: 0,
-      levels: [
-        { name: 'Beyond Human', rank: null, unlocked: false, difficulty: 90, timeLimit: 250, scoreTarget: 60000, lanes: 8 },
-        { name: 'Perfect Machine', rank: null, unlocked: false, difficulty: 92, timeLimit: 280, scoreTarget: 70000, lanes: 8 },
-        { name: 'Rhythm God', rank: null, unlocked: false, difficulty: 94, timeLimit: 300, scoreTarget: 80000, lanes: 8 },
-        { name: 'Immortal Legend', rank: null, unlocked: false, difficulty: 96, timeLimit: 350, scoreTarget: 100000, lanes: 8 },
-      ]
-    },
-    {
-      name: 'Infinity',
-      unlocked: false,
-      completion: 0,
-      levels: [
-        { name: 'Frame Perfect', rank: null, unlocked: false, difficulty: 97, timeLimit: 300, scoreTarget: 120000, lanes: 8 },
-        { name: 'Impossibility', rank: null, unlocked: false, difficulty: 98, timeLimit: 350, scoreTarget: 150000, lanes: 8 },
-        { name: 'The Final Test', rank: null, unlocked: false, difficulty: 99, timeLimit: 400, scoreTarget: 200000, lanes: 8 },
-        { name: 'Eternal Rhythm', rank: null, unlocked: false, difficulty: 100, timeLimit: 500, scoreTarget: 500000, lanes: 8 },
+        { name: 'Cultural Icon Status', rank: null, unlocked: false, difficulty: 99, timeLimit: 450, scoreTarget: 350000, lanes: 8 },
+        { name: 'Lifetime Achievement', rank: null, unlocked: false, difficulty: 99, timeLimit: 480, scoreTarget: 400000, lanes: 8 },
+        { name: 'Master Class Teacher', rank: null, unlocked: false, difficulty: 100, timeLimit: 500, scoreTarget: 450000, lanes: 8 },
+        { name: 'FINAL TEST: Immortal Legacy', rank: null, unlocked: false, difficulty: 100, timeLimit: 600, scoreTarget: 500000, lanes: 8, isChapterFinal: true }
       ]
     }
   ]
