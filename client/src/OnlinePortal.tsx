@@ -13,12 +13,26 @@ interface OnlinePortalProps {
 }
 type PortalSection = 'main' | 'arenas' | 'leaderboards' | 'friends' | 'profile' | 'party';
 interface PlayerData { id: string; username: string; rank: string; elo: number; wins: number; losses: number; draws: number; level: number; avatar: string; status: 'online' | 'away' | 'in-game' | 'offline'; lastPlayed: Date; }
-interface Arena { id: string; name: string; type: 'tournament' | 'ranked' | 'casual' | 'speed' | 'party'; startTime: Date; duration: number; players: number; maxPlayers: number; difficulty: number; prizePool?: number; status: 'waiting' | 'starting' | 'live' | 'finished'; timeControl: string; host: string; }
+interface Arena { 
+  id: string; 
+  name: string; 
+  type: 'tournament' | 'ranked' | 'casual' | 'speed' | 'party' | 'battle-royale' | 'team-battle' | 'practice' | 'blitz' | 'championship' | 'seasonal' | 'custom'; 
+  startTime: Date; 
+  duration: number; 
+  players: number; 
+  maxPlayers: number; 
+  difficulty: number; 
+  prizePool?: number; 
+  status: 'waiting' | 'starting' | 'live' | 'finished'; 
+  timeControl: string; 
+  host: string; 
+}
 interface Friend { id: string; username: string; status: 'online' | 'away' | 'in-game' | 'offline'; elo: number; rank: string; currentGame?: string; avatar: string; }
 
-
-const ArenaTimetableView: React.FC<any> = ({ upcomingArenas, onJoinArena, getArenaTypeColor }) => {
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
+const ArenaTimetableView: React.FC<any> = ({ upcomingArenas, onJoinArena, getArenaTypeColor, height }) => {
+  const [baseOffset, setBaseOffset] = useState({ x: 0, y: 0 }); // Accumulated offset
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 }); // Current drag offset
+  const [currentTime, setCurrentTime] = useState(new Date());
   const viewportRef = useRef<HTMLDivElement>(null);
   const timelineStart = useMemo(() => { const d = new Date(); d.setMinutes(0,0,0); return d; }, []);
 
@@ -27,14 +41,28 @@ const ArenaTimetableView: React.FC<any> = ({ upcomingArenas, onJoinArena, getAre
   const hourWidth = 400;
   const timelineTotalWidth = timelineHours * hourWidth;
 
+  // Update current time every minute
+  useEffect(() => {
+    const updateTime = () => {
+      setCurrentTime(new Date());
+    };
+    
+    updateTime();
+    const interval = setInterval(updateTime, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Initial centering on current time
   useEffect(() => {
     if (viewportRef.current) {
       const viewportCenter = viewportRef.current.clientWidth / 2;
-      const minutesFromStart = (new Date().getTime() - timelineStart.getTime()) / 60000;
+      const minutesFromStart = (currentTime.getTime() - timelineStart.getTime()) / 60000;
       const currentOffsetPx = minutesFromStart * (hourWidth / 60);
-      setOffset({ x: viewportCenter - currentOffsetPx, y: 0 });
+      const newBaseOffset = { x: viewportCenter - currentOffsetPx, y: 0 };
+      setBaseOffset(newBaseOffset);
+      setDragOffset({ x: 0, y: 0 });
     }
-  }, [timelineStart]);
+  }, [timelineStart, currentTime]);
 
   const laidOutArenas = useMemo(() => {
     const lanes: Date[] = [];
@@ -49,24 +77,70 @@ const ArenaTimetableView: React.FC<any> = ({ upcomingArenas, onJoinArena, getAre
   }, [upcomingArenas]);
 
   const maxLanes = laidOutArenas.length > 0 ? Math.max(...laidOutArenas.map(a => a.lane)) + 1 : 0;
-  // Cap the height to prevent extreme empty space
-  const contentTotalHeight = Math.min(maxLanes, 20) * laneHeight + 45; // Max 20 lanes visible + header
+  const contentTotalHeight = Math.min(maxLanes, 30) * laneHeight + 45;
 
-  const bind = useDrag(({ offset: [ox, oy] }) => {
-    const viewportWidth = viewportRef.current?.clientWidth ?? 0;
-    const viewportHeight = viewportRef.current?.clientHeight ?? 0;
+  const bind = useDrag({
+    onStart: () => {
+      // Optional: Add visual feedback when drag starts
+    },
+    onDrag: ({ offset: [ox, oy] }) => {
+      setDragOffset({ x: ox, y: oy });
+    },
+    onEnd: ({ offset: [ox, oy] }) => {
+      // When drag ends, merge the drag offset into the base offset
+      const viewportWidth = viewportRef.current?.clientWidth ?? 0;
+      const viewportHeight = viewportRef.current?.clientHeight ?? 0;
 
-    const clampedX = Math.max(viewportWidth - timelineTotalWidth, Math.min(ox, 0));
-    const clampedY = Math.max(viewportHeight - contentTotalHeight, Math.min(oy, 0));
-    
-    setOffset({ x: clampedX, y: clampedY });
+      const newBaseX = baseOffset.x + ox;
+      const newBaseY = baseOffset.y + oy;
+
+      const clampedX = Math.max(viewportWidth - timelineTotalWidth, Math.min(newBaseX, 0));
+      const clampedY = Math.max(viewportHeight - contentTotalHeight, Math.min(newBaseY, 0));
+      
+      setBaseOffset({ x: clampedX, y: clampedY });
+      setDragOffset({ x: 0, y: 0 });
+    }
   });
 
+  // Calculate the final offset (base + current drag)
+  const finalOffset = {
+    x: baseOffset.x + dragOffset.x,
+    y: baseOffset.y + dragOffset.y
+  };
+
+  // Apply clamping to the final offset for display
+  const viewportWidth = viewportRef.current?.clientWidth ?? 0;
+  const viewportHeight = viewportRef.current?.clientHeight ?? 0;
+  const clampedFinalOffset = {
+    x: Math.max(viewportWidth - timelineTotalWidth, Math.min(finalOffset.x, 0)),
+    y: Math.max(viewportHeight - contentTotalHeight, Math.min(finalOffset.y, 0))
+  };
+
+  const getCurrentTimePosition = () => {
+    const minutesFromStart = (currentTime.getTime() - timelineStart.getTime()) / 60000;
+    return minutesFromStart * (hourWidth / 60);
+  };
+
+  const currentTimePosition = getCurrentTimePosition();
+
   return (
-    <div ref={viewportRef} {...bind()} style={{ width: '100%', height: '280px', position: 'relative', overflow: 'hidden', background: '#1a1a2e', cursor: 'grab', userSelect: 'none' }}>
-      <div style={{ position: 'absolute', width: `${timelineTotalWidth}px`, transform: `translate(${offset.x}px, ${offset.y}px)` }}>
-        <div style={{ position: 'sticky', top: 0, zIndex: 3, background: '#1a1a2e' }}>
-            {/* Time Header */}
+    <div 
+      ref={viewportRef} 
+      {...bind()} 
+      style={{ 
+        width: '100%', 
+        height: `${height}px`, 
+        position: 'relative', 
+        overflow: 'hidden', 
+        background: '#1a1a2e', 
+        cursor: 'grab', 
+        userSelect: 'none',
+        touchAction: 'none' // Prevent default touch behaviors
+      }}
+    >
+      <div style={{ position: 'absolute', width: `${timelineTotalWidth}px`, transform: `translate(${clampedFinalOffset.x}px, ${clampedFinalOffset.y}px)` }}>
+        {/* Sticky Header */}
+        <div style={{ position: 'sticky', top: 0, zIndex: 10, background: '#1a1a2e', borderBottom: '1px solid #4a4a6e' }}>
             <div style={{ display: 'flex', height: '45px', alignItems: 'center' }}>
                 {Array.from({ length: timelineHours }).map((_, i) => (
                     <div key={`header-${i}`} style={{ width: `${hourWidth}px`, padding: '10px', borderLeft: '1px solid #4a4a6e', color: '#aaa' }}>
@@ -74,12 +148,65 @@ const ArenaTimetableView: React.FC<any> = ({ upcomingArenas, onJoinArena, getAre
                     </div>
                 ))}
             </div>
+            
+            {/* Current Time Indicator - sticks to header when scrolling */}
+            <div style={{ 
+              position: 'absolute', 
+              left: `${currentTimePosition}px`, 
+              top: 0, 
+              bottom: 0, 
+              width: '3px', 
+              background: 'linear-gradient(to bottom, #ff1493, #ff69b4)', 
+              zIndex: 15, 
+              pointerEvents: 'none',
+              boxShadow: '0 0 10px #ff1493, 0 0 20px #ff1493'
+            }} />
+            
+            {/* Current Time Label - also sticks to header */}
+            <div style={{
+              position: 'absolute',
+              left: `${currentTimePosition}px`,
+              top: '5px',
+              transform: 'translateX(-50%)',
+              background: '#ff1493',
+              color: 'white',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              fontSize: '11px',
+              fontWeight: 'bold',
+              zIndex: 16,
+              pointerEvents: 'none',
+              boxShadow: '0 2px 10px rgba(255, 20, 147, 0.5)',
+              whiteSpace: 'nowrap'
+            }}>
+              {currentTime.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+              })}
+            </div>
         </div>
+        
         <div style={{ position: 'relative', height: `${contentTotalHeight - 45}px` }}>
             {/* Minute Lines */}
             {Array.from({ length: timelineHours * 2 }).map((_, i) => (
                 <div key={`line-${i}`} style={{ position: 'absolute', left: `${i * (hourWidth / 2)}px`, top: 0, height: '100%', borderLeft: '1px dashed rgba(255, 255, 255, 0.1)' }} />
             ))}
+            
+            {/* Extended Current Time Indicator Line */}
+            <div style={{ 
+              position: 'absolute', 
+              left: `${currentTimePosition}px`, 
+              top: 0, 
+              height: '100%',
+              width: '3px', 
+              background: 'linear-gradient(to bottom, #ff1493, #ff69b4)', 
+              zIndex: 5, 
+              pointerEvents: 'none',
+              boxShadow: '0 0 10px #ff1493',
+              opacity: 0.7
+            }} />
+            
             {/* Arenas */}
             {laidOutArenas.map(arena => {
               const startOffsetMinutes = (arena.startTime.getTime() - timelineStart.getTime()) / 60000;
@@ -87,7 +214,28 @@ const ArenaTimetableView: React.FC<any> = ({ upcomingArenas, onJoinArena, getAre
               const widthPx = arena.duration * (hourWidth / 60) - 4;
               const bgColor = arena.status === 'finished' ? '#424242' : getArenaTypeColor(arena.type);
               return (
-                <div key={arena.id} onClick={() => onJoinArena(arena.id)} title={arena.name} style={{ position: 'absolute', top: `${arena.lane * laneHeight + 5}px`, left: `${leftPx}px`, width: `${widthPx}px`, height: '50px', background: bgColor, borderRadius: '5px', padding: '8px', color: 'white', cursor: 'pointer', zIndex: 1 }}>
+                <div 
+                  key={arena.id} 
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent drag when clicking arenas
+                    onJoinArena(arena.id);
+                  }} 
+                  title={arena.name} 
+                  style={{ 
+                    position: 'absolute', 
+                    top: `${arena.lane * laneHeight + 5}px`, 
+                    left: `${leftPx}px`, 
+                    width: `${widthPx}px`, 
+                    height: '50px', 
+                    background: bgColor, 
+                    borderRadius: '5px', 
+                    padding: '8px', 
+                    color: 'white', 
+                    cursor: 'pointer', 
+                    zIndex: 1,
+                    pointerEvents: 'auto' // Ensure arenas are clickable
+                  }}
+                >
                   <div style={{ fontWeight: 'bold', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{arena.name}</div>
                   <div>{arena.players}/{arena.maxPlayers}</div>
                 </div>
@@ -95,21 +243,168 @@ const ArenaTimetableView: React.FC<any> = ({ upcomingArenas, onJoinArena, getAre
             })}
         </div>
       </div>
-      <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: '2px', background: '#ff1493', zIndex: 2, pointerEvents: 'none', boxShadow: '0 0 10px #ff1493' }} />
     </div>
   );
 };
 
+// Resizable Timetable Component
+const ResizableTimetable: React.FC<any> = ({ upcomingArenas, onJoinArena, getArenaTypeColor }) => {
+  const [timetableHeight, setTimetableHeight] = useState(280);
+  const [isResizing, setIsResizing] = useState(false);
+  const resizeRef = useRef<HTMLDivElement>(null);
 
-// Main Portal Component (Original Layout)
+  const minHeight = 200;
+  const maxHeight = 600;
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation(); // Prevent the drag gesture from interfering
+    setIsResizing(true);
+    
+    const startY = e.clientY;
+    const startHeight = timetableHeight;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaY = e.clientY - startY;
+      const newHeight = Math.max(minHeight, Math.min(maxHeight, startHeight + deltaY));
+      setTimetableHeight(newHeight);
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+
+  const progressPercent = ((timetableHeight - minHeight) / (maxHeight - minHeight)) * 100;
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <ArenaTimetableView 
+        upcomingArenas={upcomingArenas} 
+        onJoinArena={onJoinArena} 
+        getArenaTypeColor={getArenaTypeColor}
+        height={timetableHeight}
+      />
+      
+      {/* Resize Handle */}
+      <div 
+        ref={resizeRef}
+        onMouseDown={handleMouseDown}
+        style={{
+          position: 'absolute',
+          bottom: '-8px',
+          left: 0,
+          right: 0,
+          height: '16px',
+          cursor: 'ns-resize',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: isResizing ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+          borderRadius: '8px',
+          transition: 'background 0.2s ease',
+          zIndex: 30, // Higher z-index to ensure it's above the draggable area
+          pointerEvents: 'auto' // Ensure this element captures mouse events
+        }}
+        onMouseEnter={(e) => {
+          if (!isResizing) {
+            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!isResizing) {
+            e.currentTarget.style.background = 'transparent';
+          }
+        }}
+      >
+        {/* Resize Indicator */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '4px 12px',
+          background: 'rgba(0, 0, 0, 0.7)',
+          borderRadius: '12px',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          transition: 'all 0.2s ease',
+          opacity: isResizing ? 1 : 0.7,
+          pointerEvents: 'none' // Let the parent handle the mouse events
+        }}>
+          {/* Drag Icon */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '2px'
+          }}>
+            {[...Array(3)].map((_, i) => (
+              <div key={i} style={{
+                width: '12px',
+                height: '2px',
+                background: '#fff',
+                borderRadius: '1px',
+                opacity: 0.6
+              }} />
+            ))}
+          </div>
+          
+          {/* Height Display */}
+          <span style={{
+            fontSize: '11px',
+            color: '#fff',
+            fontWeight: 'bold',
+            minWidth: '50px',
+            textAlign: 'center'
+          }}>
+            {timetableHeight}px
+          </span>
+          
+          {/* Progress Bar */}
+          <div style={{
+            width: '60px',
+            height: '4px',
+            background: 'rgba(255, 255, 255, 0.2)',
+            borderRadius: '2px',
+            overflow: 'hidden'
+          }}>
+            <div style={{
+              width: `${progressPercent}%`,
+              height: '100%',
+              background: 'linear-gradient(90deg, #4caf50, #2196f3)',
+              borderRadius: '2px',
+              transition: 'width 0.1s ease'
+            }} />
+          </div>
+          
+          {/* Size Labels */}
+          <div style={{
+            fontSize: '9px',
+            color: '#aaa',
+            display: 'flex',
+            flexDirection: 'column',
+            lineHeight: '1'
+          }}>
+            <span>{progressPercent < 25 ? 'Small' : progressPercent < 75 ? 'Medium' : 'Large'}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Main Portal Component (Updated Layout)
 const MainPortal: React.FC<any> = ({ upcomingArenas, friends, onNavigate, onStartGame, getArenaTypeColor }) => {
     const getRankColor = (rank: string) => ({ diamond: '#b9f2ff', platinum: '#e5e4e2', gold: '#ffd700' }[rank.toLowerCase()] || '#c0c0c0');
     const getStatusIcon = (status: Friend['status']) => ({ online: '🟢', away: '🟡', 'in-game': '🎮', offline: '⚫' }[status]);
   return (
     <div style={{ display: 'flex', height: '100%' }}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
-          <ArenaTimetableView upcomingArenas={upcomingArenas} onJoinArena={onStartGame} getArenaTypeColor={getArenaTypeColor} />
+        <div style={{ flex: 1, overflow: 'hidden', position: 'relative', padding: '0 0 20px 0' }}>
+          <ResizableTimetable upcomingArenas={upcomingArenas} onJoinArena={onStartGame} getArenaTypeColor={getArenaTypeColor} />
         </div>
         <div style={{ padding: '20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '15px', background: 'rgba(0,0,0,0.2)', borderTop: '1px solid #333' }}>
           {[
@@ -168,22 +463,94 @@ const OnlinePortal: React.FC<OnlinePortalProps> = ({ onBack, onStartGame }) => {
     const mockFriends: Friend[] = [
       { id: 'friend_1', username: 'BeatBuddy', status: 'online', elo: 1756, rank: 'Diamond', avatar: '/avatars/friend1.png' },
       { id: 'friend_2', username: 'RhythmPal', status: 'in-game', elo: 1623, rank: 'Platinum', currentGame: 'Tournament', avatar: '/avatars/friend2.png' },
+      { id: 'friend_3', username: 'MelodyMate', status: 'away', elo: 1892, rank: 'Diamond', avatar: '/avatars/friend3.png' },
+      { id: 'friend_4', username: 'SoundSibling', status: 'offline', elo: 1445, rank: 'Gold', avatar: '/avatars/friend4.png' },
+      { id: 'friend_5', username: 'NoteMaster', status: 'online', elo: 2134, rank: 'Master', avatar: '/avatars/friend5.png' },
+      { id: 'friend_6', username: 'BassDrop', status: 'away', elo: 1789, rank: 'Diamond', avatar: '/avatars/friend6.png' },
     ];
     setFriends(mockFriends);
-    const mockArenas: Arena[] = []; const now = new Date();
+    
+    // Enhanced Mock Arenas with more categories
+    const mockArenas: Arena[] = []; 
+    const now = new Date();
     for (let i = -24; i < 48; i++) {
-      const arenaTypes: Arena['type'][] = ['tournament', 'ranked', 'casual', 'speed', 'party'];
-      if (Math.random() > 0.15) {
+      // Expanded arena types with more categories
+      const arenaTypes: Arena['type'][] = [
+        'tournament', 'ranked', 'casual', 'speed', 'party', 
+        'battle-royale', 'team-battle', 'practice', 'blitz', 
+        'championship', 'seasonal', 'custom'
+      ];
+      
+      if (Math.random() > 0.1) { // Increased spawn rate for more arenas
         const type = arenaTypes[Math.floor(Math.random() * arenaTypes.length)];
-        const startTime = new Date(now.getTime() + i * 15 * 60 * 1000);
-        const arenaNames = { tournament: ['Championship', 'Masters Cup'], ranked: ['Ranked Blitz', 'ELO Climb'], casual: ['Fun Mode', 'Practice Arena'], speed: ['Bullet Mayhem', 'Lightning Round'], party: ['Team Battle', 'Group Play']};
-        mockArenas.push({ id: `arena_${i}`, name: arenaNames[type][Math.floor(Math.random() * arenaNames[type].length)], type, startTime, duration: ({ tournament: 90, ranked: 30, casual: 20, speed: 15, party: 45 }[type]), players: Math.floor(Math.random() * 50) + 10, maxPlayers: ({ tournament: 64, ranked: 8, casual: 12, speed: 16, party: 6 }[type]), difficulty: Math.floor(Math.random() * 100) + 1, prizePool: type === 'tournament' ? Math.floor(Math.random() * 10000) + 1000 : undefined, status: (()=>{ const diff = startTime.getTime() - new Date().getTime(); if (diff < -(90*60*1000)) return 'finished'; if (diff < 0) return 'live'; if (diff < 5*60*1000) return 'starting'; return 'waiting'; })(), timeControl: '5+3', host: `Host${Math.floor(Math.random() * 100)}` });
+        const startTime = new Date(now.getTime() + i * 10 * 60 * 1000); // Every 10 minutes instead of 15
+        
+        const arenaNames = { 
+          tournament: ['World Championship', 'Masters Cup', 'Elite Tournament', 'Pro League'],
+          ranked: ['Ranked Climb', 'ELO Battle', 'Competitive Match', 'Ladder Challenge'], 
+          casual: ['Fun Mode', 'Practice Arena', 'Chill Session', 'Social Play'],
+          speed: ['Bullet Mayhem', 'Lightning Round', 'Quick Fire', 'Speed Demon'],
+          party: ['Team Battle', 'Group Play', 'Squad Match', 'Friends Only'],
+          'battle-royale': ['Last Player Standing', 'Survival Arena', 'BR Championship', 'Ultimate Showdown'],
+          'team-battle': ['5v5 Showdown', 'Team Championship', 'Squad Wars', 'Alliance Battle'],
+          practice: ['Training Ground', 'Skill Builder', 'Warm-up Arena', 'Drill Session'],
+          blitz: ['Blitz Battle', 'Quick Match', 'Fast Track', 'Rapid Fire'],
+          championship: ['Grand Finals', 'World Series', 'Championship Series', 'Title Match'],
+          seasonal: ['Spring Event', 'Summer Festival', 'Autumn Cup', 'Winter Special'],
+          custom: ['Custom Rules', 'Modded Match', 'Special Event', 'Community Game']
+        };
+        
+        const durations = {
+          tournament: 120, ranked: 45, casual: 30, speed: 15, party: 60,
+          'battle-royale': 90, 'team-battle': 75, practice: 20, blitz: 10,
+          championship: 150, seasonal: 100, custom: 40
+        };
+        
+        const maxPlayers = {
+          tournament: 64, ranked: 8, casual: 12, speed: 16, party: 6,
+          'battle-royale': 100, 'team-battle': 10, practice: 20, blitz: 8,
+          championship: 32, seasonal: 50, custom: 24
+        };
+        
+        mockArenas.push({ 
+          id: `arena_${i}`, 
+          name: arenaNames[type][Math.floor(Math.random() * arenaNames[type].length)], 
+          type, 
+          startTime, 
+          duration: durations[type], 
+          players: Math.floor(Math.random() * maxPlayers[type] * 0.8) + 1, 
+          maxPlayers: maxPlayers[type], 
+          difficulty: Math.floor(Math.random() * 100) + 1, 
+          prizePool: ['tournament', 'championship', 'seasonal'].includes(type) ? Math.floor(Math.random() * 50000) + 5000 : undefined, 
+          status: (()=>{ 
+            const diff = startTime.getTime() - new Date().getTime(); 
+            if (diff < -(durations[type] * 60 * 1000)) return 'finished'; 
+            if (diff < 0) return 'live'; 
+            if (diff < 5*60*1000) return 'starting'; 
+            return 'waiting'; 
+          })(), 
+          timeControl: '5+3', 
+          host: `Host${Math.floor(Math.random() * 100)}` 
+        });
       }
     }
     setUpcomingArenas(mockArenas);
   }, []);
 
-  const getArenaTypeColor = (type: Arena['type']): string => ({ tournament: '#ff6b35', ranked: '#8e24aa', casual: '#43a047', speed: '#f44336', party: '#ff9800' })[type];
+  const getArenaTypeColor = (type: Arena['type']): string => ({
+    tournament: '#ff6b35',
+    ranked: '#8e24aa', 
+    casual: '#43a047',
+    speed: '#f44336',
+    party: '#ff9800',
+    'battle-royale': '#e91e63',
+    'team-battle': '#3f51b5',
+    practice: '#4caf50',
+    blitz: '#ff5722',
+    championship: '#ffd700',
+    seasonal: '#9c27b0',
+    custom: '#607d8b'
+  })[type] || '#666';
 
   const renderCurrentSection = () => {
     if (!playerData) return <div>Loading...</div>;
