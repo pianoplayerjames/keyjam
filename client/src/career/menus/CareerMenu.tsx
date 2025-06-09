@@ -102,10 +102,10 @@ const CareerMenu = ({ onBack }: CareerMenuProps) => {
         {/* Header Section */}
         <div className="text-center mb-12">
           <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent animate-slide-up">
-            CAREER MODE
+            SOLO CAREER
           </h1>
           <p className="text-xl text-gray-300 mb-8 animate-slide-up">
-            Master the art of rhythm through structured progression
+            Rise to international fame and glory
           </p>
           
           {/* Progress Overview */}
