@@ -1,3 +1,5 @@
+// client/src/components/MainPortal.tsx
+
 import React from 'react';
 import { ResizableTimetable } from './ArenaTimetable';
 
@@ -31,6 +33,7 @@ interface MainPortalProps {
   friends: Friend[];
   onNavigate: (section: string) => void;
   onStartGame: (config: any) => void;
+  onViewArena?: (arena: Arena) => void;
   getArenaTypeColor: (type: Arena['type']) => string;
 }
 
@@ -39,6 +42,7 @@ export const MainPortal: React.FC<MainPortalProps> = ({
   friends, 
   onNavigate, 
   onStartGame, 
+  onViewArena,
   getArenaTypeColor 
 }) => {
   const getRankColor = (rank: string) => ({ 
@@ -61,6 +65,7 @@ export const MainPortal: React.FC<MainPortalProps> = ({
           <ResizableTimetable 
             upcomingArenas={upcomingArenas} 
             onJoinArena={onStartGame} 
+            onViewArena={onViewArena}
             getArenaTypeColor={getArenaTypeColor} 
           />
         </div>

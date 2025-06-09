@@ -258,48 +258,49 @@ export const ArenaTimetableView: React.FC<ArenaTimetableViewProps> = ({
           }} />
           
           {/* Arenas */}
-          {laidOutArenas.map(arena => {
-            const startOffsetMinutes = (arena.startTime.getTime() - timelineStart.getTime()) / 60000;
-            const leftPx = startOffsetMinutes * (hourWidth / 60);
-            const widthPx = arena.duration * (hourWidth / 60) - 4;
-            const bgColor = arena.status === 'finished' ? '#424242' : getArenaTypeColor(arena.type);
-            
-            return (
-              <div 
-                key={arena.id} 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (onViewArena) {
-                    onViewArena(arena);
-                  } else {
-                    onJoinArena(arena.id);
-                  }
-                }} 
-                title={arena.name} 
-                style={{ 
-                  position: 'absolute', 
-                  top: `${arena.lane * laneHeight + 5}px`, 
-                  left: `${leftPx}px`, 
-                  width: `${widthPx}px`, 
-                  height: '50px', 
-                  background: bgColor, 
-                  borderRadius: '5px', 
-                  padding: '8px', 
-                  color: 'white', 
-                  cursor: 'pointer', 
-                  zIndex: 1,
-                  pointerEvents: 'auto',
-                  transition: 'transform 0.2s ease, box-shadow 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.02)';
-                  e.currentTarget.style.boxShadow = `0 4px 15px ${bgColor}44`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
+{laidOutArenas.map(arena => {
+  const startOffsetMinutes = (arena.startTime.getTime() - timelineStart.getTime()) / 60000;
+  const leftPx = startOffsetMinutes * (hourWidth / 60);
+  const widthPx = arena.duration * (hourWidth / 60) - 4;
+  const bgColor = arena.status === 'finished' ? '#424242' : getArenaTypeColor(arena.type);
+  
+  return (
+    <div 
+      key={arena.id} 
+      onClick={(e) => {
+        e.stopPropagation();
+        // Use onViewArena if available, otherwise fallback to onJoinArena
+        if (onViewArena) {
+          onViewArena(arena);
+        } else {
+          onJoinArena(arena.id);
+        }
+      }} 
+      title={arena.name} 
+      style={{ 
+        position: 'absolute', 
+        top: `${arena.lane * laneHeight + 5}px`, 
+        left: `${leftPx}px`, 
+        width: `${widthPx}px`, 
+        height: '50px', 
+        background: bgColor, 
+        borderRadius: '5px', 
+        padding: '8px', 
+        color: 'white', 
+        cursor: 'pointer', 
+        zIndex: 1,
+        pointerEvents: 'auto',
+        transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'scale(1.02)';
+        e.currentTarget.style.boxShadow = `0 4px 15px ${bgColor}44`;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'scale(1)';
+        e.currentTarget.style.boxShadow = 'none';
+      }}
+    >
                 <div style={{ 
                   fontWeight: 'bold', 
                   whiteSpace: 'nowrap', 
