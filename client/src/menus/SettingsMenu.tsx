@@ -31,13 +31,6 @@ const SettingsMenu = ({ onBack }: SettingsMenuProps) => {
           </p>
         </div>
 
-        <div className="text-center mb-12">
-          <div className="inline-block bg-yellow-900 bg-opacity-50 border border-yellow-500 rounded-xl p-6">
-            <h2 className="text-3xl font-bold text-yellow-400 mb-3">🚧 COMING SOON! 🚧</h2>
-            <p className="text-yellow-200">Settings menu is currently in development</p>
-          </div>
-        </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
           {upcomingFeatures.map((feature, index) => (
             <div
@@ -50,13 +43,6 @@ const SettingsMenu = ({ onBack }: SettingsMenuProps) => {
               <p className="text-sm text-gray-500">{feature.description}</p>
             </div>
           ))}
-        </div>
-
-        <div className="mt-12 text-center">
-          <p className="text-gray-400 text-sm max-w-2xl">
-            These features will be available in a future update. 
-            Currently focusing on core gameplay mechanics and multiplayer functionality.
-          </p>
         </div>
       </div>
     </div>
