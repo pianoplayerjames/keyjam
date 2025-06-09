@@ -20,7 +20,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
       label: 'Solo Career', 
       icon: '🚀', 
       color: 'bg-gradient-to-r from-pink-500 to-purple-600',
-      description: 'From Rookie To Grandmaster'
+      description: 'Rise to international fame'
     },
     { 
       id: 'arcade', 
