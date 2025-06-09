@@ -72,7 +72,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
   };
 
   return (
-    <div className="flex-shrink-0">
+    <div className="flex-shrink-0 bg-slate-900/50 border-0 border-b border-black/50 shadow-2xl">
       <div className="px-4">
         <div className="flex justify-center overflow-x-auto">
           {tabs.map((tab) => {
@@ -128,8 +128,6 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
         </div>
       </div>
       
-      {/* Thicker bottom border line */}
-      <div className="h-1 bg-black/30" />
     </div>
   );
 };

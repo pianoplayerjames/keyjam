@@ -52,7 +52,7 @@ export const TopBar: React.FC<TopBarProps> = ({ playerData, playerStats }) => {
   };
 
   return (
-    <div className="flex-shrink-0 bg-slate-800/50 py-1 border-white/10 shadow-2xl">
+    <div className="flex-shrink-0 bg-slate-800/50 py-1 border-0 border-b border-black/50 shadow-2xl">
       <div className="px-6 py-0">
         <div className="flex items-center justify-between">
           
