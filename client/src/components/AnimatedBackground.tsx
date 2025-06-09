@@ -117,17 +117,6 @@ export const AnimatedBackground: React.FC = () => {
                     )), []
                 )}
             </div>
-
-            <style jsx>{`
-                @keyframes float {
-                  from {
-                    transform: translateY(100vh) rotate(0deg);
-                  }
-                  to {
-                    transform: translateY(-100px) rotate(360deg);
-                  }
-                }
-              `}</style>
         </div>
     );
 };

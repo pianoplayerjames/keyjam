@@ -196,11 +196,11 @@ const MainMenu = () => {
       <AnimatedBackground />
       <div className="relative z-10 flex flex-col h-screen">
         <div className="flex-shrink-0 border-b border-white border-opacity-10">
-          <div className="px-8 py-4">
+          <div className="px-8 py-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <img src="/logo.png" alt="KeyJam" className="h-12 w-auto animate-tilt" />
-                <div className="text-white font-bold text-xl">KeyJam Online</div>
+                <div className="text-white font-bold text-xl">KeyJam</div>
               </div>
               <div className="flex items-center gap-8">
                 <div className="hidden lg:flex gap-6 text-sm text-gray-300">
