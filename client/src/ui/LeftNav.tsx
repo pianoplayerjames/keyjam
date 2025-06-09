@@ -1,64 +1,430 @@
+import React, { useState } from 'react';
 
 const friends = [
-  { id: 1, name: 'RhythmGod', avatar: '🤖', status: 'online' },
-  { id: 2, name: 'BeatMaster', avatar: '🧑', status: 'online' },
-  { id: 3, name: 'ComboKing', avatar: '🦄', status: 'away' },
-  { id: 4, name: 'SoundWave', avatar: '🐼', status: 'offline' },
-  { id: 5, name: 'NoteNinja', avatar: '🦊', status: 'online' },
-  { id: 6, name: 'MelodyMaster', avatar: '🐙', status: 'in-game' },
-  { id: 7, name: 'TimingPro', avatar: '🦖', status: 'online' },
-{ id: 8, name: 'RhythmGod', avatar: '🤖', status: 'online' },
-  { id: 9, name: 'BeatMaster', avatar: '🧑', status: 'online' },
-  { id: 10, name: 'ComboKing', avatar: '🦄', status: 'away' },
-  { id: 11, name: 'SoundWave', avatar: '🐼', status: 'offline' },
-  { id: 12, name: 'NoteNinja', avatar: '🦊', status: 'online' }
+  { id: 1, name: 'RhythmGod', avatar: '🤖', status: 'online', messageCount: 2 },
+  { id: 2, name: 'BeatMaster', avatar: '🧑', status: 'online', messageCount: 0 },
+  { id: 3, name: 'ComboKing', avatar: '🦄', status: 'away', messageCount: 1 },
+  { id: 4, name: 'SoundWave', avatar: '🐼', status: 'offline', messageCount: 0 },
+  { id: 5, name: 'NoteNinja', avatar: '🦊', status: 'online', messageCount: 5 },
+  { id: 6, name: 'MelodyMaster', avatar: '🐙', status: 'in-game', messageCount: 0 },
+  { id: 7, name: 'TimingPro', avatar: '🦖', status: 'online', messageCount: 3 },
+  { id: 8, name: 'AccuracyAce', avatar: '🤖', status: 'online', messageCount: 0 },
+  { id: 9, name: 'BeatBoss', avatar: '🧑', status: 'online', messageCount: 1 },
+  { id: 10, name: 'RhythmRuler', avatar: '🦄', status: 'away', messageCount: 0 },
+  { id: 11, name: 'SoundSavant', avatar: '🐼', status: 'offline', messageCount: 2 },
+  { id: 12, name: 'NoteSavage', avatar: '🦊', status: 'online', messageCount: 0 }
+];
+
+// Mock notifications data
+const mockNotifications = [
+  { id: 1, text: 'New tournament starting in 5 minutes!', type: 'tournament', time: '2m ago', read: false },
+  { id: 2, text: 'Friend request from BeatMaster99', type: 'friend', time: '5m ago', read: false },
+  { id: 3, text: 'Achievement unlocked: Combo King!', type: 'achievement', time: '1h ago', read: true },
+  { id: 4, text: 'Daily challenge completed', type: 'challenge', time: '2h ago', read: true },
+  { id: 5, text: 'Server maintenance scheduled for tonight', type: 'system', time: '3h ago', read: false },
+  { id: 6, text: 'Weekly leaderboard reset', type: 'system', time: '1d ago', read: true },
+  { id: 7, text: 'New friend online: SoundWave', type: 'friend', time: '2d ago', read: true },
+  { id: 8, text: 'High score beaten in Neon Dreams!', type: 'achievement', time: '3d ago', read: true },
 ];
 
 const getStatusColor = (status: 'online' | 'away' | 'in-game' | 'offline') => {
-    switch (status) {
-        case 'online': return 'bg-green-400';
-        case 'away': return 'bg-yellow-400';
-        case 'in-game': return 'bg-blue-400';
-        default: return 'bg-gray-500';
-    }
-}
+  switch (status) {
+    case 'online': return 'bg-green-400';
+    case 'away': return 'bg-yellow-400';
+    case 'in-game': return 'bg-blue-400';
+    default: return 'bg-gray-500';
+  }
+};
+
+const getNotificationIcon = (type: string) => {
+  switch (type) {
+    case 'tournament': return '🏆';
+    case 'friend': return '👥';
+    case 'achievement': return '🎯';
+    case 'challenge': return '⚡';
+    case 'system': return '⚙️';
+    default: return '🔔';
+  }
+};
+
+const NotificationBadge: React.FC<{ count: number }> = ({ count }) => {
+  if (count === 0) return null;
+  
+  return (
+    <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center font-bold border-2 border-slate-900 z-10">
+      {count > 99 ? '99+' : count}
+    </div>
+  );
+};
+
+const MessageBadge: React.FC<{ count: number }> = ({ count }) => {
+  if (count === 0) return null;
+  
+  return (
+    <div className="absolute -bottom-0.5 -right-0.5 bg-red-500 text-white text-xs rounded-full min-w-[16px] h-[16px] flex items-center justify-center font-bold border-2 border-slate-900 z-10">
+      {count > 9 ? '9+' : count}
+    </div>
+  );
+};
 
 const LeftNav = () => {
-  return (
-    <nav className="fixed top-0 left-0 h-screen w-18 hover:w-56 bg-slate-900/80 backdrop-blur-md border-r border-slate-700/50 transition-all duration-300 ease-in-out overflow-x-hidden z-50 group">
-      <div className="flex flex-col justify-between h-full">
-                {/* Bottom Icons - e.g., Notifications and Settings */}
-        <ul className="flex flex-col items-start mt-4 space-y-2">
-           <li>
-              <a href="#" className="flex items-center p-4 py-2 rounded-lg text-gray-300 hover:bg-slate-700/50 hover:text-white transition-colors duration-200">
-                <span className="text-3xl">🔔</span>
-                <span className="ml-4 text-base font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100 whitespace-nowrap">Notifications</span>
-              </a>
-            </li>
-           <li>
-              <a href="#" className="flex items-center p-4 py-2 rounded-lg text-gray-300 hover:bg-slate-700/50 hover:text-white transition-colors duration-200">
-                <span className="text-3xl">⚙️</span>
-                <span className="ml-4 text-base font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100 whitespace-nowrap">Settings</span>
-              </a>
-            </li>
-        </ul>
-        {/* Friends List */}
-        <ul className="flex flex-col items-start mb-4 space-y-2">
-          <li className="text-gray-500 text-xs font-bold uppercase transition-all duration-300 w-full px-7 mb-2 opacity-0 group-hover:opacity-100">Friends</li>
-          {friends.map(friend => (
-            <li key={friend.id} className="w-full">
-              <a href="#" className="flex items-center p-4 py-2 text-gray-300 hover:bg-slate-700/50 hover:text-white transition-colors duration-200">
-                <div className="relative">
-                    <span className="text-3xl">{friend.avatar}</span>
-                    <span className={`absolute bottom-0 right-0 block h-3 w-3 rounded-full border-2 border-slate-900 ${getStatusColor(friend.status)}`}></span>
+  const [activeSection, setActiveSection] = useState<'main' | 'notifications' | 'settings'>('main');
+  
+  // Count unread notifications and total messages
+  const unreadNotifications = mockNotifications.filter(n => !n.read).length;
+  const totalMessages = friends.reduce((sum, friend) => sum + friend.messageCount, 0);
+
+  const handleNotificationsClick = () => {
+    setActiveSection(activeSection === 'notifications' ? 'main' : 'notifications');
+  };
+
+  const handleSettingsClick = () => {
+    setActiveSection(activeSection === 'settings' ? 'main' : 'settings');
+  };
+
+  const markNotificationAsRead = (id: number) => {
+    // In a real app, this would update the notification state
+    console.log(`Marking notification ${id} as read`);
+  };
+
+  if (activeSection === 'notifications') {
+    return (
+      <>
+        <style>
+          {`
+            .leftnav-scrollbar::-webkit-scrollbar {
+              width: 8px;
+              opacity: 0;
+              transition: opacity 0.2s ease;
+            }
+            
+            .leftnav-scrollbar:hover::-webkit-scrollbar {
+              opacity: 1;
+            }
+            
+            .leftnav-scrollbar::-webkit-scrollbar-track {
+              background: rgba(51, 65, 85, 0.3);
+              border-radius: 4px;
+            }
+            
+            .leftnav-scrollbar::-webkit-scrollbar-thumb {
+              background: rgba(148, 163, 184, 0.5);
+              border-radius: 4px;
+              border: 1px solid rgba(30, 41, 59, 0.8);
+            }
+            
+            .leftnav-scrollbar::-webkit-scrollbar-thumb:hover {
+              background: rgba(148, 163, 184, 0.8);
+            }
+
+            .leftnav-scrollbar {
+              scrollbar-width: thin;
+              scrollbar-color: transparent transparent;
+              transition: scrollbar-color 0.2s ease;
+            }
+
+            .leftnav-scrollbar:hover {
+              scrollbar-color: rgba(148, 163, 184, 0.5) rgba(51, 65, 85, 0.3);
+            }
+          `}
+        </style>
+        <nav className="fixed top-0 left-0 h-screen w-80 bg-slate-900/90 backdrop-blur-md border-r border-slate-700/50 transition-all duration-300 ease-in-out overflow-hidden z-50">
+          <div className="flex flex-col h-full">
+            {/* Header */}
+            <div className="p-4 border-b border-slate-700/50">
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={() => setActiveSection('main')}
+                  className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
+                >
+                  <span className="text-xl">←</span>
+                  <span className="font-semibold">Back</span>
+                </button>
+                <h2 className="text-white font-bold text-lg">Notifications</h2>
+                <div className="w-16"></div>
+              </div>
+            </div>
+
+            {/* Notifications List */}
+            <div className="flex-1 overflow-y-auto leftnav-scrollbar p-2">
+              {mockNotifications.map((notification) => (
+                <div
+                  key={notification.id}
+                  onClick={() => markNotificationAsRead(notification.id)}
+                  className={`p-3 mb-2 rounded-lg cursor-pointer transition-colors ${
+                    notification.read 
+                      ? 'bg-slate-800/30 text-gray-400' 
+                      : 'bg-slate-700/50 text-white hover:bg-slate-600/50'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="text-lg flex-shrink-0 mt-0.5">
+                      {getNotificationIcon(notification.type)}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm leading-relaxed ${notification.read ? 'text-gray-400' : 'text-gray-200'}`}>
+                        {notification.text}
+                      </p>
+                      <span className="text-xs text-gray-500 mt-1 block">
+                        {notification.time}
+                      </span>
+                    </div>
+                    {!notification.read && (
+                      <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2"></div>
+                    )}
+                  </div>
                 </div>
-                <span className="ml-4 text-base font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100 whitespace-nowrap">{friend.name}</span>
-              </a>
+              ))}
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-slate-700/50">
+              <button className="w-full py-2 px-4 bg-slate-700 hover:bg-slate-600 rounded-lg text-white text-sm font-medium transition-colors">
+                Mark All as Read
+              </button>
+            </div>
+          </div>
+        </nav>
+      </>
+    );
+  }
+
+  if (activeSection === 'settings') {
+    return (
+      <>
+        <style>
+          {`
+            .leftnav-scrollbar::-webkit-scrollbar {
+              width: 8px;
+              opacity: 0;
+              transition: opacity 0.2s ease;
+            }
+            
+            .leftnav-scrollbar:hover::-webkit-scrollbar {
+              opacity: 1;
+            }
+            
+            .leftnav-scrollbar::-webkit-scrollbar-track {
+              background: rgba(51, 65, 85, 0.3);
+              border-radius: 4px;
+            }
+            
+            .leftnav-scrollbar::-webkit-scrollbar-thumb {
+              background: rgba(148, 163, 184, 0.5);
+              border-radius: 4px;
+              border: 1px solid rgba(30, 41, 59, 0.8);
+            }
+            
+            .leftnav-scrollbar::-webkit-scrollbar-thumb:hover {
+              background: rgba(148, 163, 184, 0.8);
+            }
+
+            .leftnav-scrollbar {
+              scrollbar-width: thin;
+              scrollbar-color: transparent transparent;
+              transition: scrollbar-color 0.2s ease;
+            }
+
+            .leftnav-scrollbar:hover {
+              scrollbar-color: rgba(148, 163, 184, 0.5) rgba(51, 65, 85, 0.3);
+            }
+          `}
+        </style>
+        <nav className="fixed top-0 left-0 h-screen w-80 bg-slate-900/90 backdrop-blur-md border-r border-slate-700/50 transition-all duration-300 ease-in-out overflow-hidden z-50">
+          <div className="flex flex-col h-full">
+            {/* Header */}
+            <div className="p-4 border-b border-slate-700/50">
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={() => setActiveSection('main')}
+                  className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
+                >
+                  <span className="text-xl">←</span>
+                  <span className="font-semibold">Back</span>
+                </button>
+                <h2 className="text-white font-bold text-lg">Settings</h2>
+                <div className="w-16"></div>
+              </div>
+            </div>
+
+            {/* Settings Categories */}
+            <div className="flex-1 overflow-y-auto leftnav-scrollbar p-2">
+              {[
+                { icon: '🎵', title: 'Audio Settings', desc: 'Volume, sound effects, music' },
+                { icon: '🎨', title: 'Appearance', desc: 'Theme, colors, animations' },
+                { icon: '⌨️', title: 'Controls', desc: 'Key bindings, input settings' },
+                { icon: '🌐', title: 'Online', desc: 'Privacy, friends, multiplayer' },
+                { icon: '📊', title: 'Performance', desc: 'Graphics, FPS, optimization' },
+                { icon: '🔔', title: 'Notifications', desc: 'Alerts, sounds, badges' },
+                { icon: '🎯', title: 'Gameplay', desc: 'Difficulty, scoring, timing' },
+                { icon: '📱', title: 'Account', desc: 'Profile, achievements, stats' },
+                { icon: '🎮', title: 'Input Devices', desc: 'Keyboard, gamepad, calibration' },
+                { icon: '🌍', title: 'Language', desc: 'Region, localization, time zone' },
+                { icon: '🔐', title: 'Privacy', desc: 'Data sharing, analytics, cookies' },
+                { icon: '💾', title: 'Data & Storage', desc: 'Save files, cloud sync, backups' },
+              ].map((setting, index) => (
+                <div
+                  key={index}
+                  className="p-3 mb-2 rounded-lg cursor-pointer bg-slate-800/30 hover:bg-slate-700/50 transition-colors group"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl">{setting.icon}</span>
+                    <div className="flex-1">
+                      <h3 className="text-white font-medium group-hover:text-cyan-400 transition-colors">
+                        {setting.title}
+                      </h3>
+                      <p className="text-xs text-gray-400">{setting.desc}</p>
+                    </div>
+                    <span className="text-gray-500 group-hover:text-gray-300 transition-colors">
+                      →
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-slate-700/50">
+              <div className="text-center text-xs text-gray-500">
+                KeyJam v11.8.2
+              </div>
+            </div>
+          </div>
+        </nav>
+      </>
+    );
+  }
+
+  // Main navigation (default)
+  return (
+    <>
+      <style>
+        {`
+          .leftnav-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+          }
+          
+          .leftnav-scrollbar:hover::-webkit-scrollbar {
+            opacity: 1;
+          }
+          
+          .leftnav-scrollbar::-webkit-scrollbar-track {
+            background: rgba(51, 65, 85, 0.2);
+            border-radius: 3px;
+          }
+          
+          .leftnav-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.4);
+            border-radius: 3px;
+            border: 1px solid rgba(30, 41, 59, 0.6);
+          }
+          
+          .leftnav-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.7);
+          }
+
+          .leftnav-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: transparent transparent;
+            transition: scrollbar-color 0.2s ease;
+          }
+
+          .leftnav-scrollbar:hover {
+            scrollbar-color: rgba(148, 163, 184, 0.4) rgba(51, 65, 85, 0.2);
+          }
+
+          .leftnav-main-container:hover .leftnav-scrollbar::-webkit-scrollbar {
+            opacity: 1;
+          }
+
+          .leftnav-main-container:hover .leftnav-scrollbar {
+            scrollbar-color: rgba(148, 163, 184, 0.4) rgba(51, 65, 85, 0.2);
+          }
+        `}
+      </style>
+      <nav className="leftnav-main-container fixed top-0 left-0 h-screen w-18 hover:w-56 bg-slate-900/80 backdrop-blur-md border-r border-slate-700/50 transition-all duration-300 ease-in-out overflow-x-hidden z-50 group">
+        <div className="flex flex-col justify-between h-full">
+          {/* Top Icons - Notifications and Settings */}
+          <ul className="flex flex-col items-start mt-4 space-y-2">
+            <li className="w-full">
+              <button
+                onClick={handleNotificationsClick}
+                className="flex items-center w-full p-4 py-3 rounded-lg text-gray-300 hover:bg-slate-700/50 hover:text-white transition-colors duration-200 relative"
+              >
+                <div className="relative">
+                  <span className="text-3xl">🔔</span>
+                  <NotificationBadge count={unreadNotifications} />
+                </div>
+                <span className="ml-4 text-base font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100 whitespace-nowrap">
+                  Notifications
+                </span>
+              </button>
             </li>
-          ))}
-        </ul>
-      </div>
-    </nav>
+            <li className="w-full">
+              <button
+                onClick={handleSettingsClick}
+                className="flex items-center w-full p-4 py-3 rounded-lg text-gray-300 hover:bg-slate-700/50 hover:text-white transition-colors duration-200"
+              >
+                <span className="text-3xl">⚙️</span>
+                <span className="ml-4 text-base font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100 whitespace-nowrap">
+                  Settings
+                </span>
+              </button>
+            </li>
+          </ul>
+
+          {/* Friends List */}
+          <div className="flex-1 flex flex-col min-h-0">
+            {/* Direct Messages Header */}
+            <div className="px-4 py-2 border-b border-slate-700/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500 text-xs font-bold uppercase">Direct Messages</span>
+                {totalMessages > 0 && (
+                  <span className="bg-red-500 text-white text-xs rounded-full px-2 py-0.5 font-bold">
+                    {totalMessages}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Friends List with Messages */}
+            <ul className="flex-1 overflow-y-auto leftnav-scrollbar min-h-0">
+              {friends.map(friend => (
+                <li key={friend.id} className="w-full">
+                  <a 
+                    href="#" 
+                    className="flex items-center p-4 py-3 text-gray-300 hover:bg-slate-700/50 hover:text-white transition-colors duration-200 group/friend"
+                  >
+                    <div className="relative">
+                      <span className="text-3xl">{friend.avatar}</span>
+                      <div className={`absolute bottom-0 right-0 block h-3 w-3 rounded-full border-2 border-slate-900 ${getStatusColor(friend.status)}`}></div>
+                      <MessageBadge count={friend.messageCount} />
+                    </div>
+                    <div className="ml-4 flex-1 min-w-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100">
+                      <div className="flex items-center justify-between">
+                        <span className="text-base font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
+                          {friend.name}
+                        </span>
+                        {friend.messageCount > 0 && (
+                          <div className="ml-2 bg-red-500 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center font-bold">
+                            {friend.messageCount > 9 ? '9+' : friend.messageCount}
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-500 capitalize">
+                        {friend.status === 'in-game' ? 'Playing KeyJam' : friend.status}
+                      </div>
+                    </div>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </>
   );
 };
 
