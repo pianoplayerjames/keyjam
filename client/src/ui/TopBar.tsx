@@ -127,12 +127,6 @@ export const TopBar: React.FC<TopBarProps> = ({ playerData, playerStats }) => {
                 )}
               </div>
 
-              {/* Notifications */}
-              <button className="relative p-2 hover:bg-white/10 rounded-lg transition-colors duration-200 group">
-                <span className="text-xl group-hover:scale-110 transition-transform duration-200 block">🔔</span>
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-              </button>
-
               {/* User Profile Card */}
               <div className="flex items-center gap-3 px-2 py-1 backdrop-blur-sm hover:from-white/10 hover:to-white/15 transition-all duration-300 cursor-pointer group">
                 <div className="relative">

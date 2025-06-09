@@ -12,6 +12,7 @@ import ScoreSelectionMenu from './training/menus/ScoreSelectionMenu';
 import ReplayBrowser from './replay/components/ReplayBrowser';
 import ArcadeMenu from './arcade/menus/ArcadeMenu';
 import { AnimatedBackground } from './shared/components/AnimatedBackground';
+import LeftNav from './ui/LeftNav';
 import { useMenuStore } from './shared/stores/menuStore';
 import { useGameStore } from './shared/stores/gameStore';
 
@@ -123,6 +124,7 @@ const MainMenu = () => {
 
   return (
     <div className="fixed inset-0 z-50">
+      <LeftNav />
       <AnimatedBackground />
       <div className="relative z-10 flex flex-col h-screen">
         
