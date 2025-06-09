@@ -1,13 +1,13 @@
 import { useEffect, Suspense, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
-import Game from './Game';
+import Game from './stage/Game';
 import MainMenu from './MainMenu';
-import Transition from './Transition';
-import PulsingBackground from './PulsingBackground';
-import { useGameStore } from './stores/gameStore';
-import { useMenuStore } from './stores/menuStore';
-import { useReplayStore } from './stores/replayStore';
-import ReplayPlayer from './replays/ReplayPlayer';
+import Transition from './shared/components/Transition';
+import PulsingBackground from './shared/components/PulsingBackground';
+import { useGameStore } from './shared/stores/gameStore';
+import { useMenuStore } from './shared/stores/menuStore';
+import { useReplayStore } from './shared/stores/replayStore';
+import ReplayPlayer from './replay/components/ReplayPlayer';
 import './App.css';
 
 const SimpleLoading = () => (
