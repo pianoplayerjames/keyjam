@@ -7,7 +7,8 @@ body,
   padding: 0;
   width: 100vw;
   height: 100vh;
-  overflow: hidden; /* This will hide the scrollbars */
+  overflow: hidden;
+  background: #181e37;
 }
 
 @keyframes slide-up {
