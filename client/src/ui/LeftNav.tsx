@@ -15,7 +15,6 @@ const friends = [
   { id: 12, name: 'NoteSavage', avatar: '🦊', status: 'online', messageCount: 0 }
 ];
 
-// Mock notifications data
 const mockNotifications = [
   { id: 1, text: 'New tournament starting in 5 minutes!', type: 'tournament', time: '2m ago', read: false },
   { id: 2, text: 'Friend request from BeatMaster99', type: 'friend', time: '5m ago', read: false },
@@ -26,6 +25,37 @@ const mockNotifications = [
   { id: 7, text: 'New friend online: SoundWave', type: 'friend', time: '2d ago', read: true },
   { id: 8, text: 'High score beaten in Neon Dreams!', type: 'achievement', time: '3d ago', read: true },
 ];
+
+const mockMessages: { [key: number]: Array<{ id: number; text: string; sender: 'me' | 'them'; timestamp: string; }> } = {
+  1: [
+    { id: 1, text: 'Hey! Want to play some co-op?', sender: 'them', timestamp: '2:30 PM' },
+    { id: 2, text: 'Sure! Which song?', sender: 'me', timestamp: '2:32 PM' },
+    { id: 3, text: 'How about Neon Dreams on Expert?', sender: 'them', timestamp: '2:33 PM' },
+    { id: 4, text: 'Perfect! Creating room now', sender: 'me', timestamp: '2:34 PM' },
+  ],
+  3: [
+    { id: 1, text: 'Nice combo streak in the tournament!', sender: 'them', timestamp: '1:45 PM' },
+  ],
+  5: [
+    { id: 1, text: 'Did you see the new update?', sender: 'them', timestamp: '12:20 PM' },
+    { id: 2, text: 'Yeah! The new songs are amazing', sender: 'me', timestamp: '12:22 PM' },
+    { id: 3, text: 'Especially that techno track', sender: 'them', timestamp: '12:23 PM' },
+    { id: 4, text: 'Want to practice it together?', sender: 'them', timestamp: '12:24 PM' },
+    { id: 5, text: 'Lets do it after my current match', sender: 'me', timestamp: '12:25 PM' },
+  ],
+  7: [
+    { id: 1, text: 'Your timing on that last song was perfect!', sender: 'them', timestamp: '11:30 AM' },
+    { id: 2, text: 'Thanks! Been practicing a lot', sender: 'me', timestamp: '11:32 AM' },
+    { id: 3, text: 'Any tips for the fast sections?', sender: 'them', timestamp: '11:33 PM' },
+  ],
+  9: [
+    { id: 1, text: 'GG on that match!', sender: 'them', timestamp: '10:15 AM' },
+  ],
+  11: [
+    { id: 1, text: 'When will you be online next?', sender: 'them', timestamp: 'Yesterday' },
+    { id: 2, text: 'Miss our daily challenges!', sender: 'them', timestamp: 'Yesterday' },
+  ],
+};
 
 const getStatusColor = (status: 'online' | 'away' | 'in-game' | 'offline') => {
   switch (status) {
@@ -68,9 +98,11 @@ const MessageBadge: React.FC<{ count: number }> = ({ count }) => {
 };
 
 const LeftNav = () => {
-  const [activeSection, setActiveSection] = useState<'main' | 'notifications' | 'settings'>('main');
+  const [activeSection, setActiveSection] = useState<'main' | 'notifications' | 'settings' | 'chat'>('main');
+  const [activeChatFriend, setActiveChatFriend] = useState<number | null>(null);
+  const [newMessage, setNewMessage] = useState('');
+  const [messages, setMessages] = useState(mockMessages);
   
-  // Count unread notifications and total messages
   const unreadNotifications = mockNotifications.filter(n => !n.read).length;
   const totalMessages = friends.reduce((sum, friend) => sum + friend.messageCount, 0);
 
@@ -82,10 +114,152 @@ const LeftNav = () => {
     setActiveSection(activeSection === 'settings' ? 'main' : 'settings');
   };
 
+  const handleFriendClick = (friendId: number) => {
+    setActiveChatFriend(friendId);
+    setActiveSection('chat');
+  };
+
+  const handleSendMessage = () => {
+    if (!newMessage.trim() || !activeChatFriend) return;
+    
+    const newMsg = {
+      id: Date.now(),
+      text: newMessage.trim(),
+      sender: 'me' as const,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    
+    setMessages(prev => ({
+      ...prev,
+      [activeChatFriend]: [...(prev[activeChatFriend] || []), newMsg]
+    }));
+    
+    setNewMessage('');
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
   const markNotificationAsRead = (id: number) => {
-    // In a real app, this would update the notification state
     console.log(`Marking notification ${id} as read`);
   };
+
+  if (activeSection === 'chat' && activeChatFriend) {
+    const friend = friends.find(f => f.id === activeChatFriend);
+    const chatMessages = messages[activeChatFriend] || [];
+    
+    return (
+      <>
+        <style>
+          {`
+            .leftnav-scrollbar::-webkit-scrollbar {
+              width: 8px;
+              opacity: 0;
+              transition: opacity 0.2s ease;
+            }
+            
+            .leftnav-scrollbar:hover::-webkit-scrollbar {
+              opacity: 1;
+            }
+            
+            .leftnav-scrollbar::-webkit-scrollbar-track {
+              background: rgba(51, 65, 85, 0.3);
+              border-radius: 4px;
+            }
+            
+            .leftnav-scrollbar::-webkit-scrollbar-thumb {
+              background: rgba(148, 163, 184, 0.5);
+              border-radius: 4px;
+              border: 1px solid rgba(30, 41, 59, 0.8);
+            }
+            
+            .leftnav-scrollbar::-webkit-scrollbar-thumb:hover {
+              background: rgba(148, 163, 184, 0.8);
+            }
+
+            .leftnav-scrollbar {
+              scrollbar-width: thin;
+              scrollbar-color: transparent transparent;
+              transition: scrollbar-color 0.2s ease;
+            }
+
+            .leftnav-scrollbar:hover {
+              scrollbar-color: rgba(148, 163, 184, 0.5) rgba(51, 65, 85, 0.3);
+            }
+          `}
+        </style>
+        <nav className="fixed top-0 left-0 h-screen w-80 bg-slate-900/90 backdrop-blur-md border-r border-slate-700/50 transition-all duration-300 ease-in-out overflow-hidden z-50">
+          <div className="flex flex-col h-full">
+            <div className="p-4 border-b border-slate-700/50">
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={() => setActiveSection('main')}
+                  className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
+                >
+                  <span className="text-xl">←</span>
+                  <span className="font-semibold">Back</span>
+                </button>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">{friend?.avatar}</span>
+                  <div>
+                    <h2 className="text-white font-bold text-sm">{friend?.name}</h2>
+                    <p className="text-xs text-gray-400 capitalize">{friend?.status}</p>
+                  </div>
+                </div>
+                <div className="w-16"></div>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto leftnav-scrollbar p-4">
+              <div className="space-y-3">
+                {chatMessages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex ${message.sender === 'me' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-[70%] p-3 rounded-lg ${
+                        message.sender === 'me'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-slate-700 text-gray-200'
+                      }`}
+                    >
+                      <p className="text-sm">{message.text}</p>
+                      <p className="text-xs opacity-70 mt-1">{message.timestamp}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-slate-700/50">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Type a message..."
+                  className="flex-1 px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 text-sm"
+                />
+                <button
+                  onClick={handleSendMessage}
+                  disabled={!newMessage.trim()}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 disabled:cursor-not-allowed rounded-lg text-white text-sm font-medium transition-colors"
+                >
+                  Send
+                </button>
+              </div>
+            </div>
+          </div>
+        </nav>
+      </>
+    );
+  }
 
   if (activeSection === 'notifications') {
     return (
@@ -130,7 +304,6 @@ const LeftNav = () => {
         </style>
         <nav className="fixed top-0 left-0 h-screen w-80 bg-slate-900/90 backdrop-blur-md border-r border-slate-700/50 transition-all duration-300 ease-in-out overflow-hidden z-50">
           <div className="flex flex-col h-full">
-            {/* Header */}
             <div className="p-4 border-b border-slate-700/50">
               <div className="flex items-center justify-between">
                 <button
@@ -145,7 +318,6 @@ const LeftNav = () => {
               </div>
             </div>
 
-            {/* Notifications List */}
             <div className="flex-1 overflow-y-auto leftnav-scrollbar p-2">
               {mockNotifications.map((notification) => (
                 <div
@@ -177,7 +349,6 @@ const LeftNav = () => {
               ))}
             </div>
 
-            {/* Footer */}
             <div className="p-4 border-t border-slate-700/50">
               <button className="w-full py-2 px-4 bg-slate-700 hover:bg-slate-600 rounded-lg text-white text-sm font-medium transition-colors">
                 Mark All as Read
@@ -232,7 +403,6 @@ const LeftNav = () => {
         </style>
         <nav className="fixed top-0 left-0 h-screen w-80 bg-slate-900/90 backdrop-blur-md border-r border-slate-700/50 transition-all duration-300 ease-in-out overflow-hidden z-50">
           <div className="flex flex-col h-full">
-            {/* Header */}
             <div className="p-4 border-b border-slate-700/50">
               <div className="flex items-center justify-between">
                 <button
@@ -247,7 +417,6 @@ const LeftNav = () => {
               </div>
             </div>
 
-            {/* Settings Categories */}
             <div className="flex-1 overflow-y-auto leftnav-scrollbar p-2">
               {[
                 { icon: '🎵', title: 'Audio Settings', desc: 'Volume, sound effects, music' },
@@ -283,7 +452,6 @@ const LeftNav = () => {
               ))}
             </div>
 
-            {/* Footer */}
             <div className="p-4 border-t border-slate-700/50">
               <div className="text-center text-xs text-gray-500">
                 KeyJam v11.8.2
@@ -295,7 +463,6 @@ const LeftNav = () => {
     );
   }
 
-  // Main navigation (default)
   return (
     <>
       <style>
@@ -344,14 +511,13 @@ const LeftNav = () => {
           }
         `}
       </style>
-      <nav className="leftnav-main-container fixed top-0 left-0 h-screen w-18 hover:w-56 bg-slate-900/80 backdrop-blur-md border-r border-slate-700/50 transition-all duration-300 ease-in-out overflow-x-hidden z-50 group">
+      <nav className="leftnav-main-container fixed top-0 left-0 h-screen w-18 hover:w-64 bg-slate-900/80 backdrop-blur-md border-r border-slate-700/50 transition-all duration-300 ease-in-out overflow-x-hidden z-50 group">
         <div className="flex flex-col justify-between h-full">
-          {/* Top Icons - Notifications and Settings */}
           <ul className="flex flex-col items-start mt-4 space-y-2">
             <li className="w-full">
               <button
                 onClick={handleNotificationsClick}
-                className="flex items-center w-full p-4 py-3 rounded-lg text-gray-300 hover:bg-slate-700/50 hover:text-white transition-colors duration-200 relative"
+                className="flex items-center w-full p-4 py-3 text-gray-300 hover:bg-slate-700/50 hover:text-white transition-colors duration-200 relative"
               >
                 <div className="relative">
                   <span className="text-3xl">🔔</span>
@@ -365,7 +531,7 @@ const LeftNav = () => {
             <li className="w-full">
               <button
                 onClick={handleSettingsClick}
-                className="flex items-center w-full p-4 py-3 rounded-lg text-gray-300 hover:bg-slate-700/50 hover:text-white transition-colors duration-200"
+                className="flex items-center w-full p-4 py-3 text-gray-300 hover:bg-slate-700/50 hover:text-white transition-colors duration-200"
               >
                 <span className="text-3xl">⚙️</span>
                 <span className="ml-4 text-base font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100 whitespace-nowrap">
@@ -375,9 +541,7 @@ const LeftNav = () => {
             </li>
           </ul>
 
-          {/* Friends List */}
           <div className="flex-1 flex flex-col min-h-0">
-            {/* Direct Messages Header */}
             <div className="px-4 py-2 border-b border-slate-700/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0">
               <div className="flex items-center justify-between">
                 <span className="text-gray-500 text-xs font-bold uppercase">Direct Messages</span>
@@ -389,13 +553,12 @@ const LeftNav = () => {
               </div>
             </div>
 
-            {/* Friends List with Messages */}
             <ul className="flex-1 overflow-y-auto leftnav-scrollbar min-h-0">
               {friends.map(friend => (
                 <li key={friend.id} className="w-full">
-                  <a 
-                    href="#" 
-                    className="flex items-center p-4 py-3 text-gray-300 hover:bg-slate-700/50 hover:text-white transition-colors duration-200 group/friend"
+                  <button 
+                    onClick={() => handleFriendClick(friend.id)}
+                    className="flex items-center w-full p-4 py-3 text-gray-300 hover:bg-slate-700/50 hover:text-white transition-colors duration-200 group/friend"
                   >
                     <div className="relative">
                       <span className="text-3xl">{friend.avatar}</span>
@@ -413,11 +576,11 @@ const LeftNav = () => {
                           </div>
                         )}
                       </div>
-                      <div className="text-xs text-gray-500 capitalize">
+                      <div className="text-xs text-gray-500 capitalize text-left">
                         {friend.status === 'in-game' ? 'Playing KeyJam' : friend.status}
                       </div>
                     </div>
-                  </a>
+                  </button>
                 </li>
               ))}
             </ul>
