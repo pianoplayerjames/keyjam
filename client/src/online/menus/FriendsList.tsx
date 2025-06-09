@@ -1,3 +1,4 @@
+// client/src/online/menus/FriendsList.tsx
 import React, { useState, useEffect } from 'react';
 
 interface Friend {

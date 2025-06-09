@@ -1,4 +1,4 @@
-// client/src/OnlinePortal.tsx
+// client/src/online/OnlinePortal.tsx
 
 import React, { useState, useEffect } from 'react';
 import ArenasBrowser from './menus/ArenasBrowser';
@@ -408,7 +408,7 @@ const OnlinePortal: React.FC<OnlinePortalProps> = ({ onBack, onStartGame }) => {
  };
 
  return (
-   <div className="h-full w-full overflow-hidden bg-gray-900 text-white flex flex-col">
+   <div className="h-full w-full overflow-hidden text-white flex flex-col">
      <div className="flex-grow overflow-hidden">{renderCurrentSection()}</div>
    </div>
  );

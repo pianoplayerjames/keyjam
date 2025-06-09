@@ -84,7 +84,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
                 key={tab.id}
                 onClick={() => onTabChange(tab.id)}
                 className={`
-                  group relative px-5 py-4 font-medium transition-all duration-300 ease-out 
+                  group relative px-5 py-3 font-medium transition-all duration-300 ease-out 
                   min-w-max flex items-center gap-3 text-white
                   ${isActive 
                     ? `${tab.color} shadow-lg` 
@@ -92,7 +92,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
                   }
                 `}
               >
-                <span className="text-lg transition-transform duration-200 group-hover:scale-110">
+                <span className="text-xl transition-transform duration-200 scale-150">
                   {tab.icon}
                 </span>
                 <div className="text-left">

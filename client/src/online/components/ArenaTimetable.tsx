@@ -168,7 +168,6 @@ export const ArenaTimetableView: React.FC<ArenaTimetableViewProps> = ({
         height: `${height}px`, 
         position: 'relative', 
         overflow: 'hidden', 
-        background: '#1a1a2e', 
         cursor: isDragging ? 'grabbing' : 'grab', 
         userSelect: 'none'
       }}
@@ -181,18 +180,15 @@ export const ArenaTimetableView: React.FC<ArenaTimetableViewProps> = ({
         <div style={{ 
           position: 'sticky', 
           top: 0, 
-          zIndex: 10, 
-          background: '#1a1a2e', 
-          borderBottom: '1px solid #4a4a6e' 
+          zIndex: 10
         }}>
-          <div style={{ display: 'flex', height: '45px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', height: '25px', alignItems: 'center' }}>
             {Array.from({ length: timelineHours }).map((_, i) => (
               <div 
                 key={`header-${i}`} 
                 style={{ 
                   width: `${hourWidth}px`, 
                   padding: '10px', 
-                  borderLeft: '1px solid #4a4a6e', 
                   color: '#aaa' 
                 }}
               >
