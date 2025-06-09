@@ -22,4 +22,11 @@ export default defineConfig({
       usePolling: true,
     }
   },
+    theme: {
+    extend: {
+      margin: {
+        '18': '4.5rem', // 72px to match your nav width
+      }
+    }
+  }
 })

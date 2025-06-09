@@ -69,7 +69,7 @@ const CareerMenu = ({ onBack }: CareerMenuProps) => {
 
   return (
     <div className="h-full overflow-y-auto">
-      <CenteredContainer maxWidth="xl">
+      <CenteredContainer maxWidth="xl" accountForLeftNav={true}>
         <div className="py-8">
           {/* Header with Continue Button */}
           <div className="flex items-center justify-between mb-8">

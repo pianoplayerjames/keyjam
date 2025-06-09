@@ -147,7 +147,7 @@ const ArcadeMenu: React.FC<ArcadeMenuProps> = ({ onBack, onSelectSong }) => {
 
   return (
     <div className="h-full">
-      <CenteredContainer maxWidth="xl" className="h-full">
+      <CenteredContainer maxWidth="xl" className="h-full" accountForLeftNav={true}>
         <div ref={menuRef} className="h-full flex">
           <div className="w-1/4 backdrop-blur-sm border-opacity-30" onWheel={handleSongListWheel}>
             <div className="p-4 border-b border-pink-500 border-opacity-30">

@@ -6,6 +6,7 @@ interface LayoutProps {
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
   className?: string;
   padding?: 'none' | 'sm' | 'md' | 'lg';
+  accountForLeftNav?: boolean;
 }
 
 const maxWidthClasses = {
@@ -28,8 +29,32 @@ export const Layout: React.FC<LayoutProps> = ({
   children, 
   maxWidth = 'xl', 
   className = '',
-  padding = 'md'
+  padding = 'md',
+  accountForLeftNav = false
 }) => {
+  const containerStyle = accountForLeftNav ? {
+    marginLeft: '4.5rem', // 72px for left nav
+    width: 'calc(100% - 4.5rem)', // Reduce available width
+    maxWidth: 'none' // Override max-width constraint
+  } : {};
+
+  const innerStyle = accountForLeftNav ? {
+    maxWidth: maxWidthClasses[maxWidth].replace('max-w-', ''),
+    margin: '0 auto'
+  } : {};
+
+  if (accountForLeftNav) {
+    return (
+      <div style={containerStyle} className={className}>
+        <div 
+          className={`mx-auto ${maxWidthClasses[maxWidth]} ${paddingClasses[padding]}`}
+        >
+          {children}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`mx-auto ${maxWidthClasses[maxWidth]} ${paddingClasses[padding]} ${className}`}>
       {children}
@@ -41,10 +66,16 @@ export const CenteredContainer: React.FC<LayoutProps> = ({
   children, 
   maxWidth = 'xl', 
   className = '',
-  padding = 'md'
+  padding = 'md',
+  accountForLeftNav = false
 }) => {
   return (
-    <Layout maxWidth={maxWidth} className={className} padding={padding}>
+    <Layout 
+      maxWidth={maxWidth} 
+      className={className} 
+      padding={padding}
+      accountForLeftNav={accountForLeftNav}
+    >
       {children}
     </Layout>
   );
@@ -55,10 +86,15 @@ export const PageWrapper: React.FC<{
   children: React.ReactNode;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
   className?: string;
-}> = ({ children, maxWidth = 'xl', className = '' }) => {
+  accountForLeftNav?: boolean;
+}> = ({ children, maxWidth = 'xl', className = '', accountForLeftNav = false }) => {
   return (
     <div className={`min-h-screen ${className}`}>
-      <CenteredContainer maxWidth={maxWidth} className="h-full">
+      <CenteredContainer 
+        maxWidth={maxWidth} 
+        className="h-full"
+        accountForLeftNav={accountForLeftNav}
+      >
         {children}
       </CenteredContainer>
     </div>

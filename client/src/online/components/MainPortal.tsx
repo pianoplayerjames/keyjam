@@ -59,7 +59,7 @@ export const MainPortal: React.FC<MainPortalProps> = ({
   }[status]);
 
   return (
-    <CenteredContainer maxWidth="xl">
+    <CenteredContainer maxWidth="xl" accountForLeftNav={true}>
       <div style={{ display: 'flex', height: '100%' }}>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <div style={{ flex: 1, overflow: 'hidden', position: 'relative', padding: '0 0 20px 0' }}>
