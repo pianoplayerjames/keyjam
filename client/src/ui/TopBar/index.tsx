@@ -30,9 +30,9 @@ interface TopBarProps {
 
 export const TopBar: React.FC<TopBarProps> = ({ playerData, playerStats }) => {
   return (
-    <div className="flex-shrink-0 bg-slate-800/50 py-1 border-white/10 shadow-2xl">
-      <div className="px-6 py-0">
-        <div className="flex items-center justify-between">
+    <div className="flex-shrink-0 flex justify-center py-2">
+      <div className="px-6 py-1 bg-slate-800/50 border-white/10 shadow-2xl rounded-lg w-fit">
+        <div className="flex items-center justify-between gap-8">
           <div className="flex items-center gap-6">
             <Logo />
             <LiveStats />
