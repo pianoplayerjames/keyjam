@@ -19,6 +19,7 @@ import ArcadeMenu from '@/pages/arcade';
 import { AnimatedBackground } from '@/shared/components/AnimatedBackground';
 import LeftNav from '@/ui/LeftNav';
 import { ArenaPage } from '@/pages/online/Arena';
+import MouseTrail from '@/shared/utils/MouseTrail'; // Add this import
 
 const SimpleLoading = () => (
   <group>
@@ -81,7 +82,6 @@ function App() {
     }
   }, []);
 
-
   const handleStartGameWithConfig = (config: typeof gameConfig) => {
     setGameConfig(config);
     setIsTransitioning(true);
@@ -106,7 +106,19 @@ function App() {
   };
 
   if (gameState === 'game') {
-    return <Game onBackToMenu={handleBackToMenu} />;
+    return (
+      <>
+        <Game onBackToMenu={handleBackToMenu} />
+        {/* Mouse trail active during gameplay */}
+        <MouseTrail 
+          enabled={true}
+          particleCount={60}
+          particleSize={0.03}
+          fadeSpeed={0.94}
+          color="#ff6b9d"
+        />
+      </>
+    );
   }
 
   const renderMainMenu = () => {
@@ -156,29 +168,40 @@ function App() {
   }
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden" style={{ visibility: isPlayingReplay ? 'hidden' : 'visible' }}>
-      {isPlayingReplay && <ReplayPlayer />}
+    <>
+      <div className="relative w-screen h-screen overflow-hidden" style={{ visibility: isPlayingReplay ? 'hidden' : 'visible' }}>
+        {isPlayingReplay && <ReplayPlayer />}
 
-      <Canvas
-        camera={{ position: [0, 2.5, 5], fov: 75 }}
-        className="absolute inset-0"
-      >
-        <Suspense fallback={<SimpleLoading />}>
-          <PulsingBackground />
-          <ambientLight intensity={0.8} />
-          <directionalLight position={[10, 10, 5]} intensity={0.5} />
+        <Canvas
+          camera={{ position: [0, 2.5, 5], fov: 75 }}
+          className="absolute inset-0"
+        >
+          <Suspense fallback={<SimpleLoading />}>
+            <PulsingBackground />
+            <ambientLight intensity={0.8} />
+            <directionalLight position={[10, 10, 5]} intensity={0.5} />
 
-          {gameState === 'in-transition' && (
-            <Transition
-              onTransitionComplete={handleTransitionComplete}
-              gameMode={gameConfig.mode}
-            />
-          )}
-        </Suspense>
-      </Canvas>
+            {gameState === 'in-transition' && (
+              <Transition
+                onTransitionComplete={handleTransitionComplete}
+                gameMode={gameConfig.mode}
+              />
+            )}
+          </Suspense>
+        </Canvas>
 
-      {gameState === 'menu' && renderMainMenu()}
-    </div>
+        {gameState === 'menu' && renderMainMenu()}
+      </div>
+
+<MouseTrail 
+  enabled={!isPlayingReplay}
+  trailLength={150}
+  lineWidth={0.02}
+  fadeSpeed={0.93}
+  color="#ff6b9d"
+  showCustomCursor={true}
+/>
+    </>
   );
 }
 
