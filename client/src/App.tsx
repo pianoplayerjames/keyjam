@@ -19,7 +19,8 @@ import ArcadeMenu from '@/pages/arcade';
 import { AnimatedBackground } from '@/shared/components/AnimatedBackground';
 import LeftNav from '@/ui/LeftNav';
 import { ArenaPage } from '@/pages/online/Arena';
-import MouseTrail from '@/shared/utils/MouseTrail'; // Add this import
+import MouseTrail from '@/shared/utils/MouseTrail';
+import { FullscreenButton } from '@/ui/FullscreenButton';
 
 const SimpleLoading = () => (
   <group>
@@ -59,6 +60,45 @@ function App() {
     ...gameConfig,
     songId: ''
   });
+
+  useEffect(() => {
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      return false;
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'F11') {
+        e.preventDefault();
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+        } else {
+          document.exitFullscreen();
+        }
+      }
+      if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+        e.preventDefault();
+        return false;
+      }
+    };
+
+    const handleSelectStart = (e: Event) => {
+      if (!(e.target as HTMLElement).matches('input, textarea, [contenteditable="true"]')) {
+        e.preventDefault();
+        return false;
+      }
+    };
+
+    document.addEventListener('contextmenu', handleContextMenu);
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('selectstart', handleSelectStart);
+
+    return () => {
+      document.removeEventListener('contextmenu', handleContextMenu);
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('selectstart', handleSelectStart);
+    };
+  }, []);
 
   useEffect(() => {
     try {
@@ -109,7 +149,6 @@ function App() {
     return (
       <>
         <Game onBackToMenu={handleBackToMenu} />
-        {/* Mouse trail active during gameplay */}
         <MouseTrail 
           enabled={true}
           particleCount={60}
@@ -117,6 +156,7 @@ function App() {
           fadeSpeed={0.94}
           color="#ff6b9d"
         />
+        <FullscreenButton />
       </>
     );
   }
@@ -193,14 +233,16 @@ function App() {
         {gameState === 'menu' && renderMainMenu()}
       </div>
 
-<MouseTrail 
-  enabled={!isPlayingReplay}
-  trailLength={150}
-  lineWidth={0.02}
-  fadeSpeed={0.93}
-  color="#ff6b9d"
-  showCustomCursor={true}
-/>
+      <MouseTrail 
+        enabled={!isPlayingReplay}
+        trailLength={150}
+        lineWidth={0.02}
+        fadeSpeed={0.93}
+        color="#ff6b9d"
+        showCustomCursor={true}
+      />
+      
+      <FullscreenButton />
     </>
   );
 }

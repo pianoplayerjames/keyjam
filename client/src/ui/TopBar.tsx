@@ -1,4 +1,3 @@
-// client/src/ui/TopBar.tsx
 import React from 'react';
 import { CenteredContainer } from '../shared/components/Layout';
 
@@ -58,7 +57,6 @@ export const TopBar: React.FC<TopBarProps> = ({ playerData, playerStats }) => {
       <CenteredContainer maxWidth="xl">
         <div className="flex items-center justify-between gap-8">
           
-          {/* Left Section - Logo & Branding */}
           <div className="flex items-center">
             <div className="flex items-center gap-3 group">
               <div>
@@ -69,7 +67,6 @@ export const TopBar: React.FC<TopBarProps> = ({ playerData, playerStats }) => {
               </div>
             </div>
 
-            {/* Live Stats with Animations */}
             <div className="hidden xl:flex items-center gap-4 ml-8">
               <div className="flex items-center gap-2 px-3 py-2">
                 <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
@@ -91,10 +88,8 @@ export const TopBar: React.FC<TopBarProps> = ({ playerData, playerStats }) => {
             </div>
           </div>
 
-          {/* Right Section - User Profile & Status */}
           <div className="flex items-center gap-4">
             
-            {/* Performance Stats */}
             <div className="hidden md:flex items-center gap-4 px-4 py-1 rounded bg-slate-900 border border-black/50 shadow-sm backdrop-blur-sm">
               <div className="text-center">
                 <div className="text-sm font-bold text-green-400">{calculateWinRate()}%</div>
@@ -128,13 +123,11 @@ export const TopBar: React.FC<TopBarProps> = ({ playerData, playerStats }) => {
              )}
            </div>
 
-           {/* User Profile Card */}
            <div className="flex items-center gap-3 px-2 py-1 backdrop-blur-sm hover:from-white/10 hover:to-white/15 transition-all duration-300 cursor-pointer group">
              <div className="relative">
                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg group-hover:scale-110 transition-transform duration-200">
                  👤
                </div>
-               {/* Online Status Indicator */}
                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-slate-900 animate-pulse"></div>
              </div>
              <div className="hidden sm:block">
@@ -154,7 +147,6 @@ export const TopBar: React.FC<TopBarProps> = ({ playerData, playerStats }) => {
          </div>
        </div>
 
-       {/* Mobile Stats Row */}
        <div className="xl:hidden mt-3 flex items-center justify-center gap-4">
          <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 rounded-lg border border-green-500/20">
            <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></div>
