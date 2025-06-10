@@ -21,6 +21,7 @@ import ReplayBrowser from '@/pages/replay/components/ReplayBrowser';
 import ArcadeMenu from '@/pages/arcade';
 import { AnimatedBackground } from '@/shared/components/AnimatedBackground';
 import LeftNav from '@/ui/LeftNav';
+import { ArenaPage } from '@/pages/online/Arena';
 
 const SimpleLoading = () => (
   <group>
@@ -149,7 +150,7 @@ function App() {
                   setMenuState(mode === 'time' ? 'time-selection' : 'score-selection');
                 }} />} />
                 <Route path="/replays" element={<div className="h-full"><ReplayBrowser isVisible={true} onClose={() => navigate('/')} /></div>} />
-                {/* <Route path="/settings" element={<SettingsMenu onBack={() => navigate('/')} />} /> */}
+                <Route path="/arena/:id" element={<ArenaPage />} />
             </Routes>
           </div>
         </div>
