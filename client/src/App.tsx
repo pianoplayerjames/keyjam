@@ -1,5 +1,6 @@
-import { useEffect, Suspense, useMemo, useState } from 'react';
+import { Suspense, useMemo, useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import '@/App.css';
 import Game from '@/stage/Game';
 import Transition from '@/shared/components/Transition';
@@ -41,8 +42,8 @@ function App() {
   const { gameState, gameConfig, setGameConfig, setGameState } = useGameStore();
   const { menuState, setMenuState, isTransitioning, setIsTransitioning } = useMenuStore();
   const isPlayingReplay = useReplayStore((state) => state.isPlaying);
+  const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState<'career' | 'arcade' | 'online' | 'practice' | 'replays' | 'settings'>('online');
   const [playerStats, setPlayerStats] = useState<PlayerStats | null>(null);
   const [playerData] = useState({
     username: 'RhythmMaster',
@@ -100,43 +101,11 @@ function App() {
     setIsTransitioning(false);
   };
 
-  const handleGameStart = () => {
-    setGameConfig(localGameConfig);
-    setGameState('in-transition');
-  };
-
   const handleSelectSong = (songId: string) => {
     const newConfig = { ...localGameConfig, mode: 'arcade' as const, subMode: 'arcade' as const, songId };
     setLocalGameConfig(newConfig);
     handleStartGameWithConfig(newConfig);
   };
-
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 'career':
-        return <CareerMenu onBack={() => {}} />;
-      case 'arcade':
-        return <ArcadeMenu onBack={() => setActiveTab('career')} onSelectSong={handleSelectSong} />;
-      case 'online':
-        return <OnlinePortal onBack={() => setActiveTab('career')} onStartGame={(config) => {
-          const newConfig = { ...localGameConfig, mode: config.mode || 'online', subMode: config.subMode || config.gameMode || 'arena', difficulty: config.difficulty || 50 };
-          setLocalGameConfig(newConfig);
-          handleStartGameWithConfig(newConfig);
-        }} />;
-      case 'practice':
-        return <PractiseMenu onBack={() => setActiveTab('career')} onSelectMode={(mode) => {
-          setLocalGameConfig(prev => ({ ...prev, mode: 'practise', subMode: mode }));
-          setMenuState(mode === 'time' ? 'time-selection' : 'score-selection');
-        }} />;
-      case 'replays':
-        return <div className="h-full"><ReplayBrowser isVisible={true} onClose={() => setActiveTab('career')} /></div>;
-      case 'settings':
-        return <SettingsMenu onBack={() => setActiveTab('career')} />;
-      default:
-        return null;
-    }
-  };
-
 
   if (gameState === 'game') {
     return <Game onBackToMenu={handleBackToMenu} />;
@@ -169,9 +138,19 @@ function App() {
         <AnimatedBackground />
         <div className="relative z-10 flex flex-col h-screen">
           <TopBar playerData={playerData} playerStats={playerStats} />
-          <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+          <Navigation />
           <div className="flex-grow relative overflow-hidden">
-            {renderTabContent()}
+            <Routes>
+                <Route path="/" element={<OnlinePortal onBack={() => navigate('/')} onStartGame={(config) => handleStartGameWithConfig(config)} />} />
+                <Route path="/career" element={<CareerMenu onBack={() => navigate('/')} />} />
+                <Route path="/arcade" element={<ArcadeMenu onBack={() => navigate('/')} onSelectSong={handleSelectSong} />} />
+                <Route path="/practice" element={<PractiseMenu onBack={() => navigate('/')} onSelectMode={(mode) => {
+                  setLocalGameConfig(prev => ({ ...prev, mode: 'practise', subMode: mode }));
+                  setMenuState(mode === 'time' ? 'time-selection' : 'score-selection');
+                }} />} />
+                <Route path="/replays" element={<div className="h-full"><ReplayBrowser isVisible={true} onClose={() => navigate('/')} /></div>} />
+                {/* <Route path="/settings" element={<SettingsMenu onBack={() => navigate('/')} />} /> */}
+            </Routes>
           </div>
         </div>
       </div>

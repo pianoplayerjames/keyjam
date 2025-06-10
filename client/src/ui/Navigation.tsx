@@ -1,22 +1,20 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 
 interface Tab {
   id: string;
+  path: string;
   label: string;
   icon: string;
   color: string;
   description: string;
 }
 
-interface NavigationProps {
-  activeTab: string;
-  onTabChange: (tabId: string) => void;
-}
-
-export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
+export const Navigation: React.FC = () => {
   const tabs: Tab[] = [
     { 
       id: 'online', 
+      path: '/', 
       label: 'Online Multiplayer', 
       icon: '🌎', 
       color: 'bg-gradient-to-r from-blue-500 to-indigo-600',
@@ -24,6 +22,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
     },
     { 
       id: 'career', 
+      path: '/career', 
       label: 'Solo Career', 
       icon: '🚀', 
       color: 'bg-gradient-to-r from-pink-500 to-purple-600',
@@ -31,13 +30,15 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
     },
     { 
       id: 'arcade', 
+      path: '/arcade', 
       label: 'Arcade Mode', 
-      icon: '🎵', 
+      icon: '🕹️', 
       color: 'bg-gradient-to-r from-teal-500 to-cyan-600',
       description: 'Select your own songs'
     },
     { 
       id: 'practice', 
+      path: '/practice', 
       label: 'Training', 
       icon: '🎯', 
       color: 'bg-gradient-to-r from-green-500 to-emerald-600',
@@ -45,6 +46,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
     },
     { 
       id: 'replays', 
+      path: '/replays', 
       label: 'Replays', 
       icon: '🎬', 
       color: 'bg-gradient-to-r from-orange-500 to-red-600',
@@ -69,53 +71,56 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
       <div className="px-4">
         <div className="flex justify-center overflow-x-auto">
           {tabs.map((tab) => {
-            const isActive = activeTab === tab.id;
+            const isActive = location.pathname === tab.path;
             const activeGradient = getActiveColors(tab.color);
             
             return (
-              <button
+              <NavLink
                 key={tab.id}
-                onClick={() => onTabChange(tab.id)}
-                className={`
-                  group relative px-5 py-3 font-medium transition-all duration-300 ease-out 
+                to={tab.path}
+                className={({ isActive }) =>
+                  `group relative px-5 py-3 font-medium transition-all duration-300 ease-out 
                   min-w-max flex items-center gap-3 text-white
-                  ${isActive 
-                    ? `${tab.color} shadow-lg` 
-                    : `hover:${tab.color} hover:shadow-md hover:bg-opacity-80`
-                  }
-                `}
+                  ${
+                    isActive
+                      ? `${tab.color} shadow-lg`
+                      : `hover:${tab.color} hover:shadow-md hover:bg-opacity-80`
+                  }`
+                }
               >
-                <span className="text-xl transition-transform duration-200 scale-150">
-                  {tab.icon}
-                </span>
-                <div className="text-left">
-                  <div className={`font-semibold transition-colors duration-200 ${
-                    isActive ? 'text-white' : 'text-gray-200 group-hover:text-white'
-                  }`}>
-                    {tab.label}
-                  </div>
-                  <div className={`text-xs transition-colors duration-200 ${
-                    isActive ? 'text-gray-100' : 'text-gray-400 group-hover:text-gray-200'
-                  }`}>
-                    {tab.description}
-                  </div>
-                </div>
-                
-                {/* Active indicator - positioned at the very bottom */}
-                {isActive && (
-                  <div className={`
-                    absolute bottom-0 left-0 w-full h-1 
-                    bg-gradient-to-r ${activeGradient}
-                    shadow-lg z-10
-                  `} />
+                {({ isActive }) => (
+                  <>
+                    <span className="text-xl transition-transform duration-200 scale-150">
+                      {tab.icon}
+                    </span>
+                    <div className="text-left">
+                      <div className={`font-semibold transition-colors duration-200 ${
+                        isActive ? 'text-white' : 'text-gray-200 group-hover:text-white'
+                      }`}>
+                        {tab.label}
+                      </div>
+                      <div className={`text-xs transition-colors duration-200 ${
+                        isActive ? 'text-gray-100' : 'text-gray-400 group-hover:text-gray-200'
+                      }`}>
+                        {tab.description}
+                      </div>
+                    </div>
+                    
+                    {isActive && (
+                      <div className={`
+                        absolute bottom-0 left-0 w-full h-1 
+                        bg-gradient-to-r ${activeGradient}
+                        shadow-lg z-10
+                      `} />
+                    )}
+                    
+                    <div className={`
+                      absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300
+                      ${tab.color} rounded-sm
+                    `} />
+                  </>
                 )}
-                
-                {/* Hover glow effect */}
-                <div className={`
-                  absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300
-                  ${tab.color} rounded-sm
-                `} />
-              </button>
+              </NavLink>
             );
           })}
         </div>
