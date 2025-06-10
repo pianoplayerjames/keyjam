@@ -27,7 +27,7 @@ const MainMenu = () => {
   const { menuState, setMenuState } = useMenuStore();
   const { gameConfig, setGameConfig, setGameState } = useGameStore();
   
-  const [activeTab, setActiveTab] = useState<'career' | 'arcade' | 'online' | 'practice' | 'replays' | 'settings'>('career');
+  const [activeTab, setActiveTab] = useState<'career' | 'arcade' | 'online' | 'practice' | 'replays' | 'settings'>('online');
   const [playerStats, setPlayerStats] = useState<PlayerStats | null>(null);
   const [playerData] = useState({
     username: 'RhythmMaster',

@@ -395,14 +395,13 @@ const OnlinePortal: React.FC<OnlinePortalProps> = ({ onBack, onStartGame }) => {
        );
      default:
        return (
-         <MainPortal 
-           friends={friends} 
-           upcomingArenas={upcomingArenas} 
-           onNavigate={setCurrentSection} 
-           onStartGame={onStartGame} 
-           onViewArena={handleViewArena}
-           getArenaTypeColor={getArenaTypeColor} 
-         />
+  <MainPortal 
+    upcomingArenas={upcomingArenas} 
+    onNavigate={setCurrentSection} 
+    onStartGame={onStartGame} 
+    onViewArena={handleViewArena}
+    getArenaTypeColor={getArenaTypeColor} 
+  />
        );
    }
  };

@@ -16,6 +16,13 @@ interface NavigationProps {
 export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
   const tabs: Tab[] = [
     { 
+      id: 'online', 
+      label: 'Online Multiplayer', 
+      icon: '🌎', 
+      color: 'bg-gradient-to-r from-blue-500 to-indigo-600',
+      description: 'Play with others worldwide'
+    },
+    { 
       id: 'career', 
       label: 'Solo Career', 
       icon: '🚀', 
@@ -28,13 +35,6 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }
       icon: '🎵', 
       color: 'bg-gradient-to-r from-teal-500 to-cyan-600',
       description: 'Select your own songs'
-    },
-    { 
-      id: 'online', 
-      label: 'Online Multiplayer', 
-      icon: '🌎', 
-      color: 'bg-gradient-to-r from-blue-500 to-indigo-600',
-      description: 'Play with others worldwide'
     },
     { 
       id: 'practice', 
