@@ -37,12 +37,12 @@ export const Navigation: React.FC = () => {
       description: 'Select your own songs'
     },
     { 
-      id: 'practice', 
-      path: '/practice', 
-      label: 'Training', 
-      icon: '🎯', 
+      id: 'training', 
+      path: '/training', 
+      label: 'Training Hub', 
+      icon: '🎓', 
       color: 'bg-gradient-to-r from-green-500 to-emerald-600',
-      description: 'Tutorials & Skill Games'
+      description: 'Lessons, Skills & Analysis'
     },
     { 
       id: 'replays', 

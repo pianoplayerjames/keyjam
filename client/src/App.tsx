@@ -13,10 +13,7 @@ import { TopBar } from '@/ui/TopBar';
 import { Navigation } from '@/ui/Navigation';
 import CareerMenu from '@/pages/career';
 import OnlinePortal from '@/pages/online/Multiplayer';
-import PractiseMenu from '@/pages/training/Practise';
-import DifficultyMenu from '@/pages/training/Difficulty';
-import TimeSelectionMenu from '@/pages/training/TimeSelection';
-import ScoreSelectionMenu from '@/pages/training/ScoreSelection';
+import Training from '@/pages/training';
 import ReplayBrowser from '@/pages/replay/components/ReplayBrowser';
 import ArcadeMenu from '@/pages/arcade';
 import { AnimatedBackground } from '@/shared/components/AnimatedBackground';
@@ -145,7 +142,7 @@ function App() {
                 <Route path="/" element={<OnlinePortal onBack={() => navigate('/')} onStartGame={(config) => handleStartGameWithConfig(config)} />} />
                 <Route path="/career" element={<CareerMenu onBack={() => navigate('/')} />} />
                 <Route path="/arcade" element={<ArcadeMenu onBack={() => navigate('/')} onSelectSong={handleSelectSong} />} />
-                <Route path="/practice" element={<PractiseMenu onBack={() => navigate('/')} onSelectMode={(mode) => {
+                <Route path="/training" element={<Training onBack={() => navigate('/')} onSelectMode={(mode) => {
                   setLocalGameConfig(prev => ({ ...prev, mode: 'practise', subMode: mode }));
                   setMenuState(mode === 'time' ? 'time-selection' : 'score-selection');
                 }} />} />
