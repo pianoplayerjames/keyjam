@@ -1,31 +1,32 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import tailwindcss from '@tailwindcss/vite'
+import path from 'path'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss()
   ],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
   server: {
-    // This is the default, but it's good to be explicit
-    // This makes the server accessible from your host machine
     host: true,
-    port: 5173, // This is the port you're exposing in Docker
-    // This is the crucial part for HMR to work with Nginx
+    port: 5173,
     hmr: {
       clientPort: 80,
     },
     watch: {
-      // Required for live-reloading to work in some containerized environments
       usePolling: true,
     }
   },
     theme: {
     extend: {
       margin: {
-        '18': '4.5rem', // 72px to match your nav width
+        '18': '4.5rem',
       }
     }
   }
