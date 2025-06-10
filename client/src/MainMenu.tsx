@@ -3,7 +3,7 @@ import { Canvas } from '@react-three/fiber';
 import { TopBar } from './ui/TopBar';
 import { Navigation } from './ui/Navigation';
 import CareerMenu from './career/menus/CareerMenu';
-import OnlinePortal from './online/OnlinePortal';
+import OnlinePortal from './online';
 import PractiseMenu from './training/menus/PractiseMenu';
 import SettingsMenu from './settings/menus/SettingsMenu';
 import DifficultyMenu from './training/menus/DifficultyMenu';

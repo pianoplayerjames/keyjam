@@ -1,7 +1,6 @@
-import { useEffect, Suspense, useMemo } from 'react';
+import { useEffect, Suspense, useMemo, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import Game from './stage/Game';
-import MainMenu from './MainMenu';
 import Transition from './shared/components/Transition';
 import PulsingBackground from './shared/components/PulsingBackground';
 import { useGameStore } from './shared/stores/gameStore';
@@ -9,6 +8,19 @@ import { useMenuStore } from './shared/stores/menuStore';
 import { useReplayStore } from './shared/stores/replayStore';
 import ReplayPlayer from './replay/components/ReplayPlayer';
 import './App.css';
+import { TopBar } from './ui/TopBar';
+import { Navigation } from './ui/Navigation';
+import CareerMenu from './career/menus/CareerMenu';
+import MainPortal from './online';
+import PractiseMenu from './training/menus/PractiseMenu';
+import SettingsMenu from './settings/menus/SettingsMenu';
+import DifficultyMenu from './training/menus/DifficultyMenu';
+import TimeSelectionMenu from './training/menus/TimeSelectionMenu';
+import ScoreSelectionMenu from './training/menus/ScoreSelectionMenu';
+import ReplayBrowser from './replay/components/ReplayBrowser';
+import ArcadeMenu from './arcade/menus/ArcadeMenu';
+import { AnimatedBackground } from './shared/components/AnimatedBackground';
+import LeftNav from './ui/LeftNav';
 
 const SimpleLoading = () => (
   <group>
@@ -19,19 +31,60 @@ const SimpleLoading = () => (
   </group>
 );
 
-function App() {
-  const gameState = useGameStore((state) => state.gameState);
-  const gameConfig = useGameStore((state) => state.gameConfig);
-  const setGameConfig = useGameStore((state) => state.setGameConfig);
-  const setGameState = useGameStore((state) => state.setGameState);
+interface PlayerStats {
+  totalReplays: number;
+  bestScore: number;
+  bestAccuracy: number;
+  totalPlayTime: number;
+}
 
-  const isTransitioning = useMenuStore((state) => state.isTransitioning);
-  const setIsTransitioning = useMenuStore((state) => state.setIsTransitioning);
-  const setMenuState = useMenuStore((state) => state.setMenuState);
-  
+function App() {
+  const { gameState, gameConfig, setGameConfig, setGameState } = useGameStore();
+  const { menuState, setMenuState, isTransitioning, setIsTransitioning } = useMenuStore();
   const isPlayingReplay = useReplayStore((state) => state.isPlaying);
 
-  const handleStartGame = (config: typeof gameConfig) => {
+  const [activeTab, setActiveTab] = useState<'career' | 'arcade' | 'online' | 'practice' | 'replays' | 'settings'>('online');
+  const [playerStats, setPlayerStats] = useState<PlayerStats | null>(null);
+  const [playerData] = useState({
+    username: 'RhythmMaster',
+    rank: 'Diamond',
+    elo: 1847,
+    level: 28,
+    wins: 156,
+    losses: 89,
+    draws: 12,
+    status: 'online' as const
+  });
+
+  const [localGameConfig, setLocalGameConfig] = useState({
+    ...gameConfig,
+    songId: ''
+  });
+
+  useEffect(() => {
+    try {
+      const storedReplays = localStorage.getItem('rhythm-game-replays');
+      const replays = storedReplays ? JSON.parse(storedReplays).state.savedReplays : [];
+
+      if (replays && replays.length > 0) {
+        const bestScore = Math.max(...replays.map((r: any) => r.metadata.finalScore));
+        const bestAccuracy = Math.max(...replays.map((r: any) => r.metadata.accuracy));
+        const totalPlayTime = replays.reduce((sum: number, r: any) => sum + r.duration, 0);
+
+        setPlayerStats({
+          totalReplays: replays.length,
+          bestScore,
+          bestAccuracy,
+          totalPlayTime
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load player stats:', error);
+    }
+  }, []);
+
+
+  const handleStartGameWithConfig = (config: typeof gameConfig) => {
     setGameConfig(config);
     setIsTransitioning(true);
     setGameState('in-transition');
@@ -48,8 +101,82 @@ function App() {
     setIsTransitioning(false);
   };
 
+  const handleGameStart = () => {
+    setGameConfig(localGameConfig);
+    setGameState('in-transition');
+  };
+
+  const handleSelectSong = (songId: string) => {
+    const newConfig = { ...localGameConfig, mode: 'arcade' as const, subMode: 'arcade' as const, songId };
+    setLocalGameConfig(newConfig);
+    handleStartGameWithConfig(newConfig);
+  };
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'career':
+        return <CareerMenu onBack={() => {}} />;
+      case 'arcade':
+        return <ArcadeMenu onBack={() => setActiveTab('career')} onSelectSong={handleSelectSong} />;
+      case 'online':
+        return <MainPortal onBack={() => setActiveTab('career')} onStartGame={(config) => {
+          const newConfig = { ...localGameConfig, mode: config.mode || 'online', subMode: config.subMode || config.gameMode || 'arena', difficulty: config.difficulty || 50 };
+          setLocalGameConfig(newConfig);
+          handleStartGameWithConfig(newConfig);
+        }} />;
+      case 'practice':
+        return <PractiseMenu onBack={() => setActiveTab('career')} onSelectMode={(mode) => {
+          setLocalGameConfig(prev => ({ ...prev, mode: 'practise', subMode: mode }));
+          setMenuState(mode === 'time' ? 'time-selection' : 'score-selection');
+        }} />;
+      case 'replays':
+        return <div className="h-full"><ReplayBrowser isVisible={true} onClose={() => setActiveTab('career')} /></div>;
+      case 'settings':
+        return <SettingsMenu onBack={() => setActiveTab('career')} />;
+      default:
+        return null;
+    }
+  };
+
+
   if (gameState === 'game') {
     return <Game onBackToMenu={handleBackToMenu} />;
+  }
+
+  const renderMainMenu = () => {
+    if (menuState === 'time-selection' || menuState === 'score-selection' || menuState === 'difficulty') {
+      return (
+        <div className="relative w-screen h-screen overflow-hidden">
+          <Canvas camera={{ position: [0, 0, 10], fov: 60 }} className="absolute inset-0">
+            <Suspense fallback={null}>
+              <AnimatedBackground />
+            </Suspense>
+          </Canvas>
+          <div className="absolute inset-0 z-10">
+            {menuState === 'time-selection' && <TimeSelectionMenu onBack={() => setMenuState('main')} onSelectTime={(timeLimit) => {
+              setLocalGameConfig(prev => ({ ...prev, timeLimit }));
+              setMenuState('difficulty');
+            }} />}
+            {menuState === 'score-selection' && <ScoreSelectionMenu onBack={() => setMenuState('main')} />}
+            {menuState === 'difficulty' && <DifficultyMenu onBack={() => setMenuState(localGameConfig.subMode === 'time' ? 'time-selection' : 'score-selection')} />}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="fixed inset-0 z-50">
+        <LeftNav />
+        <AnimatedBackground />
+        <div className="relative z-10 flex flex-col h-screen">
+          <TopBar playerData={playerData} playerStats={playerStats} />
+          <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+          <div className="flex-grow relative overflow-hidden">
+            {renderTabContent()}
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -64,7 +191,7 @@ function App() {
           <PulsingBackground />
           <ambientLight intensity={0.8} />
           <directionalLight position={[10, 10, 5]} intensity={0.5} />
-          
+
           {gameState === 'in-transition' && (
             <Transition
               onTransitionComplete={handleTransitionComplete}
@@ -74,9 +201,7 @@ function App() {
         </Suspense>
       </Canvas>
 
-      {gameState === 'menu' && (
-        <MainMenu />
-      )}
+      {gameState === 'menu' && renderMainMenu()}
     </div>
   );
 }
