@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useGameStore } from '../../shared/stores/gameStore'
 import { ComplexityManager } from '../../shared/utils/ComplexityManager'
-import { replayRecorder } from '../../replay/ReplayRecorder';
+import { replayRecorder } from '../../pages/replay/ReplayRecorder';
 
 const allLetters = '12345678';
 

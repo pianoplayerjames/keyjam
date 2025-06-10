@@ -20,7 +20,7 @@ import KeyboardHandler from './components/KeyboardHandler'
 import TutorialUI from './ui/TutorialUI'
 import { useGameStore } from '../shared/stores/gameStore'
 import { useReplayStore } from '../shared/stores/replayStore'
-import { replayRecorder } from '../replay/ReplayRecorder'
+import { replayRecorder } from '../pages/replay/ReplayRecorder'
 
 interface GameProps {
   onBackToMenu: () => void

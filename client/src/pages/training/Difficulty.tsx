@@ -1,6 +1,6 @@
 // client/src/menus/DifficultyMenu.tsx
-import { useGameStore } from '../../shared/stores/gameStore';
-import { useMenuStore } from '../../shared/stores/menuStore';
+import { useGameStore } from '@/shared/stores/gameStore';
+import { useMenuStore } from '@/shared/stores/menuStore';
 
 interface DifficultyMenuProps {
   onBack: () => void;

@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { useGameStore } from '../../shared/stores/gameStore'
 import { useReplayStore } from '../../shared/stores/replayStore'
 import { ComplexityManager, type PatternNote } from '../../shared/utils/ComplexityManager'
-import { replayRecorder } from '../../replay/ReplayRecorder'
+import { replayRecorder } from '../../pages/replay/ReplayRecorder'
 import { songs } from '../../songs/data/song-data';
 
 const allLetters = '12345678';

@@ -2,8 +2,8 @@ import React, { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Text, RoundedBox } from '@react-three/drei';
 import * as THREE from 'three';
-import { useGameStore } from '../../shared/stores/gameStore';
-import { useMenuStore } from '../../shared/stores/menuStore';
+import { useGameStore } from '@/shared/stores/gameStore';
+import { useMenuStore } from '@/shared/stores/menuStore';
 
 interface ScoreSelectionMenuProps {
   onBack: () => void;

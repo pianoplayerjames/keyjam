@@ -1,26 +1,25 @@
 import { useEffect, Suspense, useMemo, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import Game from './stage/Game';
-import Transition from './shared/components/Transition';
-import PulsingBackground from './shared/components/PulsingBackground';
-import { useGameStore } from './shared/stores/gameStore';
-import { useMenuStore } from './shared/stores/menuStore';
-import { useReplayStore } from './shared/stores/replayStore';
-import ReplayPlayer from './replay/components/ReplayPlayer';
-import './App.css';
-import { TopBar } from './ui/TopBar';
-import { Navigation } from './ui/Navigation';
-import CareerMenu from './career/menus/CareerMenu';
-import MainPortal from './online';
-import PractiseMenu from './training/menus/PractiseMenu';
-import SettingsMenu from './settings/menus/SettingsMenu';
-import DifficultyMenu from './training/menus/DifficultyMenu';
-import TimeSelectionMenu from './training/menus/TimeSelectionMenu';
-import ScoreSelectionMenu from './training/menus/ScoreSelectionMenu';
-import ReplayBrowser from './replay/components/ReplayBrowser';
-import ArcadeMenu from './arcade/menus/ArcadeMenu';
-import { AnimatedBackground } from './shared/components/AnimatedBackground';
-import LeftNav from './ui/LeftNav';
+import '@/App.css';
+import Game from '@/stage/Game';
+import Transition from '@/shared/components/Transition';
+import PulsingBackground from '@/shared/components/PulsingBackground';
+import { useGameStore } from '@/shared/stores/gameStore';
+import { useMenuStore } from '@/shared/stores/menuStore';
+import { useReplayStore } from '@/shared/stores/replayStore';
+import ReplayPlayer from '@/pages/replay/components/ReplayPlayer';
+import { TopBar } from '@/ui/TopBar';
+import { Navigation } from '@/ui/Navigation';
+import CareerMenu from '@/pages/career';
+import OnlinePortal from '@/pages/online/Multiplayer';
+import PractiseMenu from '@/pages/training/Practise';
+import DifficultyMenu from '@/pages/training/Difficulty';
+import TimeSelectionMenu from '@/pages/training/TimeSelection';
+import ScoreSelectionMenu from '@/pages/training/ScoreSelection';
+import ReplayBrowser from '@/pages/replay/components/ReplayBrowser';
+import ArcadeMenu from '@/pages/arcade';
+import { AnimatedBackground } from '@/shared/components/AnimatedBackground';
+import LeftNav from '@/ui/LeftNav';
 
 const SimpleLoading = () => (
   <group>
@@ -119,7 +118,7 @@ function App() {
       case 'arcade':
         return <ArcadeMenu onBack={() => setActiveTab('career')} onSelectSong={handleSelectSong} />;
       case 'online':
-        return <MainPortal onBack={() => setActiveTab('career')} onStartGame={(config) => {
+        return <OnlinePortal onBack={() => setActiveTab('career')} onStartGame={(config) => {
           const newConfig = { ...localGameConfig, mode: config.mode || 'online', subMode: config.subMode || config.gameMode || 'arena', difficulty: config.difficulty || 50 };
           setLocalGameConfig(newConfig);
           handleStartGameWithConfig(newConfig);

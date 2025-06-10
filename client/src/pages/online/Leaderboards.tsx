@@ -1,6 +1,5 @@
-// client/src/online/Leaderboards.tsx
 import React, { useState, useEffect } from 'react';
-import { useOnlineStore } from '../../shared/stores/onlineStore';
+import { useOnlineStore } from '@/shared/stores/onlineStore';
 
 interface LeaderboardsProps {
   onBack: () => void;

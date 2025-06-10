@@ -2,19 +2,19 @@
 import React, { useState, useRef, useCallback, useEffect, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
-import { useReplayStore } from '../../shared/stores/replayStore';
+import { useReplayStore } from '../../../shared/stores/replayStore';
 import { ReplayEngine } from '../ReplayEngine';
-import FallingLetter from '../../stage/components/FallingNotes';
-import Fretboard from '../../stage/components/Fretboard';
-import PulsingBackground from '../../shared/components/PulsingBackground';
-import SparklesEffect from '../../stage/components/SparklesEffect';
-import FeedbackText3D from '../../stage/components/FeedbackText3D';
-import { Veronica } from '../../shared/components/Veronica';
-import HealthUI from '../../stage/ui/HealthUI';
-import TimeUI from '../../stage/ui/TimeUI';
-import HitZoneIndicator from '../../stage/components/HitZoneIndicator';
-import TimingDisplay from '../../stage/components/TimingDisplay';
-import Stamp from '../../stage/components/Stamp';
+import FallingLetter from '../../../stage/components/FallingNotes';
+import Fretboard from '../../../stage/components/Fretboard';
+import PulsingBackground from '../../../shared/components/PulsingBackground';
+import SparklesEffect from '../../../stage/components/SparklesEffect';
+import FeedbackText3D from '../../../stage/components/FeedbackText3D';
+import { Veronica } from '../../../shared/components/Veronica';
+import HealthUI from '../../../stage/ui/HealthUI';
+import TimeUI from '../../../stage/ui/TimeUI';
+import HitZoneIndicator from '../../../stage/components/HitZoneIndicator';
+import TimingDisplay from '../../../stage/components/TimingDisplay';
+import Stamp from '../../../stage/components/Stamp';
 
 // Re-export ReplayEngine to fix the circular dependency with the store
 export { ReplayEngine };

@@ -1,7 +1,7 @@
 // client/src/career/menus/CareerMenu.tsx
-import { useGameStore } from '../../shared/stores/gameStore';
-import { useMenuStore } from '../../shared/stores/menuStore';
-import { CenteredContainer } from '../../shared/components/Layout';
+import { useGameStore } from '@/shared/stores/gameStore';
+import { useMenuStore } from '@/shared/stores/menuStore';
+import { CenteredContainer } from '@/shared/components/Layout';
 
 interface CareerMenuProps {
   onBack: () => void;

@@ -1,4 +1,3 @@
-// client/src/online/PlayerProfile.tsx
 import React, { useState } from 'react';
 
 interface PlayerProfileProps {

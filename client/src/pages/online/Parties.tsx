@@ -1,7 +1,6 @@
-// client/src/online/PartySystem.tsx
 import React, { useState } from 'react';
-import { useOnlineStore } from '../../shared/stores/onlineStore';
-import type { Party, PartyMember } from '../../shared/stores/onlineStore';
+import { useOnlineStore } from '@/shared/stores/onlineStore';
+import type { Party, PartyMember } from '@/shared/stores/onlineStore';
 
 interface PartySystemProps {
   onBack: () => void;

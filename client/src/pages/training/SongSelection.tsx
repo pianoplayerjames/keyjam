@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { songs } from '../songs/song-data';
-import { useGameStore } from '../../shared/stores/gameStore';
-import { useMenuStore } from '../../shared/stores/menuStore';
+import { songs } from '@/songs/song-data';
+import { useGameStore } from '@/shared/stores/gameStore';
+import { useMenuStore } from '@/shared/stores/menuStore';
 
 interface SongSelectionMenuProps {
   onBack: () => void;

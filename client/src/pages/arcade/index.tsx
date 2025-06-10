@@ -1,7 +1,6 @@
-// client/src/arcade/menus/ArcadeMenu.tsx
 import React, { useState, useEffect, useRef } from 'react';
-import { songs } from '../../songs/data/song-data';
-import { CenteredContainer } from '../../shared/components/Layout';
+import { songs } from '@/songs/data/song-data';
+import { CenteredContainer } from '@/shared/components/Layout';
 
 interface ArcadeMenuProps {
   onBack: () => void;

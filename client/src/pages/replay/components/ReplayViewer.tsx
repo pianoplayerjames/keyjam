@@ -4,15 +4,15 @@ import { Canvas } from '@react-three/fiber';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import FallingLetter from '../FallingNotes';
 import Fretboard from '../Fretboard';
-import PulsingBackground from '../../shared/components/PulsingBackground'; // Changed
+import PulsingBackground from '../../../shared/components/PulsingBackground'; // Changed
 import SparklesEffect from '../SparklesEffect';
 import FeedbackText3D from '../FeedbackText3D';
-import { Veronica } from '../../shared/components/Veronica';
+import { Veronica } from '../../../shared/components/Veronica';
 import HealthUI from '../HealthUI';
 import TimeUI from '../TimeUI';
 import HitZoneIndicator from '../HitZoneIndicator';
 import TimingDisplay from '../TimingDisplay';
-import Stamp from '../../stage/components/Stamp';
+import Stamp from '../../../stage/components/Stamp';
 import { ReplayData } from '../ReplayRecorder';
 
 const letters = '12345';

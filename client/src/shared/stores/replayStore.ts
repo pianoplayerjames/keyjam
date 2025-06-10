@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { ReplayData } from '../../replay/ReplayRecorder';
-import { ReplayEngine } from '../../replay/ReplayEngine';
+import { ReplayData } from '../../pages/replay/ReplayRecorder';
+import { ReplayEngine } from '../../pages/replay/ReplayEngine';
 
 interface SavedReplay extends ReplayData {
   id: string;

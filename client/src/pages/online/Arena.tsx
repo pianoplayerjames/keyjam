@@ -1,6 +1,5 @@
-// client/src/online/components/ArenaPage.tsx
 import React, { useState, useEffect, useRef } from 'react';
-import { CenteredContainer } from '../../shared/components/Layout';
+import { CenteredContainer } from '@/shared/components/Layout';
 
 interface Player {
   id: string;

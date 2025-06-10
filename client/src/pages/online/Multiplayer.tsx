@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import ArenasBrowser from './menus/ArenasBrowser';
-import Leaderboards from './menus/Leaderboards';
-import FriendsList from './menus/FriendsList';
-import PlayerProfile from './menus/PlayerProfile';
-import PartySystem from './menus/PartySystem';
-import { ResizableTimetable } from './components/ArenaTimetable';
-import { CenteredContainer } from '../shared/components/Layout';
-import { ArenaPage } from './components/ArenaPage';
+import React, { useState, useEffect } from 'react';
+import Leaderboards from '@/pages/online/Leaderboards';
+import FriendsList from '@/pages/online/Friends';
+import PlayerProfile from '@/pages/online/Profile';
+import PartySystem from '@/pages/online/Parties';
+import { ResizableTimetable } from '@/pages/online/components/ArenaTimetable';
+import { CenteredContainer } from '@/shared/components/Layout';
+import { ArenaPage } from '@/pages/online/Arena';
 
 interface PlayerData { 
   id: string; 
@@ -343,7 +342,6 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
             onJoinArena={handleJoinArena} onLeaveArena={handleLeaveArena} isPlayerInArena={isPlayerInSelectedArena}
           />
         ) : null;
-      case 'arenas': return <ArenasBrowser onBack={() => setCurrentSection('main')} onJoinArena={(id) => onStartGame({ mode: 'online', arenaId: id })} />;
       case 'leaderboards': return <Leaderboards onBack={() => setCurrentSection('main')} />;
       case 'friends': return <FriendsList playerData={playerData} onBack={() => setCurrentSection('main')} onInviteFriend={(id) => console.log('Inviting friend:', id)} />;
       case 'profile': return <PlayerProfile playerData={playerData} onBack={() => setCurrentSection('main')} onUpdateProfile={(data) => setPlayerData({ ...playerData, ...data })} />;

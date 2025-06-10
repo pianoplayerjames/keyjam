@@ -1,7 +1,7 @@
 // client/src/replay/components/ReplayBrowser.tsx
 import React, { useState } from 'react';
-import { useReplayStore } from '../../shared/stores/replayStore';
-import { CenteredContainer } from '../../shared/components/Layout';
+import { useReplayStore } from '../../../shared/stores/replayStore';
+import { CenteredContainer } from '../../../shared/components/Layout';
 import { ReplayData } from '../ReplayRecorder';
 
 interface ReplayBrowserProps {
