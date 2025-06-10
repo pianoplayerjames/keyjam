@@ -54,7 +54,7 @@ export const TopBar: React.FC<TopBarProps> = ({ playerData, playerStats }) => {
 
   return (
     <div className="flex-shrink-0 bg-slate-800/50 py-1 border-0 border-b border-black/50 shadow-2xl">
-      <CenteredContainer maxWidth="xl">
+      <CenteredContainer maxWidth="xl" accountForLeftNav={true}>
         <div className="flex items-center justify-between gap-8">
           
           <div className="flex items-center">
