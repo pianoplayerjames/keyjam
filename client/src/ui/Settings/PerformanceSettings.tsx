@@ -1,10 +1,9 @@
-// client/src/ui/settings/PerformanceSettings.tsx
 import React from 'react';
-import { useSettingsStore } from '../../shared/stores/settingsStore';
-import { SettingsSection } from '../../shared/components/settings/SettingsSection';
-import { ToggleSwitch } from '../../shared/components/settings/ToggleSwitch';
-import { SelectDropdown } from '../../shared/components/settings/SelectDropdown';
-import { SettingsContainer } from '../../shared/components/settings/SettingsContainer';
+import { useSettingsStore } from '@/shared/stores/settingsStore';
+import { SettingsSection } from '@/shared/components/settings/SettingsSection';
+import { ToggleSwitch } from '@/shared/components/settings/ToggleSwitch';
+import { SelectDropdown } from '@/shared/components/settings/SelectDropdown';
+import { SettingsContainer } from '@/shared/components/settings/SettingsContainer';
 
 export const PerformanceSettings: React.FC = () => {
   const { performance, updatePerformanceSettings } = useSettingsStore();

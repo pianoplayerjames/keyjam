@@ -1,4 +1,3 @@
-// client/src/shared/components/settings/ColorPicker.tsx
 import React, { useState } from 'react';
 
 interface ColorPickerProps {

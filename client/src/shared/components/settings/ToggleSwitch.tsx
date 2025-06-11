@@ -1,4 +1,3 @@
-// client/src/shared/components/settings/ToggleSwitch.tsx
 import React from 'react';
 
 interface ToggleSwitchProps {

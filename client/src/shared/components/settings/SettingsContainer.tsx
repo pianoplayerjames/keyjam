@@ -1,4 +1,3 @@
-// client/src/shared/components/settings/SettingsContainer.tsx
 import React from 'react';
 
 interface SettingsContainerProps {

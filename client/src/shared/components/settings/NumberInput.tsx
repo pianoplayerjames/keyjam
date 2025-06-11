@@ -1,4 +1,3 @@
-// client/src/shared/components/settings/NumberInput.tsx
 import React from 'react';
 
 interface NumberInputProps {

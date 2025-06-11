@@ -1,4 +1,3 @@
-// client/src/shared/components/settings/SettingsSection.tsx
 import React from 'react';
 
 interface SettingsSectionProps {

@@ -1,9 +1,8 @@
-// client/src/ui/settings/LanguageSettings.tsx
 import React from 'react';
-import { useSettingsStore } from '../../shared/stores/settingsStore';
-import { SettingsSection } from '../../shared/components/settings/SettingsSection';
-import { SelectDropdown } from '../../shared/components/settings/SelectDropdown';
-import { SettingsContainer } from '../../shared/components/settings/SettingsContainer';
+import { useSettingsStore } from '@/shared/stores/settingsStore';
+import { SettingsSection } from '@/shared/components/settings/SettingsSection';
+import { SelectDropdown } from '@/shared/components/settings/SelectDropdown';
+import { SettingsContainer } from '@/shared/components/settings/SettingsContainer';
 
 export const LanguageSettings: React.FC = () => {
   const { language, updateLanguageSettings } = useSettingsStore();

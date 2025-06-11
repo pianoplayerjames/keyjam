@@ -1,4 +1,3 @@
-// client/src/shared/components/settings/Slider.tsx
 import React from 'react';
 
 interface SliderProps {

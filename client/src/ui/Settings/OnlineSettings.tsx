@@ -1,10 +1,9 @@
-// client/src/ui/settings/OnlineSettings.tsx
 import React from 'react';
-import { useSettingsStore } from '../../shared/stores/settingsStore';
-import { SettingsSection } from '../../shared/components/settings/SettingsSection';
-import { ToggleSwitch } from '../../shared/components/settings/ToggleSwitch';
-import { Slider } from '../../shared/components/settings/Slider';
-import { SettingsContainer } from '../../shared/components/settings/SettingsContainer';
+import { useSettingsStore } from '@/shared/stores/settingsStore';
+import { SettingsSection } from '@/shared/components/settings/SettingsSection';
+import { ToggleSwitch } from '@/shared/components/settings/ToggleSwitch';
+import { Slider } from '@/shared/components/settings/Slider';
+import { SettingsContainer } from '@/shared/components/settings/SettingsContainer';
 
 export const OnlineSettings: React.FC = () => {
   const { online, updateOnlineSettings } = useSettingsStore();
