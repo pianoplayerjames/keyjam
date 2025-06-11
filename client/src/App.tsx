@@ -21,8 +21,8 @@ import { AnimatedBackground } from '@/shared/components/AnimatedBackground';
 import LeftNav from '@/ui/LeftNav';
 import { ArenaPage } from '@/pages/online/Arena';
 import MouseTrail from '@/shared/utils/MouseTrail';
-import { FullscreenButton } from '@/ui/FullscreenButton';
 import { BottomPanel } from '@/ui/BottomPanel/BottomPanel';
+import CommunityForums from '@/pages/social/CommunityForums';
 
 const SimpleLoading = () => (
  <group>
@@ -205,6 +205,7 @@ function App() {
                <Route path="/replays" element={<div className="h-full"><ReplayBrowser isVisible={true} onClose={() => navigate('/')} /></div>} />
                <Route path="/arena/:id" element={<ArenaPage />} />
                <Route path="/online/quick" element={<QuickMatch onBack={() => navigate('/')} onStartGame={(config) => handleStartGameWithConfig(config)} />} />
+               <Route path="/social/forums" element={<CommunityForums onBack={() => navigate('/')} />} />
            </Routes>
          </div>
        </div>
