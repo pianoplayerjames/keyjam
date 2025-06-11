@@ -23,6 +23,8 @@ import { ArenaPage } from '@/pages/online/Arena';
 import MouseTrail from '@/shared/utils/MouseTrail';
 import { BottomPanel } from '@/ui/BottomPanel/BottomPanel';
 import CommunityForums from '@/pages/social/CommunityForums';
+import Leaderboards from '@/pages/online/Leaderboards';
+
 
 const SimpleLoading = () => (
  <group>
@@ -206,6 +208,7 @@ function App() {
                <Route path="/arena/:id" element={<ArenaPage />} />
                <Route path="/online/quick" element={<QuickMatch onBack={() => navigate('/')} onStartGame={(config) => handleStartGameWithConfig(config)} />} />
                <Route path="/social/forums" element={<CommunityForums onBack={() => navigate('/')} />} />
+              <Route path="/online/leaderboards" element={<Leaderboards onBack={() => navigate('/')} />} />
            </Routes>
          </div>
        </div>

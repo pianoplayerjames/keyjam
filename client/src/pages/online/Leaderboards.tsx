@@ -1,434 +1,415 @@
-import React, { useState, useEffect } from 'react';
-import { useOnlineStore } from '@/shared/stores/onlineStore';
+// client/src/pages/online/Leaderboards.tsx
+import React, { useState, useEffect, useMemo } from 'react';
+import { CenteredContainer } from '@/shared/components/Layout';
+
+interface LeaderboardPlayer {
+  rank: number;
+  username: string;
+  elo: number;
+  tier: string;
+  wins: number;
+  losses: number;
+  winRate: number;
+  recentChange: number;
+  country: string;
+  avatar: string;
+  isOnline: boolean;
+  level: number;
+  totalGames: number;
+  streak: number;
+  lastPlayed: Date;
+  badges: string[];
+}
 
 interface LeaderboardsProps {
   onBack: () => void;
 }
 
+const mockLeaderboardData: LeaderboardPlayer[] = Array.from({ length: 500 }, (_, i) => {
+  const ranks = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Master', 'Grandmaster'];
+  const countries = ['🇺🇸', '🇰🇷', '🇯🇵', '🇩🇪', '🇬🇧', '🇫🇷', '🇨🇦', '🇦🇺', '🇸🇪', '🇳🇴'];
+  const names = [
+    'RhythmGod', 'BeatMachine', 'SoundWave', 'PerfectPlayer', 'SpeedDemon', 'ComboKing', 
+    'AccuracyAce', 'NoteMaster', 'VibeChecker', 'FlowState', 'PulseRider', 'EchoWave',
+    'SyncMaster', 'HarmonySeeker', 'TrebleClef', 'NightOwl', 'DawnBreaker', 'TimingPro',
+    'BeatBoss', 'RhythmRuler', 'SoundSavant', 'NoteSavage', 'MelodyMaster', 'BassDrop'
+  ];
+  
+  const baseElo = Math.max(800, 3000 - (i * 4) + Math.random() * 150 - 75);
+  const tier = ranks[Math.min(ranks.length - 1, Math.floor((baseElo - 800) / 350))];
+  const wins = Math.floor(Math.random() * 500) + 50;
+  const losses = Math.floor(Math.random() * 300) + 20;
+  const totalGames = wins + losses;
+  const winRate = (wins / totalGames) * 100;
+  
+  return {
+    rank: i + 1,
+    username: names[Math.floor(Math.random() * names.length)] + (Math.floor(Math.random() * 999) + 1),
+    elo: Math.floor(baseElo),
+    tier,
+    wins,
+    losses,
+    winRate,
+    recentChange: Math.floor(Math.random() * 80) - 40,
+    country: countries[Math.floor(Math.random() * countries.length)],
+    avatar: `/avatars/player${(i % 20) + 1}.png`,
+    isOnline: Math.random() > 0.3,
+    level: Math.floor(baseElo / 50) + Math.floor(Math.random() * 10),
+    totalGames,
+    streak: Math.floor(Math.random() * 15),
+    lastPlayed: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
+    badges: ['🏆', '⚡', '🎯', '🔥'].slice(0, Math.floor(Math.random() * 3))
+  };
+});
+
 const Leaderboards: React.FC<LeaderboardsProps> = ({ onBack }) => {
-  const { leaderboardData, playerData } = useOnlineStore();
   const [activeTab, setActiveTab] = useState<'global' | 'friends' | 'regional'>('global');
-  const [timeRange, setTimeRange] = useState<'daily' | 'weekly' | 'monthly' | 'all-time'>('all-time');
-  const [playerRanking, setPlayerRanking] = useState<typeof leaderboardData[0] | null>(null);
+  const [timeRange, setTimeRange] = useState<'weekly' | 'monthly' | 'alltime'>('alltime');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 50;
+
+  const currentPlayerRank = 127; // Simulated current player rank
+
+  const filteredData = useMemo(() => {
+    let filtered = mockLeaderboardData;
+
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(player => 
+        player.username.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    switch (activeTab) {
+      case 'friends':
+        filtered = filtered.slice(0, 15); // Mock friends
+        break;
+      case 'regional':
+        filtered = filtered.filter(player => player.country === '🇺🇸'); // Mock regional
+        break;
+    }
+
+    return filtered;
+  }, [activeTab, searchQuery]);
+
+  const paginatedData = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredData.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredData, currentPage]);
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
   useEffect(() => {
-    if (playerData) {
-      // Find player's ranking from the store data
-      const ranking = leaderboardData.find(p => p.username === playerData.username);
-      setPlayerRanking(ranking || null);
-    }
-  }, [leaderboardData, playerData, activeTab, timeRange]);
+    setCurrentPage(1);
+  }, [activeTab, searchQuery]);
 
   const getTierColor = (tier: string) => {
-    switch (tier.toLowerCase()) {
-      case 'grandmaster': return '#ff1744';
-      case 'master': return '#ff6b35';
-      case 'diamond': return '#b9f2ff';
-      case 'platinum': return '#e5e4e2';
-      case 'gold': return '#ffd700';
-      case 'silver': return '#c0c0c0';
-      case 'bronze': return '#cd7f32';
-      default: return '#666';
-    }
+    const colors = {
+      'grandmaster': 'text-red-400',
+      'master': 'text-orange-400',
+      'diamond': 'text-cyan-400',
+      'platinum': 'text-gray-300',
+      'gold': 'text-yellow-400',
+      'silver': 'text-gray-400',
+      'bronze': 'text-orange-600'
+    };
+    return colors[tier.toLowerCase() as keyof typeof colors] || 'text-gray-400';
   };
 
-  const getChangeColor = (change: number) => {
-    if (change > 0) return '#4caf50';
-    if (change < 0) return '#f44336';
-    return '#666';
+  const getTierBg = (tier: string) => {
+    const colors = {
+      'grandmaster': 'bg-red-500/10 border-red-500/20',
+      'master': 'bg-orange-500/10 border-orange-500/20',
+      'diamond': 'bg-cyan-500/10 border-cyan-500/20',
+      'platinum': 'bg-gray-300/10 border-gray-300/20',
+      'gold': 'bg-yellow-500/10 border-yellow-500/20',
+      'silver': 'bg-gray-400/10 border-gray-400/20',
+      'bronze': 'bg-orange-600/10 border-orange-600/20'
+    };
+    return colors[tier.toLowerCase() as keyof typeof colors] || 'bg-gray-500/10 border-gray-500/20';
   };
-
-  const getChangeIcon = (change: number) => {
-    if (change > 0) return '↗';
-    if (change < 0) return '↘';
-    return '→';
-  };
-
-  const tabs = [
-    { id: 'global', label: 'Global', icon: '🌍' },
-    { id: 'friends', label: 'Friends', icon: '👥' },
-    { id: 'regional', label: 'Regional', icon: '🏛️' }
-  ];
-
-  const timeRanges = [
-    { id: 'daily', label: 'Today' },
-    { id: 'weekly', label: 'This Week' },
-    { id: 'monthly', label: 'This Month' },
-    { id: 'all-time', label: 'All Time' }
-  ];
-
-  if (!playerData) return <div>Loading...</div>;
 
   return (
-    <div style={{ padding: '20px', height: '100vh', overflow: 'hidden' }}>
-      {/* Header */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '20px',
-        paddingBottom: '15px',
-        borderBottom: '2px solid rgba(255, 255, 255, 0.1)'
-      }}>
-        <button
-          onClick={onBack}
-          style={{
-            background: 'rgba(255, 255, 255, 0.1)',
-            border: '2px solid rgba(255, 255, 255, 0.3)',
-            color: 'white',
-            padding: '8px 15px',
-            borderRadius: '8px',
-            cursor: 'pointer'
-          }}
-        >
-          ← Back
-        </button>
-        
-        <h1 style={{
-          margin: 0,
-          fontSize: '28px',
-          fontWeight: 'bold',
-          background: 'linear-gradient(45deg, #ffd700, #ff6b35)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent'
-        }}>
-          🏆 Leaderboards
-        </h1>
+    <div className="min-h-screen bg-slate-900">
+      <CenteredContainer maxWidth="2xl" accountForLeftNav={true}>
+        {/* Header */}
+        <div className="pt-8 pb-6">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={onBack}
+                className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-gray-300 hover:text-white transition-colors"
+              >
+                ← Back
+              </button>
+              <div>
+                <h1 className="text-4xl font-bold text-white mb-2">Leaderboards</h1>
+                <p className="text-gray-400">See how you stack up against the competition</p>
+              </div>
+            </div>
+          </div>
 
-        <div style={{
-          display: 'flex',
-          gap: '10px'
-        }}>
-          {timeRanges.map(range => (
-            <button
-              key={range.id}
-              onClick={() => setTimeRange(range.id as any)}
-              style={{
-                background: timeRange === range.id ? '#4caf50' : 'rgba(255, 255, 255, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                color: timeRange === range.id ? 'black' : 'white',
-                padding: '6px 12px',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontSize: '12px',
-                fontWeight: 'bold'
-              }}
-            >
-              {range.label}
-            </button>
-          ))}
-        </div>
-      </div>
+          {/* Your Rank Card */}
+          <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-6 mb-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                  <span className="text-2xl">👤</span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white">Your Current Rank</h3>
+                  <p className="text-purple-100">RhythmMaster</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold text-white">#{currentPlayerRank}</div>
+                <div className="text-purple-100">2,347 ELO</div>
+              </div>
+            </div>
+          </div>
 
-      <div style={{ display: 'flex', gap: '20px', height: 'calc(100vh - 120px)' }}>
-        {/* Sidebar */}
-        <div style={{
-          width: '280px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '20px'
-        }}>
-          {/* Tabs */}
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.05)',
-            borderRadius: '15px',
-            padding: '15px',
-            border: '1px solid rgba(255, 255, 255, 0.1)'
-          }}>
-            <h3 style={{ margin: '0 0 15px 0', fontSize: '16px' }}>Categories</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {tabs.map(tab => (
+          {/* Tabs and Controls */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex gap-1 bg-slate-800 rounded-lg p-1">
+              {[
+                { id: 'global', label: 'Global', icon: '🌍' },
+                { id: 'friends', label: 'Friends', icon: '👥' },
+                { id: 'regional', label: 'Regional', icon: '🏛️' }
+              ].map(tab => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  style={{
-                    background: activeTab === tab.id ? 'rgba(76, 175, 80, 0.2)' : 'transparent',
-                    border: activeTab === tab.id ? '1px solid #4caf50' : '1px solid transparent',
-                    color: 'white',
-                    padding: '10px 15px',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    fontSize: '14px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px'
-                  }}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all ${
+                    activeTab === tab.id
+                      ? 'bg-blue-600 text-white shadow-lg'
+                      : 'text-gray-400 hover:text-white hover:bg-slate-700'
+                  }`}
                 >
                   <span>{tab.icon}</span>
                   {tab.label}
                 </button>
               ))}
             </div>
-          </div>
 
-          {/* Your Ranking */}
-          {playerRanking && (
-            <div style={{
-              background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(33, 150, 243, 0.2))',
-              borderRadius: '15px',
-              padding: '20px',
-              border: '2px solid #4caf50'
-            }}>
-              <h3 style={{
-                margin: '0 0 15px 0',
-                fontSize: '16px',
-                color: '#4caf50'
-              }}>
-                📊 Your Ranking
-              </h3>
-              
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '15px',
-                marginBottom: '15px'
-              }}>
-                <div style={{
-                  width: '50px',
-                  height: '50px',
-                  borderRadius: '50%',
-                  background: 'linear-gradient(45deg, #4caf50, #2196f3)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '20px'
-                }}>
-                  👤
-                </div>
-                <div>
-                  <div style={{ fontWeight: 'bold', fontSize: '16px' }}>
-                    #{playerRanking.rank}
-                  </div>
-                  <div style={{
-                    fontSize: '12px',
-                    color: getTierColor(playerRanking.tier),
-                    fontWeight: 'bold'
-                  }}>
-                    {playerRanking.tier}
-                  </div>
-                </div>
+            <div className="flex items-center gap-4">
+              <select
+                value={timeRange}
+                onChange={(e) => setTimeRange(e.target.value as any)}
+                className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:border-blue-500 focus:outline-none"
+              >
+                <option value="weekly">This Week</option>
+                <option value="monthly">This Month</option>
+                <option value="alltime">All Time</option>
+              </select>
+
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search players..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-64 px-4 py-2 pl-10 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
+                />
+                <span className="absolute left-3 top-2.5 text-gray-400">🔍</span>
               </div>
-
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '10px',
-                fontSize: '12px'
-              }}>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontWeight: 'bold', color: '#ffd700' }}>
-                    {playerRanking.elo}
-                  </div>
-                  <div style={{ color: '#ccc' }}>ELO</div>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{
-                    fontWeight: 'bold',
-                    color: getChangeColor(playerRanking.recentChange)
-                  }}>
-                    {getChangeIcon(playerRanking.recentChange)}{Math.abs(playerRanking.recentChange)}
-                  </div>
-                  <div style={{ color: '#ccc' }}>Recent</div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Statistics */}
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.05)',
-            borderRadius: '15px',
-            padding: '15px',
-            border: '1px solid rgba(255, 255, 255, 0.1)'
-          }}>
-            <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#4caf50' }}>
-              📈 Statistics
-            </h4>
-            <div style={{ fontSize: '12px', color: '#ccc', lineHeight: '1.5' }}>
-              <div>Total Players: {leaderboardData.length}</div>
-              <div>Active Today: {leaderboardData.filter(p => p.isOnline).length}</div>
-              <div>Average ELO: {Math.floor(leaderboardData.reduce((sum, p) => sum + p.elo, 0) / leaderboardData.length) || 0}</div>
-              <div>Top Player: {leaderboardData[0]?.elo || 0} ELO</div>
             </div>
           </div>
         </div>
 
-        {/* Main Leaderboard */}
-        <div style={{
-          flex: 1,
-          background: 'rgba(255, 255, 255, 0.05)',
-          borderRadius: '15px',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column'
-        }}>
-          {/* Header */}
-          <div style={{
-            padding: '20px',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-            background: 'rgba(255, 255, 255, 0.02)'
-          }}>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '60px 1fr 100px 120px 100px 80px 100px',
-              gap: '15px',
-              alignItems: 'center',
-              fontSize: '14px',
-              fontWeight: 'bold',
-              color: '#ccc'
-            }}>
-              <div>Rank</div>
-              <div>Player</div>
-              <div>ELO</div>
-              <div>W/L/D</div>
-              <div>Win Rate</div>
-              <div>Change</div>
-              <div>Status</div>
+        {/* Leaderboard Table */}
+        <div className="bg-slate-800 rounded-xl overflow-hidden mb-8">
+          {/* Table Header */}
+          <div className="bg-slate-700 px-6 py-4">
+            <div className="grid grid-cols-12 gap-4 text-sm font-semibold text-gray-300 uppercase tracking-wide">
+              <div className="col-span-1">Rank</div>
+              <div className="col-span-4">Player</div>
+              <div className="col-span-2 text-center">Rating</div>
+              <div className="col-span-2 text-center">Tier</div>
+              <div className="col-span-2 text-center">Win Rate</div>
+              <div className="col-span-1 text-center">Status</div>
             </div>
           </div>
 
-          {/* Leaderboard List */}
-          <div style={{
-            flex: 1,
-            overflowY: 'auto',
-            padding: '10px 20px'
-          }}>
-            {leaderboardData.slice(0, 50).map((player) => (
+          {/* Table Body */}
+          <div className="divide-y divide-slate-700">
+            {paginatedData.map((player, index) => (
               <div
                 key={player.rank}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '60px 1fr 100px 120px 100px 80px 100px',
-                  gap: '15px',
-                  alignItems: 'center',
-                  padding: '12px 0',
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-                  transition: 'all 0.3s ease',
-                  background: player.username === playerData.username ? 
-                    'rgba(76, 175, 80, 0.1)' : 'transparent'
-                }}
-                onMouseEnter={(e) => {
-                  if (player.username !== playerData.username) {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (player.username !== playerData.username) {
-                    e.currentTarget.style.background = 'transparent';
-                  }
-                }}
+                className={`px-6 py-4 hover:bg-slate-700/50 transition-colors ${
+                  player.username.includes('RhythmMaster') ? 'bg-blue-900/20 border-l-4 border-blue-500' : ''
+                }`}
               >
-                {/* Rank */}
-                <div style={{
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  color: player.rank <= 3 ? '#ffd700' : '#fff'
-                }}>
-                  {player.rank <= 3 ? ['🥇', '🥈', '🥉'][player.rank - 1] : `#${player.rank}`}
+                <div className="grid grid-cols-12 gap-4 items-center">
+                  {/* Rank */}
+                  <div className="col-span-1">
+                    <div className={`text-xl font-bold ${
+                      player.rank <= 3 ? 'text-yellow-400' : 'text-white'
+                    }`}>
+                      {player.rank <= 3 ? ['🥇', '🥈', '🥉'][player.rank - 1] : `#${player.rank}`}
+                    </div>
+                  </div>
+
+                  {/* Player */}
+                  <div className="col-span-4">
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                          <span className="text-lg">👤</span>
+                        </div>
+                        {player.isOnline && (
+                          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-slate-800"></div>
+                        )}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className={`font-semibold ${
+                            player.username.includes('RhythmMaster') ? 'text-blue-400' : 'text-white'
+                          }`}>
+                            {player.username}
+                            {player.username.includes('RhythmMaster') && ' (You)'}
+                          </span>
+                          <span className="text-lg">{player.country}</span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-sm text-gray-400">Level {player.level}</span>
+                          {player.badges.map((badge, i) => (
+                            <span key={i} className="text-sm">{badge}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Rating */}
+                  <div className="col-span-2 text-center">
+                    <div className="text-xl font-bold text-yellow-400">
+                      {player.elo.toLocaleString()}
+                    </div>
+                    <div className={`text-sm ${
+                      player.recentChange > 0 ? 'text-green-400' : 
+                      player.recentChange < 0 ? 'text-red-400' : 'text-gray-400'
+                    }`}>
+                      {player.recentChange > 0 ? '+' : ''}{player.recentChange}
+                    </div>
+                  </div>
+
+                  {/* Tier */}
+                  <div className="col-span-2 text-center">
+                    <div className={`inline-flex items-center px-3 py-1 rounded-full border text-sm font-medium ${getTierBg(player.tier)} ${getTierColor(player.tier)}`}>
+                      {player.tier}
+                    </div>
+                  </div>
+
+                  {/* Win Rate */}
+                  <div className="col-span-2 text-center">
+                    <div className="text-lg font-semibold text-white">
+                      {player.winRate.toFixed(1)}%
+                    </div>
+                    <div className="text-sm text-gray-400">
+                      {player.wins}W {player.losses}L
+                    </div>
+                  </div>
+
+                  {/* Status */}
+                  <div className="col-span-1 text-center">
+                    <div className={`w-3 h-3 rounded-full mx-auto ${
+                      player.isOnline ? 'bg-green-500' : 'bg-gray-500'
+                    }`}></div>
+                  </div>
                 </div>
+              </div>
+            ))}
+          </div>
 
-                {/* Player Info */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{
-                    width: '32px',
-                    height: '32px',
-                   borderRadius: '50%',
-                   background: 'linear-gradient(45deg, #4caf50, #2196f3)',
-                   display: 'flex',
-                   alignItems: 'center',
-                   justifyContent: 'center',
-                   fontSize: '14px',
-                   position: 'relative'
-                 }}>
-                   👤
-                   {player.isOnline && (
-                     <div style={{
-                       position: 'absolute',
-                       bottom: '-2px',
-                       right: '-2px',
-                       width: '12px',
-                       height: '12px',
-                       borderRadius: '50%',
-                       background: '#4caf50',
-                       border: '2px solid #000'
-                     }} />
-                   )}
-                 </div>
-                 <div>
-                   <div style={{
-                     fontWeight: 'bold',
-                     fontSize: '14px',
-                     color: player.username === playerData.username ? '#4caf50' : '#fff'
-                   }}>
-                     {player.username}
-                     {player.username === playerData.username && ' (You)'}
-                   </div>
-                   <div style={{
-                     fontSize: '12px',
-                     color: getTierColor(player.tier),
-                     fontWeight: 'bold'
-                   }}>
-                     {player.tier} • {player.country}
-                   </div>
-                 </div>
-               </div>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="bg-slate-700 px-6 py-4">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-400">
+                  Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredData.length)} of {filteredData.length} players
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 bg-slate-600 hover:bg-slate-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white transition-colors"
+                  >
+                    Previous
+                  </button>
+                  
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      const page = i + 1;
+                      return (
+                        <button
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          className={`w-10 h-10 rounded-lg font-medium transition-colors ${
+                            currentPage === page
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-slate-600 hover:bg-slate-500 text-gray-300'
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      );
+                    })}
+                    {totalPages > 5 && (
+                      <>
+                        <span className="px-2 text-gray-400">...</span>
+                        <button
+                          onClick={() => setCurrentPage(totalPages)}
+                          className={`w-10 h-10 rounded-lg font-medium transition-colors ${
+                            currentPage === totalPages
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-slate-600 hover:bg-slate-500 text-gray-300'
+                          }`}
+                        >
+                          {totalPages}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                  
+                  <button
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 bg-slate-600 hover:bg-slate-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white transition-colors"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
-               {/* ELO */}
-               <div style={{
-                 fontSize: '16px',
-                 fontWeight: 'bold',
-                 color: '#ffd700'
-               }}>
-                 {player.elo.toLocaleString()}
-               </div>
-
-               {/* W/L/D */}
-               <div style={{ fontSize: '12px' }}>
-                 <span style={{ color: '#4caf50' }}>{player.wins}W</span>
-                 <span style={{ color: '#666' }}> / </span>
-                 <span style={{ color: '#f44336' }}>{player.losses}L</span>
-                 <span style={{ color: '#666' }}> / </span>
-                 <span style={{ color: '#ffc107' }}>{Math.floor(Math.random() * 10)}D</span>
-               </div>
-
-               {/* Win Rate */}
-               <div style={{
-                 fontSize: '14px',
-                 fontWeight: 'bold',
-                 color: player.winRate >= 70 ? '#4caf50' : 
-                        player.winRate >= 50 ? '#ff9800' : '#f44336'
-               }}>
-                 {player.winRate.toFixed(1)}%
-               </div>
-
-               {/* Recent Change */}
-               <div style={{
-                 fontSize: '12px',
-                 fontWeight: 'bold',
-                 color: getChangeColor(player.recentChange),
-                 display: 'flex',
-                 alignItems: 'center',
-                 gap: '2px'
-               }}>
-                 {getChangeIcon(player.recentChange)}
-                 {Math.abs(player.recentChange)}
-               </div>
-
-               {/* Status */}
-               <div style={{
-                 fontSize: '12px',
-                 color: player.isOnline ? '#4caf50' : '#666'
-               }}>
-                 {player.isOnline ? '🟢 Online' : '⚫ Offline'}
-               </div>
-             </div>
-           ))}
-         </div>
-       </div>
-     </div>
-   </div>
+        {/* Footer Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-8">
+          <div className="bg-slate-800 rounded-xl p-6 text-center">
+            <div className="text-3xl font-bold text-blue-400 mb-2">
+              {filteredData.length.toLocaleString()}
+            </div>
+            <div className="text-gray-400">Total Players</div>
+          </div>
+          
+          <div className="bg-slate-800 rounded-xl p-6 text-center">
+            <div className="text-3xl font-bold text-green-400 mb-2">
+              {filteredData.filter(p => p.isOnline).length.toLocaleString()}
+            </div>
+            <div className="text-gray-400">Online Now</div>
+          </div>
+          
+          <div className="bg-slate-800 rounded-xl p-6 text-center">
+            <div className="text-3xl font-bold text-yellow-400 mb-2">
+              {Math.floor(filteredData.reduce((sum, p) => sum + p.elo, 0) / filteredData.length || 0)}
+            </div>
+            <div className="text-gray-400">Average ELO</div>
+          </div>
+        </div>
+      </CenteredContainer>
+    </div>
   );
 };
 
