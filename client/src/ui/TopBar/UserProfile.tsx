@@ -1,4 +1,7 @@
+// Update TopBar.tsx UserProfile section
+// client/src/ui/TopBar/UserProfile.tsx
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface PlayerData {
   username: string;
@@ -16,6 +19,8 @@ interface UserProfileProps {
 }
 
 export const UserProfile: React.FC<UserProfileProps> = ({ playerData }) => {
+  const navigate = useNavigate();
+
   const getRankColor = (rank: string) => {
     switch (rank.toLowerCase()) {
       case 'bronze': return '#cd7f32';
@@ -29,11 +34,17 @@ export const UserProfile: React.FC<UserProfileProps> = ({ playerData }) => {
     }
   };
 
+  const handleProfileClick = () => {
+    navigate(`/profile/${playerData.username}`);
+  };
+
   return (
     <div className="flex items-center gap-4">
-
       {/* User Profile Card */}
-      <div className="flex items-center gap-3 px-2 py-1 backdrop-blur-sm hover:from-white/10 hover:to-white/15 transition-all duration-300 cursor-pointer group">
+      <div 
+        className="flex items-center gap-3 px-2 py-1 backdrop-blur-sm hover:from-white/10 hover:to-white/15 transition-all duration-300 cursor-pointer group"
+        onClick={handleProfileClick}
+      >
         <div className="relative">
           <div className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg group-hover:scale-110 transition-transform duration-200">
             👤
@@ -42,7 +53,9 @@ export const UserProfile: React.FC<UserProfileProps> = ({ playerData }) => {
           <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-slate-900 animate-pulse"></div>
         </div>
         <div className="hidden sm:block">
-          <div className="text-white font-semibold text-sm">{playerData.username}</div>
+          <div className="text-white font-semibold text-sm group-hover:text-cyan-400 transition-colors">
+            {playerData.username}
+          </div>
           <div className="flex items-center gap-2">
             <span 
               className="text-xs font-bold" 

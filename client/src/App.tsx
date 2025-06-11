@@ -26,7 +26,7 @@ import CommunityForums from '@/pages/social/CommunityForums';
 import Leaderboards from '@/pages/online/Leaderboards';
 import Tutorials from '@/pages/training/Tutorials';
 import Analysis from '@/pages/training/Analysis';
-
+import { ProfilePage } from '@/pages/online/Profile';
 
 const SimpleLoading = () => (
  <group>
@@ -212,7 +212,8 @@ function App() {
                <Route path="/social/forums" element={<CommunityForums onBack={() => navigate('/')} />} />
               <Route path="/online/leaderboards" element={<Leaderboards onBack={() => navigate('/')} />} />
               <Route path="/training/tutorials" element={<Tutorials onBack={() => navigate('/')} />} />
-                <Route path="/training/analysis" element={<Analysis onBack={() => navigate('/')} />} />
+              <Route path="/training/analysis" element={<Analysis onBack={() => navigate('/')} />} />
+              <Route path="/profile/:username?" element={<ProfilePage />} />
            </Routes>
          </div>
        </div>
