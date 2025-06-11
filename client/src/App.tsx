@@ -22,6 +22,7 @@ import LeftNav from '@/ui/LeftNav';
 import { ArenaPage } from '@/pages/online/Arena';
 import MouseTrail from '@/shared/utils/MouseTrail';
 import { FullscreenButton } from '@/ui/FullscreenButton';
+import { BottomPanel } from '@/ui/BottomPanel/BottomPanel';
 
 const SimpleLoading = () => (
  <group>
@@ -236,6 +237,8 @@ function App() {
        </Canvas>
 
        {gameState === 'menu' && renderMainMenu()}
+
+       <BottomPanel />
      </div>
 
 <MouseTrail 
