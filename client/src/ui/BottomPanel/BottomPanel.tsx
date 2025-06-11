@@ -396,7 +396,6 @@ export const BottomPanel: React.FC = () => {
               className={`${isExpanded ? 'absolute bottom-0 left-0 right-0' : ''} h-14 bg-slate-900/98 ${isExpanded ? 'border-t border-slate-700/30' : ''} cursor-pointer group hover:bg-slate-800/50 transition-colors duration-200`}
               onClick={handleHeaderClick}
             >
-              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-slate-600 rounded-b-full group-hover:bg-slate-500 transition-colors duration-200"></div>
               
               <div className="px-2 flex items-center h-full relative">
                 <div className="w-full flex items-center">

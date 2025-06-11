@@ -24,6 +24,8 @@ import MouseTrail from '@/shared/utils/MouseTrail';
 import { BottomPanel } from '@/ui/BottomPanel/BottomPanel';
 import CommunityForums from '@/pages/social/CommunityForums';
 import Leaderboards from '@/pages/online/Leaderboards';
+import Tutorials from '@/pages/training/Tutorials';
+import Analysis from '@/pages/training/Analysis';
 
 
 const SimpleLoading = () => (
@@ -209,6 +211,8 @@ function App() {
                <Route path="/online/quick" element={<QuickMatch onBack={() => navigate('/')} onStartGame={(config) => handleStartGameWithConfig(config)} />} />
                <Route path="/social/forums" element={<CommunityForums onBack={() => navigate('/')} />} />
               <Route path="/online/leaderboards" element={<Leaderboards onBack={() => navigate('/')} />} />
+              <Route path="/training/tutorials" element={<Tutorials onBack={() => navigate('/')} />} />
+                <Route path="/training/analysis" element={<Analysis onBack={() => navigate('/')} />} />
            </Routes>
          </div>
        </div>
