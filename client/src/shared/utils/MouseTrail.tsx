@@ -10,6 +10,11 @@ interface ParticleTrailProps {
   color?: string;
   enabled?: boolean;
   showCustomCursor?: boolean;
+  cursorStyle?: 'modern' | 'gaming' | 'minimal' | 'magnetic' | 'morphing' | 'subtle' | 'micro';
+  opacity?: number;
+  size?: number;
+  hideWhenIdle?: boolean;
+  idleTimeout?: number;
 }
 
 const TrailShaderMaterial = () => {
@@ -52,15 +57,22 @@ const TrailShaderMaterial = () => {
   });
 };
 
-const CustomCursor: React.FC<{ mousePos: { x: number, y: number }, isClicking: boolean }> = ({ mousePos, isClicking }) => {
+const SubtleCursor: React.FC<{ 
+  mousePos: { x: number, y: number }, 
+  isClicking: boolean, 
+  isHovering: boolean,
+  opacity: number,
+  size: number,
+  isIdle: boolean
+}> = ({ mousePos, isClicking, isHovering, opacity, size, isIdle }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const ringRef = useRef<THREE.Mesh>(null);
-  const { camera, size } = useThree();
+  const { camera, size: canvasSize } = useThree();
 
   useFrame((state) => {
     if (meshRef.current && ringRef.current) {
-      const x = (mousePos.x / size.width) * 2 - 1;
-      const y = -(mousePos.y / size.height) * 2 + 1;
+      const x = (mousePos.x / canvasSize.width) * 2 - 1;
+      const y = -(mousePos.y / canvasSize.height) * 2 + 1;
       
       const vector = new THREE.Vector3(x, y, 0);
       vector.unproject(camera);
@@ -72,51 +84,221 @@ const CustomCursor: React.FC<{ mousePos: { x: number, y: number }, isClicking: b
       ringRef.current.position.copy(worldPos);
       
       const time = state.clock.elapsedTime;
-      const scale = isClicking ? 1.3 : 1.0;
-      const pulse = 1 + Math.sin(time * 4) * 0.08;
+      const clickScale = isClicking ? 0.7 : 1.0;
+      const hoverScale = isHovering ? 1.3 : 1.0;
+      const idleScale = isIdle ? 0.5 : 1.0;
+      const pulse = 1 + Math.sin(time * 4) * 0.05;
       
-      meshRef.current.scale.setScalar(scale * pulse);
-      ringRef.current.scale.setScalar(scale);
+      meshRef.current.scale.setScalar(clickScale * pulse * size * idleScale);
+      ringRef.current.scale.setScalar(hoverScale * pulse * size * idleScale);
       
-      ringRef.current.rotation.z = time * 0.4;
+      ringRef.current.rotation.z = time * 0.2;
+      
+      const finalOpacity = opacity * (isIdle ? 0.3 : 1.0);
+      (meshRef.current.material as THREE.MeshBasicMaterial).opacity = finalOpacity;
+      (ringRef.current.material as THREE.MeshBasicMaterial).opacity = finalOpacity * 0.5;
     }
   });
 
   return (
     <group>
-      <mesh ref={ringRef} position={[0, 0, 0.01]}>
-        <ringGeometry args={[0.15, 0.22, 24]} />
+      <mesh ref={ringRef} position={[0, 0, 0]}>
+        <ringGeometry args={[0.08, 0.1, 16]} />
         <meshBasicMaterial 
           color="#ff6b9d" 
           transparent 
-          opacity={isClicking ? 0.7 : 0.5}
+          opacity={opacity * 0.4}
         />
       </mesh>
       
-      <mesh ref={meshRef} position={[0, 0, 0.02]}>
-        <circleGeometry args={[0.06, 20]} />
+      <mesh ref={meshRef} position={[0, 0, 0.01]}>
+        <circleGeometry args={[0.03, 12]} />
         <meshBasicMaterial 
           color="#ffffff" 
           transparent 
-          opacity={0.9}
+          opacity={opacity * 0.8}
         />
       </mesh>
     </group>
   );
 };
 
+const MicroCursor: React.FC<{ 
+  mousePos: { x: number, y: number }, 
+  isClicking: boolean, 
+  isHovering: boolean,
+  opacity: number,
+  size: number,
+  isIdle: boolean
+}> = ({ mousePos, isClicking, isHovering, opacity, size, isIdle }) => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const { camera, size: canvasSize } = useThree();
+
+  useFrame((state) => {
+    if (meshRef.current) {
+      const x = (mousePos.x / canvasSize.width) * 2 - 1;
+      const y = -(mousePos.y / canvasSize.height) * 2 + 1;
+      
+      const vector = new THREE.Vector3(x, y, 0);
+      vector.unproject(camera);
+      const dir = vector.sub(camera.position).normalize();
+      const distance = -camera.position.z / dir.z;
+      const worldPos = camera.position.clone().add(dir.multiplyScalar(distance));
+      
+      meshRef.current.position.copy(worldPos);
+      
+      const clickScale = isClicking ? 0.5 : 1.0;
+      const hoverScale = isHovering ? 1.5 : 1.0;
+      const idleScale = isIdle ? 0.2 : 1.0;
+      
+      meshRef.current.scale.setScalar(clickScale * hoverScale * size * idleScale * 0.5);
+      
+      const finalOpacity = opacity * (isIdle ? 0.2 : 1.0);
+      (meshRef.current.material as THREE.MeshBasicMaterial).opacity = finalOpacity;
+    }
+  });
+
+  return (
+    <mesh ref={meshRef} position={[0, 0, 0]}>
+      <circleGeometry args={[0.02, 8]} />
+      <meshBasicMaterial 
+        color={isHovering ? "#ffffff" : "#ff6b9d"} 
+        transparent 
+        opacity={opacity}
+      />
+    </mesh>
+  );
+};
+
+const ModernCursorMinimal: React.FC<{ 
+  mousePos: { x: number, y: number }, 
+  isClicking: boolean, 
+  isHovering: boolean,
+  opacity: number,
+  size: number,
+  isIdle: boolean
+}> = ({ mousePos, isClicking, isHovering, opacity, size, isIdle }) => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const ringRef = useRef<THREE.Mesh>(null);
+  const { camera, size: canvasSize } = useThree();
+
+  useFrame((state) => {
+    if (meshRef.current && ringRef.current) {
+      const x = (mousePos.x / canvasSize.width) * 2 - 1;
+      const y = -(mousePos.y / canvasSize.height) * 2 + 1;
+      
+      const vector = new THREE.Vector3(x, y, 0);
+      vector.unproject(camera);
+      const dir = vector.sub(camera.position).normalize();
+      const distance = -camera.position.z / dir.z;
+      const worldPos = camera.position.clone().add(dir.multiplyScalar(distance));
+      
+      meshRef.current.position.copy(worldPos);
+      ringRef.current.position.copy(worldPos);
+      
+      const time = state.clock.elapsedTime;
+      const clickScale = isClicking ? 0.8 : 1.0;
+      const hoverScale = isHovering ? 1.2 : 1.0;
+      const idleScale = isIdle ? 0.4 : 1.0;
+      const pulse = 1 + Math.sin(time * 3) * 0.03;
+      
+      meshRef.current.scale.setScalar(clickScale * pulse * size * 0.7 * idleScale);
+      ringRef.current.scale.setScalar(hoverScale * pulse * size * 0.8 * idleScale);
+      
+      ringRef.current.rotation.z = time * 0.15;
+      
+      const finalOpacity = opacity * (isIdle ? 0.2 : 1.0);
+      (meshRef.current.material as THREE.MeshBasicMaterial).opacity = finalOpacity * 0.7;
+      (ringRef.current.material as THREE.MeshBasicMaterial).opacity = finalOpacity * 0.3;
+    }
+  });
+
+  return (
+    <group>
+      <mesh ref={ringRef} position={[0, 0, 0]}>
+        <ringGeometry args={[0.06, 0.08, 12]} />
+        <meshBasicMaterial 
+          color="#ff6b9d" 
+          transparent 
+          opacity={opacity * 0.3}
+        />
+      </mesh>
+      
+      <mesh ref={meshRef} position={[0, 0, 0.01]}>
+        <circleGeometry args={[0.025, 10]} />
+        <meshBasicMaterial 
+          color="#ffffff" 
+          transparent 
+          opacity={opacity * 0.6}
+        />
+      </mesh>
+    </group>
+  );
+};
+
+const CustomCursor: React.FC<{ 
+  mousePos: { x: number, y: number }, 
+  isClicking: boolean,
+  cursorStyle: 'modern' | 'gaming' | 'minimal' | 'magnetic' | 'morphing' | 'subtle' | 'micro',
+  opacity: number,
+  size: number,
+  isIdle: boolean
+}> = ({ mousePos, isClicking, cursorStyle, opacity, size, isIdle }) => {
+  const [isHovering, setIsHovering] = useState(false);
+
+  useEffect(() => {
+    const checkHover = () => {
+      const elements = document.elementsFromPoint(mousePos.x, mousePos.y);
+      const isHoveringInteractive = elements.some(el => 
+        el.tagName === 'BUTTON' || 
+        el.tagName === 'A' || 
+        el.getAttribute('role') === 'button' ||
+        el.classList.contains('clickable') ||
+        window.getComputedStyle(el).cursor === 'pointer'
+      );
+      setIsHovering(isHoveringInteractive);
+    };
+
+    checkHover();
+  }, [mousePos]);
+
+  const renderCursor = () => {
+    const props = { mousePos, isClicking, isHovering, opacity, size, isIdle };
+    
+    switch (cursorStyle) {
+      case 'subtle':
+        return <SubtleCursor {...props} />;
+      case 'micro':
+        return <MicroCursor {...props} />;
+      case 'minimal':
+        return <ModernCursorMinimal {...props} />;
+      default:
+        return <ModernCursorMinimal {...props} />;
+    }
+  };
+
+  return renderCursor();
+};
+
 const TrailLineRenderer: React.FC<ParticleTrailProps> = ({
   trailLength = 60,
-  lineWidth = 0.03,
+  lineWidth = 0.015,
   fadeSpeed = 0.97,
   color = '#ff6b9d',
-  showCustomCursor = true
+  showCustomCursor = true,
+  cursorStyle = 'subtle',
+  opacity = 0.6,
+  size = 0.8,
+  hideWhenIdle = true,
+  idleTimeout = 2000
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
-  const { camera, size } = useThree();
+  const { camera, size: canvasSize } = useThree();
   
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isClicking, setIsClicking] = useState(false);
+  const [isIdle, setIsIdle] = useState(false);
+  const [lastMoveTime, setLastMoveTime] = useState(Date.now());
   const trailPositions = useRef<THREE.Vector3[]>([]);
   const trailAlphas = useRef<number[]>([]);
 
@@ -153,6 +335,18 @@ const TrailLineRenderer: React.FC<ParticleTrailProps> = ({
   }, [color]);
 
   useEffect(() => {
+    if (hideWhenIdle) {
+      const checkIdle = () => {
+        const now = Date.now();
+        setIsIdle(now - lastMoveTime > idleTimeout);
+      };
+
+      const interval = setInterval(checkIdle, 100);
+      return () => clearInterval(interval);
+    }
+  }, [lastMoveTime, idleTimeout, hideWhenIdle]);
+
+  useEffect(() => {
     const hideDefaultCursor = () => {
       document.body.style.cursor = 'none';
       document.documentElement.style.cursor = 'none';
@@ -176,9 +370,11 @@ const TrailLineRenderer: React.FC<ParticleTrailProps> = ({
     
     const handleMouseMove = (event: MouseEvent) => {
       setMousePos({ x: event.clientX, y: event.clientY });
+      setLastMoveTime(Date.now());
+      setIsIdle(false);
       
-      const x = (event.clientX / size.width) * 2 - 1;
-      const y = -(event.clientY / size.height) * 2 + 1;
+      const x = (event.clientX / canvasSize.width) * 2 - 1;
+      const y = -(event.clientY / canvasSize.height) * 2 + 1;
       
       const vector = new THREE.Vector3(x, y, 0);
       vector.unproject(camera);
@@ -212,18 +408,20 @@ const TrailLineRenderer: React.FC<ParticleTrailProps> = ({
       document.removeEventListener('dragover', handleMouseMove, { capture: true });
       cleanupCursor();
     };
-  }, [camera, size, trailLength]);
+  }, [camera, canvasSize, trailLength]);
 
   useFrame((state) => {
     if (!meshRef.current) return;
 
     shaderMaterial.uniforms.uTime.value = state.clock.elapsedTime;
 
+    const trailOpacity = isIdle ? opacity * 0.3 : opacity;
+
     for (let i = 0; i < trailAlphas.current.length; i++) {
       trailAlphas.current[i] *= fadeSpeed;
     }
 
-    const minAlpha = 0.02;
+    const minAlpha = 0.01;
     const validIndices: number[] = [];
     for (let i = 0; i < trailAlphas.current.length; i++) {
       if (trailAlphas.current[i] > minAlpha) {
@@ -244,8 +442,8 @@ const TrailLineRenderer: React.FC<ParticleTrailProps> = ({
         const direction = new THREE.Vector3().subVectors(next, current).normalize();
         const perpendicular = new THREE.Vector3(-direction.y, direction.x, 0).multiplyScalar(lineWidth);
         
-        const alpha = trailAlphas.current[i];
-        const nextAlpha = trailAlphas.current[i + 1];
+        const alpha = trailAlphas.current[i] * trailOpacity;
+        const nextAlpha = trailAlphas.current[i + 1] * trailOpacity;
         const linePos = i / (trailLength - 1);
         
         positions[baseIndex * 3] = current.x - perpendicular.x;
@@ -293,7 +491,14 @@ const TrailLineRenderer: React.FC<ParticleTrailProps> = ({
     <group>
       <mesh ref={meshRef} geometry={geometry} material={shaderMaterial} />
       {showCustomCursor && (
-        <CustomCursor mousePos={mousePos} isClicking={isClicking} />
+        <CustomCursor 
+          mousePos={mousePos} 
+          isClicking={isClicking} 
+          cursorStyle={cursorStyle}
+          opacity={opacity}
+          size={size}
+          isIdle={isIdle}
+        />
       )}
     </group>
   );
@@ -301,6 +506,11 @@ const TrailLineRenderer: React.FC<ParticleTrailProps> = ({
 
 const MouseTrail: React.FC<ParticleTrailProps> = ({
   enabled = true,
+  cursorStyle = 'subtle',
+  opacity = 0.6,
+  size = 0.8,
+  hideWhenIdle = true,
+  idleTimeout = 2000,
   ...props
 }) => {
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
@@ -347,7 +557,14 @@ const MouseTrail: React.FC<ParticleTrailProps> = ({
         antialias: true
       }}
     >
-      <TrailLineRenderer {...props} />
+      <TrailLineRenderer 
+        cursorStyle={cursorStyle}
+        opacity={opacity}
+        size={size}
+        hideWhenIdle={hideWhenIdle}
+        idleTimeout={idleTimeout}
+        {...props} 
+      />
     </Canvas>,
     portalContainer
   );
