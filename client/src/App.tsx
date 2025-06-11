@@ -8,6 +8,7 @@ import PulsingBackground from '@/shared/components/PulsingBackground';
 import { useGameStore } from '@/shared/stores/gameStore';
 import { useMenuStore } from '@/shared/stores/menuStore';
 import { useReplayStore } from '@/shared/stores/replayStore';
+import QuickMatch from '@/pages/online/QuickMatch';
 import ReplayPlayer from '@/pages/replay/components/ReplayPlayer';
 import { TopBar } from '@/ui/TopBar';
 import { Navigation } from '@/ui/Navigation';
@@ -203,6 +204,7 @@ function App() {
                }} />} />
                <Route path="/replays" element={<div className="h-full"><ReplayBrowser isVisible={true} onClose={() => navigate('/')} /></div>} />
                <Route path="/arena/:id" element={<ArenaPage />} />
+               <Route path="/online/quick" element={<QuickMatch onBack={() => navigate('/')} onStartGame={(config) => handleStartGameWithConfig(config)} />} />
            </Routes>
          </div>
        </div>
