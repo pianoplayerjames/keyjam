@@ -1,4 +1,17 @@
+// client/src/ui/LeftNav.tsx
 import React, { useState } from 'react';
+import { AppearanceSettings } from './settings/AppearanceSettings';
+import { AudioSettings } from './settings/AudioSettings';
+import { ControlsSettings } from './settings/ControlsSettings';
+import { OnlineSettings } from './settings/OnlineSettings';
+import { PerformanceSettings } from './settings/PerformanceSettings';
+import { NotificationSettings } from './settings/NotificationSettings';
+import { GameplaySettings } from './settings/GameplaySettings';
+import { AccountSettings } from './settings/AccountSettings';
+import { InputSettings } from './settings/InputSettings';
+import { LanguageSettings } from './settings/LanguageSettings';
+import { PrivacySettings } from './settings/PrivacySettings';
+import { DataSettings } from './settings/DataSettings';
 
 const friends = [
   { id: 1, name: 'RhythmGod', avatar: '🤖', status: 'online', messageCount: 2 },
@@ -57,6 +70,21 @@ const mockMessages: { [key: number]: Array<{ id: number; text: string; sender: '
   ],
 };
 
+const settingsPages = [
+  { id: 'audio', icon: '🎵', title: 'Audio Settings', desc: 'Volume, sound effects, music', component: AudioSettings },
+  { id: 'appearance', icon: '🎨', title: 'Appearance', desc: 'Theme, colors, animations', component: AppearanceSettings },
+  { id: 'controls', icon: '⌨️', title: 'Controls', desc: 'Key bindings, input settings', component: ControlsSettings },
+  { id: 'online', icon: '🌐', title: 'Online', desc: 'Privacy, friends, multiplayer', component: OnlineSettings },
+  { id: 'performance', icon: '📊', title: 'Performance', desc: 'Graphics, FPS, optimization', component: PerformanceSettings },
+  { id: 'notifications', icon: '🔔', title: 'Notifications', desc: 'Alerts, sounds, badges', component: NotificationSettings },
+  { id: 'gameplay', icon: '🎯', title: 'Gameplay', desc: 'Difficulty, scoring, timing', component: GameplaySettings },
+  { id: 'account', icon: '📱', title: 'Account', desc: 'Profile, achievements, stats', component: AccountSettings },
+  { id: 'input', icon: '🎮', title: 'Input Devices', desc: 'Keyboard, gamepad, calibration', component: InputSettings },
+  { id: 'language', icon: '🌍', title: 'Language', desc: 'Region, localization, time zone', component: LanguageSettings },
+  { id: 'privacy', icon: '🔐', title: 'Privacy', desc: 'Data sharing, analytics, cookies', component: PrivacySettings },
+  { id: 'data', icon: '💾', title: 'Data & Storage', desc: 'Save files, cloud sync, backups', component: DataSettings },
+];
+
 const getStatusColor = (status: 'online' | 'away' | 'in-game' | 'offline') => {
   switch (status) {
     case 'online': return 'bg-green-400';
@@ -97,9 +125,84 @@ const MessageBadge: React.FC<{ count: number }> = ({ count }) => {
   );
 };
 
+const SettingsPageRenderer: React.FC<{ page: string; onBack: () => void }> = ({ page, onBack }) => {
+  const settingsPage = settingsPages.find(p => p.id === page);
+  if (!settingsPage) return null;
+  
+  const SettingsComponent = settingsPage.component;
+  
+  return (
+    <>
+      <style>
+        {`
+          .leftnav-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+          }
+          
+          .leftnav-scrollbar:hover::-webkit-scrollbar {
+            opacity: 1;
+          }
+          
+          .leftnav-scrollbar::-webkit-scrollbar-track {
+            background: rgba(51, 65, 85, 0.3);
+            border-radius: 4px;
+          }
+          
+          .leftnav-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.5);
+            border-radius: 4px;
+            border: 1px solid rgba(30, 41, 59, 0.8);
+          }
+          
+          .leftnav-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.8);
+          }
+
+          .leftnav-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: transparent transparent;
+            transition: scrollbar-color 0.2s ease;
+          }
+
+          .leftnav-scrollbar:hover {
+            scrollbar-color: rgba(148, 163, 184, 0.5) rgba(51, 65, 85, 0.3);
+          }
+        `}
+      </style>
+      <nav className="fixed top-0 left-0 h-screen w-96 bg-slate-900/90 backdrop-blur-md border-r border-slate-700/50 transition-all duration-300 ease-in-out overflow-hidden z-50">
+        <div className="flex flex-col h-full">
+          <div className="p-4 border-b border-slate-700/50 flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <button
+                onClick={onBack}
+                className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
+              >
+                <span className="text-xl">←</span>
+                <span className="font-semibold">Back</span>
+              </button>
+              <div className="flex items-center gap-2">
+                <span className="text-xl">{settingsPage.icon}</span>
+                <h2 className="text-white font-bold text-lg">{settingsPage.title}</h2>
+              </div>
+              <div className="w-16"></div>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto leftnav-scrollbar">
+            <SettingsComponent />
+          </div>
+        </div>
+      </nav>
+    </>
+  );
+};
+
 const LeftNav = () => {
   const [activeSection, setActiveSection] = useState<'main' | 'notifications' | 'settings' | 'chat' | 'search'>('main');
   const [activeChatFriend, setActiveChatFriend] = useState<number | null>(null);
+  const [activeSettingsPage, setActiveSettingsPage] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [messages, setMessages] = useState(mockMessages);
   const [searchQuery, setSearchQuery] = useState('');
@@ -113,6 +216,7 @@ const LeftNav = () => {
 
   const handleSettingsClick = () => {
     setActiveSection(activeSection === 'settings' ? 'main' : 'settings');
+    setActiveSettingsPage(null);
   };
 
   const handleSearchClick = () => {
@@ -163,6 +267,11 @@ const LeftNav = () => {
   const filteredNotifications = mockNotifications.filter(notification =>
     notification.text.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Show settings page if one is selected
+  if (activeSection === 'settings' && activeSettingsPage) {
+    return <SettingsPageRenderer page={activeSettingsPage} onBack={() => setActiveSettingsPage(null)} />;
+  }
 
   if (activeSection === 'search') {
     return (
@@ -500,128 +609,116 @@ const LeftNav = () => {
                   <span className="text-xl">←</span>
                   <span className="font-semibold">Back</span>
                 </button>
-                <h2 className="text-white font-bold text-lg">Notifications</h2>
-                <div className="w-16"></div>
-              </div>
-            </div>
+<h2 className="text-white font-bold text-lg">Notifications</h2>
+               <div className="w-16"></div>
+             </div>
+           </div>
 
-            <div className="flex-1 overflow-y-auto leftnav-scrollbar p-2">
-              {mockNotifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  onClick={() => markNotificationAsRead(notification.id)}
-                  className={`p-3 mb-2 rounded-lg cursor-pointer transition-colors ${
-                    notification.read 
-                      ? 'bg-slate-800/30 text-gray-400' 
-                      : 'bg-slate-700/50 text-white hover:bg-slate-600/50'
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <span className="text-lg flex-shrink-0 mt-0.5">
-                      {getNotificationIcon(notification.type)}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm leading-relaxed ${notification.read ? 'text-gray-400' : 'text-gray-200'}`}>
-                        {notification.text}
-                      </p>
-                      <span className="text-xs text-gray-500 mt-1 block">
-                        {notification.time}
-                      </span>
-                    </div>
-                    {!notification.read && (
-                      <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2"></div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+           <div className="flex-1 overflow-y-auto leftnav-scrollbar p-2">
+             {mockNotifications.map((notification) => (
+               <div
+                 key={notification.id}
+                 onClick={() => markNotificationAsRead(notification.id)}
+                 className={`p-3 mb-2 rounded-lg cursor-pointer transition-colors ${
+                   notification.read 
+                     ? 'bg-slate-800/30 text-gray-400' 
+                     : 'bg-slate-700/50 text-white hover:bg-slate-600/50'
+                 }`}
+               >
+                 <div className="flex items-start gap-3">
+                   <span className="text-lg flex-shrink-0 mt-0.5">
+                     {getNotificationIcon(notification.type)}
+                   </span>
+                   <div className="flex-1 min-w-0">
+                     <p className={`text-sm leading-relaxed ${notification.read ? 'text-gray-400' : 'text-gray-200'}`}>
+                       {notification.text}
+                     </p>
+                     <span className="text-xs text-gray-500 mt-1 block">
+                       {notification.time}
+                     </span>
+                   </div>
+                   {!notification.read && (
+                     <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2"></div>
+                   )}
+                 </div>
+               </div>
+             ))}
+           </div>
 
-            <div className="p-4 border-t border-slate-700/50">
-              <button className="w-full py-2 px-4 bg-slate-700 hover:bg-slate-600 rounded-lg text-white text-sm font-medium transition-colors">
-                Mark All as Read
-              </button>
-            </div>
-          </div>
-        </nav>
-      </>
-    );
-  }
+           <div className="p-4 border-t border-slate-700/50">
+             <button className="w-full py-2 px-4 bg-slate-700 hover:bg-slate-600 rounded-lg text-white text-sm font-medium transition-colors">
+               Mark All as Read
+             </button>
+           </div>
+         </div>
+       </nav>
+     </>
+   );
+ }
 
-  if (activeSection === 'settings') {
-    return (
-      <>
-        <style>
-          {`
-            .leftnav-scrollbar::-webkit-scrollbar {
-              width: 8px;
-              opacity: 0;
-              transition: opacity 0.2s ease;
-            }
-            
-            .leftnav-scrollbar:hover::-webkit-scrollbar {
-              opacity: 1;
-            }
-            
-            .leftnav-scrollbar::-webkit-scrollbar-track {
-              background: rgba(51, 65, 85, 0.3);
-              border-radius: 4px;
-            }
-            
-            .leftnav-scrollbar::-webkit-scrollbar-thumb {
-              background: rgba(148, 163, 184, 0.5);
-              border-radius: 4px;
-              border: 1px solid rgba(30, 41, 59, 0.8);
-            }
-            
-            .leftnav-scrollbar::-webkit-scrollbar-thumb:hover {
-              background: rgba(148, 163, 184, 0.8);
-            }
+ if (activeSection === 'settings') {
+   return (
+     <>
+       <style>
+         {`
+           .leftnav-scrollbar::-webkit-scrollbar {
+             width: 8px;
+             opacity: 0;
+             transition: opacity 0.2s ease;
+           }
+           
+           .leftnav-scrollbar:hover::-webkit-scrollbar {
+             opacity: 1;
+           }
+           
+           .leftnav-scrollbar::-webkit-scrollbar-track {
+             background: rgba(51, 65, 85, 0.3);
+             border-radius: 4px;
+           }
+           
+           .leftnav-scrollbar::-webkit-scrollbar-thumb {
+             background: rgba(148, 163, 184, 0.5);
+             border-radius: 4px;
+             border: 1px solid rgba(30, 41, 59, 0.8);
+           }
+           
+           .leftnav-scrollbar::-webkit-scrollbar-thumb:hover {
+             background: rgba(148, 163, 184, 0.8);
+           }
 
-            .leftnav-scrollbar {
-              scrollbar-width: thin;
-              scrollbar-color: transparent transparent;
-              transition: scrollbar-color 0.2s ease;
-            }
+           .leftnav-scrollbar {
+             scrollbar-width: thin;
+             scrollbar-color: transparent transparent;
+             transition: scrollbar-color 0.2s ease;
+           }
 
-            .leftnav-scrollbar:hover {
-              scrollbar-color: rgba(148, 163, 184, 0.5) rgba(51, 65, 85, 0.3);
-            }
-          `}
-        </style>
-        <nav className="fixed top-0 left-0 h-screen w-80 bg-slate-900/90 backdrop-blur-md border-r border-slate-700/50 transition-all duration-300 ease-in-out overflow-hidden z-50">
-          <div className="flex flex-col h-full">
-            <div className="p-4 border-b border-slate-700/50">
-              <div className="flex items-center justify-between">
-                <button
-                  onClick={() => setActiveSection('main')}
-                  className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
-                >
-                  <span className="text-xl">←</span>
-                  <span className="font-semibold">Back</span>
-                </button>
-                <h2 className="text-white font-bold text-lg">Settings</h2>
-                <div className="w-16"></div>
-              </div>
-            </div>
+           .leftnav-scrollbar:hover {
+             scrollbar-color: rgba(148, 163, 184, 0.5) rgba(51, 65, 85, 0.3);
+           }
+         `}
+       </style>
+       <nav className="fixed top-0 left-0 h-screen w-80 bg-slate-900/90 backdrop-blur-md border-r border-slate-700/50 transition-all duration-300 ease-in-out overflow-hidden z-50">
+         <div className="flex flex-col h-full">
+           <div className="p-4 border-b border-slate-700/50">
+             <div className="flex items-center justify-between">
+               <button
+                 onClick={() => setActiveSection('main')}
+                 className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
+               >
+                 <span className="text-xl">←</span>
+                 <span className="font-semibold">Back</span>
+               </button>
+               <h2 className="text-white font-bold text-lg">Settings</h2>
+               <div className="w-16"></div>
+             </div>
+           </div>
 
-            <div className="flex-1 overflow-y-auto leftnav-scrollbar p-2">
-              {[
-                { icon: '🎵', title: 'Audio Settings', desc: 'Volume, sound effects, music' },
-                { icon: '🎨', title: 'Appearance', desc: 'Theme, colors, animations' },
-                { icon: '⌨️', title: 'Controls', desc: 'Key bindings, input settings' },
-                { icon: '🌐', title: 'Online', desc: 'Privacy, friends, multiplayer' },
-                { icon: '📊', title: 'Performance', desc: 'Graphics, FPS, optimization' },
-                { icon: '🔔', title: 'Notifications', desc: 'Alerts, sounds, badges' },
-                { icon: '🎯', title: 'Gameplay', desc: 'Difficulty, scoring, timing' },
-                { icon: '📱', title: 'Account', desc: 'Profile, achievements, stats' },
-                { icon: '🎮', title: 'Input Devices', desc: 'Keyboard, gamepad, calibration' },
-                { icon: '🌍', title: 'Language', desc: 'Region, localization, time zone' },
-                { icon: '🔐', title: 'Privacy', desc: 'Data sharing, analytics, cookies' },
-                { icon: '💾', title: 'Data & Storage', desc: 'Save files, cloud sync, backups' },
-              ].map((setting, index) => (
-                <div
-                  key={index}
-                  className="p-3 mb-2 rounded-lg cursor-pointer bg-slate-800/30 hover:bg-slate-700/50 transition-colors group"
+           <div className="flex-1 overflow-y-auto leftnav-scrollbar p-2">
+             {settingsPages.map((setting) => (
+               <div
+                 key={setting.id}
+                 onClick={() => setActiveSettingsPage(setting.id)}
+                 className="p-3 mb-2 rounded-lg cursor-pointer bg-slate-800/30 hover:bg-slate-700/50 transition-colors group"
                >
                  <div className="flex items-center gap-3">
                    <span className="text-xl">{setting.icon}</span>
