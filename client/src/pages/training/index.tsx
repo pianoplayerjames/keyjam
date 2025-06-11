@@ -875,8 +875,8 @@ const TrainingHub: React.FC<TrainingHubProps> = ({ onBack, onStartGame }) => {
  );
 
  return (
-   <div className="h-full overflow-hidden">
-     <CenteredContainer maxWidth="2xl" accountForLeftNav={true} className="h-full">
+   <div>
+     <CenteredContainer maxWidth="2xl" accountForLeftNav={true}>
        <div className="flex flex-col h-full">
          {/* Header */}
          <div className="flex items-center justify-between py-6 border-b border-slate-700/50 flex-shrink-0">
@@ -921,7 +921,7 @@ const TrainingHub: React.FC<TrainingHubProps> = ({ onBack, onStartGame }) => {
          </div>
 
          {/* Content */}
-         <div className="flex-1 overflow-y-auto py-6">
+         <div className="flex-1 py-6">
            {activeSection === 'overview' && renderOverview()}
            {activeSection === 'lessons' && renderLessons()}
            {activeSection === 'skills' && renderSkillGames()}

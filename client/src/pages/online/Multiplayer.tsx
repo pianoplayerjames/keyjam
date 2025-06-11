@@ -869,11 +869,11 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
  };
 
  const renderMainPortal = () => (
-   <div className="h-full flex flex-col overflow-hidden">
+   <div className="h-full flex flex-col">
      <CenteredContainer maxWidth="2xl" accountForLeftNav={true} className="h-full flex-1 min-h-0">
-       <div className="flex h-full overflow-hidden">
+       <div className="flex h-full">
          {/* Main Content Area */}
-         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+         <div className="flex-1 flex flex-col min-h-0">
            {/* Top Section: Arena Timetable */}
            <div className="flex-shrink-0 mb-6">
              <ResizableTimetable 
@@ -1237,7 +1237,7 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
          </div>
 
          {/* Right Sidebar - Fixed Height with Internal Scrolling */}
-         <div className="w-80 flex-shrink-0 bg-slate-900/30 border-l border-slate-700/50 flex flex-col overflow-hidden">
+         <div className="w-80 flex-shrink-0 bg-slate-900/30 border-l border-slate-700/50 flex flex-col overflow-y-auto">
            {/* Quick Actions */}
            <div className="p-4 border-b border-slate-700/50 flex-shrink-0">
              <h3 className="text-lg font-bold text-white mb-3">Quick Actions</h3>
@@ -1524,8 +1524,8 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
  };
 
  return (
-   <div className="h-full w-full overflow-hidden text-white flex flex-col">
-     <div className="flex-grow overflow-hidden">{renderCurrentSection()}</div>
+   <div className="h-full w-full text-white flex flex-col">
+     <div className="flex-grow">{renderCurrentSection()}</div>
    </div>
  );
 };

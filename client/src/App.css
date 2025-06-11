@@ -1,13 +1,14 @@
 @import "tailwindcss";
 
+/* client/src/App.css */
 html,
 body,
 #root {
   margin: 0;
   padding: 0;
   width: 100vw;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh; /* Changed from height */
+  overflow-x: hidden; /* Changed from overflow: hidden */
   background: #181e37;
   user-select: none;
   -webkit-user-select: none;

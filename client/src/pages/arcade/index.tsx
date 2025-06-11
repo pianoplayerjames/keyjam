@@ -161,7 +161,7 @@ const ArcadeMenu: React.FC<ArcadeMenuProps> = ({ onBack, onSelectSong }) => {
   };
 
   return (
-    <div className="h-full overflow-hidden">
+    <div className="h-full">
       <CenteredContainer maxWidth="2xl" accountForLeftNav={true} className="h-full">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-700/50 bg-slate-900/50 backdrop-blur-sm">
@@ -194,7 +194,7 @@ const ArcadeMenu: React.FC<ArcadeMenuProps> = ({ onBack, onSelectSong }) => {
         </div>
 
         {/* Main Content */}
-        <div className="flex h-full">
+        <div className="flex">
           {/* Song List */}
           <div className="w-1/3 border-r border-slate-700/50 bg-slate-900/30 backdrop-blur-sm overflow-hidden flex flex-col">
             <div className="p-4 border-b border-slate-700/30">

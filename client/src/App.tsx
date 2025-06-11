@@ -164,7 +164,7 @@ function App() {
   const renderMainMenu = () => {
     if (menuState === 'time-selection' || menuState === 'score-selection' || menuState === 'difficulty') {
       return (
-        <div className="relative w-screen h-screen overflow-hidden">
+        <div className="relative w-screen h-screen">
           <Canvas camera={{ position: [0, 0, 10], fov: 60 }} className="absolute inset-0">
             <Suspense fallback={null}>
               <AnimatedBackground />
@@ -189,7 +189,7 @@ function App() {
         <div className="relative z-10 flex flex-col h-screen">
           <TopBar playerData={playerData} playerStats={playerStats} />
           <Navigation />
-          <div className="flex-grow relative overflow-hidden">
+          <div className="flex-grow relative overflow-y-auto">
             <Routes>
                 <Route path="/" element={<OnlinePortal onBack={() => navigate('/')} onStartGame={(config) => handleStartGameWithConfig(config)} />} />
                 <Route path="/career" element={<CareerMenu onBack={() => navigate('/')} />} />
