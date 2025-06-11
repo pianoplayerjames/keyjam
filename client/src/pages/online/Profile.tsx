@@ -390,7 +390,7 @@ export const ProfilePage: React.FC = () => {
 
   return (
     <div className="min-h-screen">
-      <CenteredContainer maxWidth="2xl" accountForLeftNav={true} className="py-6">
+      <CenteredContainer maxWidth="xl" accountForLeftNav={true} className="py-6">
         {/* Header with Banner */}
         <div className="relative mb-6">
           <div

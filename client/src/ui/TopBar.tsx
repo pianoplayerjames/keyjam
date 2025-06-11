@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { CenteredContainer } from '../shared/components/Layout';
 
 interface PlayerStats {
@@ -25,6 +26,8 @@ interface TopBarProps {
 }
 
 export const TopBar: React.FC<TopBarProps> = ({ playerData, playerStats }) => {
+  const navigate = useNavigate();
+
   const getRankColor = (rank: string) => {
     switch (rank.toLowerCase()) {
       case 'bronze': return '#cd7f32';
@@ -50,6 +53,10 @@ export const TopBar: React.FC<TopBarProps> = ({ playerData, playerStats }) => {
       return `${hours}h ${minutes % 60}m`;
     }
     return `${minutes}m`;
+  };
+
+  const handleProfileClick = () => {
+    navigate(`/profile/${playerData.username}`);
   };
 
   return (
@@ -123,7 +130,10 @@ export const TopBar: React.FC<TopBarProps> = ({ playerData, playerStats }) => {
              )}
            </div>
 
-           <div className="flex items-center gap-3 px-2 py-1 backdrop-blur-sm hover:from-white/10 hover:to-white/15 transition-all duration-300 cursor-pointer group">
+           <div 
+             onClick={handleProfileClick}
+             className="flex items-center gap-3 px-2 py-1 backdrop-blur-sm hover:from-white/10 hover:to-white/15 transition-all duration-300 cursor-pointer group hover:bg-slate-700/50 rounded-lg"
+           >
              <div className="relative">
                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg group-hover:scale-110 transition-transform duration-200">
                  👤
@@ -148,6 +158,11 @@ export const TopBar: React.FC<TopBarProps> = ({ playerData, playerStats }) => {
                  <span className="text-green-400 text-xs font-semibold">2794 ELO</span>
                  <span className="text-green-400 text-xs font-bold">+47</span>
                </div>
+             </div>
+             <div className="hidden sm:block ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+               <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+               </svg>
              </div>
            </div>
          </div>
