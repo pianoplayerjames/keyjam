@@ -161,7 +161,6 @@ function App() {
          fadeSpeed={0.94}
          color="#ff6b9d"
        />
-       <FullscreenButton />
      </>
    );
  }
@@ -175,7 +174,7 @@ function App() {
              <AnimatedBackground />
            </Suspense>
          </Canvas>
-         <div className="absolute inset-0 z-10">
+         <div className="absolute inset-0 z-10 pb-16">
            {menuState === 'time-selection' && <TimeSelectionMenu onBack={() => setMenuState('main')} onSelectTime={(timeLimit) => {
              setLocalGameConfig(prev => ({ ...prev, timeLimit }));
              setMenuState('difficulty');
@@ -194,7 +193,7 @@ function App() {
        <div className="relative z-10 flex flex-col h-screen">
          <TopBar playerData={playerData} playerStats={playerStats} />
          <Navigation />
-         <div className="flex-grow relative overflow-y-auto">
+         <div className="flex-grow relative overflow-y-auto pb-16">
            <Routes>
                <Route path="/" element={<OnlinePortal onBack={() => navigate('/')} onStartGame={(config) => handleStartGameWithConfig(config)} />} />
                <Route path="/career" element={<CareerMenu onBack={() => navigate('/')} />} />
@@ -241,15 +240,14 @@ function App() {
        <BottomPanel />
      </div>
 
-<MouseTrail 
-  cursorStyle="minimal"
-  opacity={0.8}
-  size={1.2}
-  hideWhenIdle={true}
-  idleTimeout={4000}
-/>
+     <MouseTrail 
+       cursorStyle="minimal"
+       opacity={0.8}
+       size={1.2}
+       hideWhenIdle={true}
+       idleTimeout={4000}
+     />
      
-     <FullscreenButton />
    </>
  );
 }

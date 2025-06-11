@@ -10,6 +10,11 @@ interface Song {
   albumArt?: string;
   genre?: string;
   difficulty?: number;
+  isLiked?: boolean;
+  isDisliked?: boolean;
+  playCount?: number;
+  bpm?: number;
+  rating?: number; // 1-5 star rating
 }
 
 interface SongLibraryProps {
@@ -26,7 +31,7 @@ export const SongLibrary: React.FC<SongLibraryProps> = ({
   onClose
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<'title' | 'artist' | 'difficulty' | 'duration'>('title');
+  const [sortBy, setSortBy] = useState<'title' | 'artist' | 'difficulty' | 'duration' | 'playCount' | 'genre' | 'bpm' | 'rating'>('title');
   const [filterGenre, setFilterGenre] = useState<string>('all');
 
   const genres = useMemo(() => {
@@ -52,6 +57,14 @@ export const SongLibrary: React.FC<SongLibraryProps> = ({
           return (a.difficulty || 0) - (b.difficulty || 0);
         case 'duration':
           return a.duration - b.duration;
+        case 'playCount':
+          return (b.playCount || 0) - (a.playCount || 0);
+        case 'genre':
+          return (a.genre || '').localeCompare(b.genre || '');
+        case 'bpm':
+          return (a.bpm || 0) - (b.bpm || 0);
+        case 'rating':
+          return (b.rating || 0) - (a.rating || 0);
         default:
           return 0;
       }
@@ -62,6 +75,13 @@ export const SongLibrary: React.FC<SongLibraryProps> = ({
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const formatPlayCount = (count?: number) => {
+    if (!count) return '0';
+    if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
+    if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+    return count.toString();
   };
 
   const getDifficultyColor = (difficulty?: number) => {
@@ -77,45 +97,78 @@ export const SongLibrary: React.FC<SongLibraryProps> = ({
     return '●'.repeat(Math.min(difficulty, 5)) + '○'.repeat(Math.max(0, 5 - difficulty));
   };
 
+  const getRatingStars = (rating?: number) => {
+    if (!rating) return '☆☆☆☆☆';
+    return '★'.repeat(Math.min(rating, 5)) + '☆'.repeat(Math.max(0, 5 - rating));
+  };
+
+  const getRatingColor = (rating?: number) => {
+    if (!rating) return 'text-gray-400';
+    if (rating <= 2) return 'text-red-400';
+    if (rating <= 3) return 'text-yellow-400';
+    return 'text-green-400';
+  };
+
+  const handleHeaderClick = () => {
+    onClose();
+  };
+
+  const handleSearchClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
+  const handleSelectClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between p-4 border-b border-slate-700/50">
+      <div 
+        className="flex items-center justify-between p-4 border-b border-slate-700/50 cursor-pointer group hover:bg-slate-800/30 transition-colors duration-200 relative"
+        onClick={handleHeaderClick}
+      >
+        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-slate-600 rounded-full group-hover:bg-slate-500 transition-colors duration-200"></div>
+        
         <h3 className="text-lg font-bold text-white">Song Library</h3>
-        <button
-          onClick={onClose}
-          className="p-2 text-gray-400 hover:text-white transition-colors duration-200"
-        >
+        
+        <div className="text-gray-400 group-hover:text-white transition-colors duration-200">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
-        </button>
+        </div>
       </div>
 
-      <div className="p-4 border-b border-slate-700/50">
-        <div className="flex gap-4 mb-4">
+      <div className="p-3 border-b border-slate-700/50" onClick={handleSearchClick}>
+        <div className="flex gap-3">
           <div className="flex-1">
             <input
               type="text"
               placeholder="Search songs..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-1.5 bg-slate-800 border border-slate-600 rounded text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 text-sm"
             />
           </div>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
-            className="px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+            onClick={handleSelectClick}
+            className="px-2 py-1.5 bg-slate-800 border border-slate-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
           >
-            <option value="title">Sort by Title</option>
-            <option value="artist">Sort by Artist</option>
-            <option value="difficulty">Sort by Difficulty</option>
-            <option value="duration">Sort by Duration</option>
+            <option value="title">Title</option>
+            <option value="artist">Artist</option>
+            <option value="genre">Genre</option>
+            <option value="rating">Rating</option>
+            <option value="difficulty">Difficulty</option>
+            <option value="bpm">BPM</option>
+            <option value="playCount">Plays</option>
+            <option value="duration">Duration</option>
           </select>
           <select
             value={filterGenre}
             onChange={(e) => setFilterGenre(e.target.value)}
-            className="px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+            onClick={handleSelectClick}
+            className="px-2 py-1.5 bg-slate-800 border border-slate-600 rounded text-white focus:outline-none focus:border-blue-500 text-sm"
           >
             <option value="all">All Genres</option>
             {genres.map(genre => (
@@ -125,51 +178,94 @@ export const SongLibrary: React.FC<SongLibraryProps> = ({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
-        <div className="space-y-1">
+      {/* Header with proper alignment */}
+      <div className="px-3 py-2 bg-slate-800/30 border-b border-slate-700/50 text-xs text-gray-400">
+        <div className="flex items-center gap-3">
+          <div className="w-8"></div> {/* Album art space */}
+          <div className="flex-1 min-w-0">Song • Artist</div>
+          <div className="w-16 text-center">Rating</div>
+          <div className="w-16 text-center">Genre</div>
+          <div className="w-12 text-center">BPM</div>
+          <div className="w-16 text-center">Plays</div>
+          <div className="w-20 text-center">Difficulty</div>
+          <div className="w-12 text-center">Time</div>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto bottom-panel-scrollbar">
+        <div className="space-y-0">
           {filteredAndSortedPlaylist.map((song) => (
             <div
               key={song.id}
               onClick={() => onSongSelect(song)}
-              className={`flex items-center gap-4 p-3 hover:bg-slate-800/50 cursor-pointer transition-colors duration-200 ${
-                currentSong.id === song.id ? 'bg-blue-600/20 border-l-4 border-blue-500' : ''
+              className={`flex items-center gap-3 p-2 hover:bg-slate-800/50 cursor-pointer transition-colors duration-200 group ${
+                currentSong.id === song.id ? 'bg-blue-600/20 border-l-2 border-blue-500' : ''
               }`}
             >
-              <div className="relative">
+              <div className="relative flex-shrink-0">
                 <img
-                  src={song.albumArt || '/images/default-album.jpg'}
+                  src={song.albumArt || 'https://picsum.photos/300/300?random=default'}
                   alt={song.title}
-                  className="w-12 h-12 rounded-lg object-cover"
+                  className="w-8 h-8 rounded object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = 'https://picsum.photos/300/300?random=default';
+                  }}
                 />
                 {currentSong.id === song.id && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-lg">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
                   </div>
                 )}
               </div>
               
               <div className="flex-1 min-w-0">
-                <div className="font-medium text-white truncate">{song.title}</div>
-                <div className="text-sm text-gray-400 truncate">{song.artist}</div>
-                {song.genre && (
-                  <div className="text-xs text-gray-500 mt-1">{song.genre}</div>
-                )}
+                <div className="font-medium text-white text-sm truncate leading-tight">
+                  {song.title}
+                </div>
+                <div className="text-xs text-gray-400 truncate leading-tight">
+                  {song.artist}
+                </div>
               </div>
               
-              <div className="text-center">
-                <div className={`text-sm font-mono ${getDifficultyColor(song.difficulty)}`}>
+              {/* Rating */}
+              <div className="w-16 text-center">
+                <div className={`text-xs ${getRatingColor(song.rating)}`}>
+                  {getRatingStars(song.rating)}
+                </div>
+              </div>
+              
+              {/* Genre */}
+              <div className="w-16 text-center">
+                <div className="text-xs text-gray-400 truncate">
+                  {song.genre || '-'}
+                </div>
+              </div>
+
+              {/* BPM */}
+              <div className="w-12 text-center">
+                <div className="text-xs text-gray-400">
+                  {song.bpm || '-'}
+                </div>
+              </div>
+              
+              {/* Play count */}
+              <div className="w-16 text-center">
+                <div className="text-xs text-gray-400">
+                  {formatPlayCount(song.playCount)}
+                </div>
+              </div>
+              
+              {/* Difficulty */}
+              <div className="w-20 text-center">
+                <div className={`text-xs font-mono ${getDifficultyColor(song.difficulty)}`}>
                   {getDifficultyStars(song.difficulty)}
                 </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  {song.difficulty ? `Level ${song.difficulty}` : 'Unrated'}
-                </div>
               </div>
               
-              <div className="text-right">
-                <div className="text-sm text-gray-400">{formatTime(song.duration)}</div>
-                <div className="text-xs text-gray-500 mt-1">
-                  {Math.floor(song.duration / 60)}m
-                </div>
+              {/* Duration */}
+              <div className="w-12 text-center">
+                <div className="text-xs text-gray-400">{formatTime(song.duration)}</div>
               </div>
             </div>
           ))}
