@@ -131,7 +131,12 @@ export const TopBar: React.FC<TopBarProps> = ({ playerData, playerStats }) => {
                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-slate-900 animate-pulse"></div>
              </div>
              <div className="hidden sm:block">
-               <div className="text-white font-semibold text-sm">{playerData.username}</div>
+               <div className="flex items-center gap-2">
+                 <span className="text-red-500 text-xs font-bold bg-red-500/20 px-1.5 py-0.5 rounded border border-red-500/30">
+                   GM
+                 </span>
+                 <span className="text-white font-semibold text-sm">{playerData.username}</span>
+               </div>
                <div className="flex items-center gap-2">
                  <span 
                    className="text-xs font-bold" 
@@ -140,7 +145,8 @@ export const TopBar: React.FC<TopBarProps> = ({ playerData, playerStats }) => {
                    {playerData.rank}
                  </span>
                  <span className="text-gray-400 text-xs">•</span>
-                 <span className="text-cyan-400 text-xs font-semibold">{playerData.elo} ELO</span>
+                 <span className="text-green-400 text-xs font-semibold">2794 ELO</span>
+                 <span className="text-green-400 text-xs font-bold">+47</span>
                </div>
              </div>
            </div>
