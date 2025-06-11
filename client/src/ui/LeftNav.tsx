@@ -1,17 +1,17 @@
 // client/src/ui/LeftNav.tsx
 import React, { useState } from 'react';
-import { AppearanceSettings } from './settings/AppearanceSettings';
-import { AudioSettings } from './settings/AudioSettings';
-import { ControlsSettings } from './settings/ControlsSettings';
-import { OnlineSettings } from './settings/OnlineSettings';
-import { PerformanceSettings } from './settings/PerformanceSettings';
-import { NotificationSettings } from './settings/NotificationSettings';
-import { GameplaySettings } from './settings/GameplaySettings';
-import { AccountSettings } from './settings/AccountSettings';
-import { InputSettings } from './settings/InputSettings';
-import { LanguageSettings } from './settings/LanguageSettings';
-import { PrivacySettings } from './settings/PrivacySettings';
-import { DataSettings } from './settings/DataSettings';
+import { AppearanceSettings } from '@/ui/Settings/AppearanceSettings';
+import { AudioSettings } from '@/ui/Settings/AudioSettings';
+import { ControlsSettings } from '@/ui/Settings/ControlsSettings';
+import { OnlineSettings } from '@/ui/Settings/OnlineSettings';
+import { PerformanceSettings } from '@/ui/Settings/PerformanceSettings';
+import { NotificationSettings } from '@/ui/Settings/NotificationSettings';
+import { GameplaySettings } from '@/ui/Settings/GameplaySettings';
+import { AccountSettings } from '@/ui/Settings/AccountSettings';
+import { InputSettings } from '@/ui/Settings/InputSettings';
+import { LanguageSettings } from '@/ui/Settings/LanguageSettings';
+import { PrivacySettings } from '@/ui/Settings/PrivacySettings';
+import { DataSettings } from '@/ui/Settings/DataSettings';
 
 const friends = [
   { id: 1, name: 'RhythmGod', avatar: '🤖', status: 'online', messageCount: 2 },
