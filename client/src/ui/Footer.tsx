@@ -190,16 +190,12 @@ export const Footer: React.FC = () => {
          <div className="border-t border-slate-700/50 pt-6">
            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
              <div className="flex items-center gap-4 text-sm text-gray-400">
-               <span>© {currentYear} Nixi Studio. All rights reserved.</span>
-               <span className="hidden md:inline">•</span>
-               <span className="hidden md:inline">Made with ❤️ for rhythm game lovers</span>
-               <span className="hidden md:inline">•</span>
-               <button
+               <span>© {currentYear} <button
                  onClick={() => window.open('https://nixi.ltd', '_blank', 'noopener,noreferrer')}
                  className="hover:text-white transition-colors"
-               >
-                 Visit Nixi Studio
-               </button>
+               >Nixi Studio</button>. All rights reserved.</span>
+               <span className="hidden md:inline">•</span>
+               <span className="hidden md:inline">Made with ❤️ for rhythm game lovers</span>
              </div>
              
              <div className="flex items-center gap-4 text-sm text-gray-400">

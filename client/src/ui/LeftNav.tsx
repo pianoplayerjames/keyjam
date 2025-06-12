@@ -845,17 +845,6 @@ const LeftNav = () => {
             </li>
             <li className="w-full">
               <button
-                onClick={handleSocialClick}
-                className="flex items-center w-full p-4 py-2 text-gray-300 hover:bg-slate-700/50 hover:text-white transition-colors duration-200"
-              >
-                <span className="text-3xl">🌐</span>
-                <span className="ml-4 text-base font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100 whitespace-nowrap">
-                  Social Links
-                </span>
-              </button>
-            </li>
-            <li className="w-full">
-              <button
                 onClick={handleSettingsClick}
                 className="flex items-center w-full p-4 py-2 text-gray-300 hover:bg-slate-700/50 hover:text-white transition-colors duration-200"
               >
