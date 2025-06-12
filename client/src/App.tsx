@@ -27,6 +27,7 @@ import Leaderboards from '@/pages/online/Leaderboards';
 import Tutorials from '@/pages/training/Tutorials';
 import Analysis from '@/pages/training/Analysis';
 import { ProfilePage } from '@/pages/online/Profile';
+import Store from '@/pages/store';
 
 const SimpleLoading = () => (
 <group>
@@ -196,7 +197,7 @@ const renderMainMenu = () => {
       <div className="relative z-10 flex flex-col h-screen">
         <TopBar playerData={playerData} playerStats={playerStats} />
         <Navigation />
-        <div className="flex-grow relative overflow-y-auto pb-16">
+        <div className="flex-grow relative overflow-y-auto">
           <Routes>
               <Route path="/" element={<OnlinePortal onBack={() => navigate('/')} onStartGame={(config) => handleStartGameWithConfig(config)} />} />
               <Route path="/career" element={<CareerMenu onBack={() => navigate('/')} />} />
@@ -212,6 +213,7 @@ const renderMainMenu = () => {
              <Route path="/online/leaderboards" element={<Leaderboards onBack={() => navigate('/')} />} />
              <Route path="/training/tutorials" element={<Tutorials onBack={() => navigate('/')} />} />
              <Route path="/training/analysis" element={<Analysis onBack={() => navigate('/')} />} />
+              <Route path="/store" element={<Store onBack={() => navigate('/')} />} />
              <Route path="/profile/:username?" element={<ProfilePage />} />
           </Routes>
         </div>
