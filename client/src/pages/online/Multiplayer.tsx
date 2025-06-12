@@ -870,7 +870,7 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
 
  const renderMainPortal = () => (
    <div className="h-full flex flex-col">
-     <CenteredContainer maxWidth="2xl" accountForLeftNav={true} className="h-full flex-1 min-h-0">
+     <CenteredContainer maxWidth="xl" accountForLeftNav={true} className="h-full flex-1 min-h-0">
        <div className="flex h-full">
          {/* Main Content Area */}
          <div className="flex-1 flex flex-col min-h-0">
