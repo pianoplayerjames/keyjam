@@ -891,27 +891,6 @@ const LeftNav = () => {
               ))}
             </ul>
             
-            <div className="p-4 mt-auto border-t border-slate-700/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0">
-              <h3 className="text-gray-400 text-xs font-bold uppercase mb-2">Follow our social media</h3>
-              <div className="grid grid-cols-4 gap-2">
-                {[
-                  { name: 'Discord', icon: '💬', url: 'https://discord.gg/cv42c32gak' },
-                  { name: 'Twitter', icon: '🐦', url: 'https://x.com/KeyJamGG' },
-                  { name: 'YouTube', icon: '📺', url: 'https://youtube.com/@KeyJamGG' },
-                  { name: 'Reddit', icon: '🤖', url: 'https://reddit.com/r/KeyJam' }
-                ].map((social) => (
-                  <div key={social.name} className="text-center">
-                    <button
-                      onClick={() => window.open(social.url, '_blank', 'noopener,noreferrer')}
-                      className="p-2 text-white transition-all duration-200 hover:scale-110 hover:text-cyan-400 w-full"
-                      title={social.name}
-                    >
-                      <div className="text-2xl">{social.icon}</div>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       </nav>
