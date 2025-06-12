@@ -6,6 +6,7 @@ import PartySystem from '@/pages/online/Parties';
 import { ResizableTimetable } from '@/pages/online/components/ArenaTimetable';
 import { CenteredContainer } from '@/shared/components/Layout';
 import { ArenaPage } from '@/pages/online/Arena';
+import SocialLinksPage from '@/pages/online/SocialLinks';
 
 interface PlayerData { 
   id: string; 
@@ -148,7 +149,7 @@ interface MainPortalProps {
   onStartGame: (config: any) => void;
 }
 
-type PortalSection = 'main' | 'arenas' | 'leaderboards' | 'friends' | 'profile' | 'party' | 'arena';
+type PortalSection = 'main' | 'arenas' | 'leaderboards' | 'friends' | 'profile' | 'party' | 'arena' | 'social';
 
 const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
   const [currentSection, setCurrentSection] = useState<PortalSection>('main');
@@ -158,7 +159,6 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
   const [isPlayerInSelectedArena, setIsPlayerInSelectedArena] = useState(false);
   const [activeTab, setActiveTab] = useState<'featured' | 'events' | 'matches' | 'challenges'>('featured');
 
-  // Mock data
   const [newsItems] = useState<NewsItem[]>([
     {
       id: '1',
@@ -636,126 +636,121 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
       return {
         id: `arena_player_${index}`,
         username,
-        elo: baseElo + Math.floor(Math.random() * 300),
-        rank,
-        avatar: `/avatars/player${index + 1}.png`,
-        status: Math.random() > 0.2 ? 'ready' : 'not-ready',
-        joinedAt: new Date(Date.now() - Math.random() * 600000),
-        isHost
-      };
-    });
-  };
+       elo: baseElo + Math.floor(Math.random() * 300),
+       rank,
+       avatar: `/avatars/player${index + 1}.png`,
+       status: Math.random() > 0.2 ? 'ready' : 'not-ready',
+       joinedAt: new Date(Date.now() - Math.random() * 600000),
+       isHost
+     };
+   });
+ };
 
-  const getArenaTypeColor = (type: Arena['type']): string => {
-    const colors = {
-      tournament: '#ff6b35',
-      ranked: '#8e24aa',
-      casual: '#43a047',
-      speed: '#f44336',
-      party: '#ff9800',
-      'battle-royale': '#e91e63',
-      'team-battle': '#3f51b5',
-      practice: '#4caf50',
-      blitz: '#ff5722',
-      championship: '#ffd700',
-      seasonal: '#9c27b0',
-      custom: '#607d8b'
-    };
-    return colors[type] || '#666';
-  };
+ const getArenaTypeColor = (type: Arena['type']): string => {
+   const colors = {
+     tournament: '#ff6b35',
+     ranked: '#8e24aa',
+     casual: '#43a047',
+     speed: '#f44336',
+     party: '#ff9800',
+     'battle-royale': '#e91e63',
+     'team-battle': '#3f51b5',
+     practice: '#4caf50',
+     blitz: '#ff5722',
+     championship: '#ffd700',
+     seasonal: '#9c27b0',
+     custom: '#607d8b'
+   };
+   return colors[type] || '#666';
+ };
 
-  const getRankColor = (rank: string) => {
-    const colors = {
-      'bronze': '#cd7f32',
-      'silver': '#c0c0c0',
-      'gold': '#ffd700',
-      'platinum': '#e5e4e2',
-      'diamond': '#b9f2ff',
-      'master': '#ff6b35',
-      'grandmaster': '#ff1744'
-    };
-    return colors[rank.toLowerCase() as keyof typeof colors] || '#666';
-  };
+ const getRankColor = (rank: string) => {
+   const colors = {
+     'bronze': '#cd7f32',
+     'silver': '#c0c0c0',
+     'gold': '#ffd700',
+     'platinum': '#e5e4e2',
+     'diamond': '#b9f2ff',
+     'master': '#ff6b35',
+     'grandmaster': '#ff1744'
+   };
+   return colors[rank.toLowerCase() as keyof typeof colors] || '#666';
+ };
 
-  useEffect(() => {
-    setPlayerData({
-      id: 'player_123',
-      username: 'RhythmMaster',
-      rank: 'Diamond',
-      elo: 1847,
-      wins: 156,
-      losses: 89,
-      draws: 12,
-      level: 28,
-      avatar: '/avatars/default.png',
-      status: 'online',
-      lastPlayed: new Date()
-    });
-    
-    // Generate lots of arenas spanning different times and types
-    const arenaTypes: Arena['type'][] = [
-      'tournament', 'ranked', 'casual', 'speed', 'party', 'battle-royale', 
-      'team-battle', 'practice', 'blitz', 'championship', 'seasonal', 'custom'
-    ];
-    
-    const arenaNames = [
-      'Elite Championship', 'Speed Demons Arena', 'Casual Friday Fun', 'Ranked Royale',
-      'Battle Royale Bonanza', 'Team Tactics', 'Practice Paradise', 'Blitz Battlefield',
-      'Championship Clash', 'Seasonal Showdown', 'Custom Chaos', 'Midnight Madness',
-      'Dawn Patrol', 'Evening Express', 'Morning Mayhem', 'Afternoon Assault',
-      'Prime Time Power', 'Late Night Legends', 'Early Bird Express', 'Weekend Warriors',
-      'Weekday Wonders', 'Holiday Heroes', 'Festival Frenzy', 'Concert Clash',
-      'Symphony Showdown', 'Rhythm Revolution', 'Beat Battle', 'Melody Mayhem',
-      'Harmony Heights', 'Tempo Temple', 'Note Nirvana', 'Chord Champions',
-      'Scale Soldiers', 'Frequency Fighters', 'Pitch Perfect', 'Tune Titans',
-      'Sound Soldiers', 'Audio Athletes', 'Music Masters', 'Rhythm Riders',
-      'Beat Brawlers', 'Melody Maniacs', 'Harmony Heroes', 'Tempo Titans',
-      'Note Ninjas', 'Chord Crushers', 'Scale Slayers', 'Frequency Fighters',
-      'Pitch Pirates', 'Tune Terminators', 'Sound Samurai', 'Audio Assassins'
-    ];
-    
-    const hostNames = [
-      'TourneyMaster', 'ArenaKing', 'BattleHost', 'EventOrganizer', 'CompetitionChief',
-      'MatchMaker', 'ChallengeCreator', 'ContestCoordinator', 'GameGuide', 'PlayMaster',
-      'RhythmRuler', 'BeatBoss', 'MelodyMaster', 'HarmonyHost', 'TempoTitan',
-      'NoteNinja', 'ChordChief', 'ScaleSensei', 'FrequencyFather', 'PitchPilot',
-      'TuneTutor', 'SoundSheriff', 'AudioAdmin', 'MusicMayor', 'RhythmRanger'
-    ];
+ useEffect(() => {
+   setPlayerData({
+     id: 'player_123',
+     username: 'RhythmMaster',
+     rank: 'Diamond',
+     elo: 1847,
+     wins: 156,
+     losses: 89,
+     draws: 12,
+     level: 28,
+     avatar: '/avatars/default.png',
+     status: 'online',
+     lastPlayed: new Date()
+   });
+   
+   const arenaTypes: Arena['type'][] = [
+     'tournament', 'ranked', 'casual', 'speed', 'party', 'battle-royale', 
+     'team-battle', 'practice', 'blitz', 'championship', 'seasonal', 'custom'
+   ];
+   
+   const arenaNames = [
+     'Elite Championship', 'Speed Demons Arena', 'Casual Friday Fun', 'Ranked Royale',
+     'Battle Royale Bonanza', 'Team Tactics', 'Practice Paradise', 'Blitz Battlefield',
+     'Championship Clash', 'Seasonal Showdown', 'Custom Chaos', 'Midnight Madness',
+     'Dawn Patrol', 'Evening Express', 'Morning Mayhem', 'Afternoon Assault',
+     'Prime Time Power', 'Late Night Legends', 'Early Bird Express', 'Weekend Warriors',
+     'Weekday Wonders', 'Holiday Heroes', 'Festival Frenzy', 'Concert Clash',
+     'Symphony Showdown', 'Rhythm Revolution', 'Beat Battle', 'Melody Mayhem',
+     'Harmony Heights', 'Tempo Temple', 'Note Nirvana', 'Chord Champions',
+     'Scale Soldiers', 'Frequency Fighters', 'Pitch Perfect', 'Tune Titans',
+     'Sound Soldiers', 'Audio Athletes', 'Music Masters', 'Rhythm Riders',
+     'Beat Brawlers', 'Melody Maniacs', 'Harmony Heroes', 'Tempo Titans',
+     'Note Ninjas', 'Chord Crushers', 'Scale Slayers', 'Frequency Fighters',
+     'Pitch Pirates', 'Tune Terminators', 'Sound Samurai', 'Audio Assassins'
+   ];
+   
+   const hostNames = [
+     'TourneyMaster', 'ArenaKing', 'BattleHost', 'EventOrganizer', 'CompetitionChief',
+     'MatchMaker', 'ChallengeCreator', 'ContestCoordinator', 'GameGuide', 'PlayMaster',
+     'RhythmRuler', 'BeatBoss', 'MelodyMaster', 'HarmonyHost', 'TempoTitan',
+     'NoteNinja', 'ChordChief', 'ScaleSensei', 'FrequencyFather', 'PitchPilot',
+     'TuneTutor', 'SoundSheriff', 'AudioAdmin', 'MusicMayor', 'RhythmRanger'
+   ];
 
-    const mockArenas: Arena[] = [];
-    
-    // Generate 100+ arenas across 8-hour timespan
-    for (let i = 0; i < 120; i++) {
-      const type = arenaTypes[Math.floor(Math.random() * arenaTypes.length)];
-      const name = arenaNames[Math.floor(Math.random() * arenaNames.length)];
-      const host = hostNames[Math.floor(Math.random() * hostNames.length)];
-      
-      // Spread arenas across 8 hours, with some clustering for realism
-      const timeOffset = (Math.random() * 8 * 60) + (Math.random() * 60 - 30); // 8 hours ± 30 minutes
-      const startTime = new Date(Date.now() + timeOffset * 60 * 1000);
-      
-      // Duration varies by type
-      let duration = 30; // default
-      switch (type) {
-        case 'tournament':
-        case 'championship':
-          duration = Math.floor(Math.random() * 60) + 90; // 90-150 minutes
-          break;
-        case 'battle-royale':
-          duration = Math.floor(Math.random() * 30) + 60; // 60-90 minutes
-          break;
-        case 'blitz':
-        case 'speed':
-          duration = Math.floor(Math.random() * 15) + 15; // 15-30 minutes
-          break;
-        case 'practice':
-          duration = Math.floor(Math.random() * 45) + 30;
-          break;
+   const mockArenas: Arena[] = [];
+   
+   for (let i = 0; i < 120; i++) {
+     const type = arenaTypes[Math.floor(Math.random() * arenaTypes.length)];
+     const name = arenaNames[Math.floor(Math.random() * arenaNames.length)];
+     const host = hostNames[Math.floor(Math.random() * hostNames.length)];
+     
+     const timeOffset = (Math.random() * 8 * 60) + (Math.random() * 60 - 30);
+     const startTime = new Date(Date.now() + timeOffset * 60 * 1000);
+     
+     let duration = 30;
+     switch (type) {
+       case 'tournament':
+       case 'championship':
+         duration = Math.floor(Math.random() * 60) + 90;
+         break;
+       case 'battle-royale':
+         duration = Math.floor(Math.random() * 30) + 60;
+         break;
+       case 'blitz':
+       case 'speed':
+         duration = Math.floor(Math.random() * 15) + 15;
+         break;
+       case 'practice':
+         duration = Math.floor(Math.random() * 45) + 30;
+         break;
        default:
-         duration = Math.floor(Math.random() * 45) + 30; // 30-75 minutes
+         duration = Math.floor(Math.random() * 45) + 30;
      }
      
-     // Player counts and max players vary by type
      let maxPlayers = 8;
      switch (type) {
        case 'tournament':
@@ -777,7 +772,6 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
      
      const currentPlayers = Math.floor(Math.random() * maxPlayers);
      
-     // Prize pools for certain types
      let prizePool: number | undefined;
      if (type === 'tournament' || type === 'championship') {
        prizePool = [1000, 2500, 5000, 10000, 25000, 50000, 100000][Math.floor(Math.random() * 7)];
@@ -801,7 +795,6 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
      });
    }
    
-   // Sort by start time
    mockArenas.sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
    setUpcomingArenas(mockArenas);
  }, []);
@@ -872,9 +865,7 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
    <div className="h-full flex flex-col">
      <CenteredContainer maxWidth="xl" accountForLeftNav={true} className="h-full flex-1 min-h-0">
        <div className="flex h-full">
-         {/* Main Content Area */}
          <div className="flex-1 flex flex-col min-h-0">
-           {/* Top Section: Arena Timetable */}
            <div className="flex-shrink-0 mb-6">
              <ResizableTimetable 
                upcomingArenas={upcomingArenas} 
@@ -884,7 +875,6 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
              />
            </div>
 
-           {/* Tab Navigation */}
            <div className="flex gap-1 mb-6 flex-shrink-0">
              {[
                { id: 'featured', label: 'Featured', icon: '⭐' },
@@ -907,12 +897,10 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
              ))}
            </div>
 
-           {/* Scrollable Content Area */}
            <div className="flex-1 overflow-y-auto min-h-0 pr-2">
              <div className="pb-6">
                {activeTab === 'featured' && (
                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                   {/* Featured News */}
                    <div className="space-y-4">
                      <h3 className="text-xl font-bold text-white flex items-center gap-2">
                        <span>📰</span> Latest News
@@ -945,7 +933,6 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
                        </div>
                      ))}
                      
-                     {/* More News Button */}
                      <div className="text-center pt-4">
                        <button className="bg-slate-700 hover:bg-slate-600 px-6 py-2 rounded-lg text-white font-medium">
                          View All News
@@ -953,13 +940,11 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
                      </div>
                    </div>
 
-                   {/* Live Streams */}
                    <div className="space-y-4">
                      <h3 className="text-xl font-bold text-white flex items-center gap-2">
                        <span>📺</span> KeyJam TV
                      </h3>
                      
-                     {/* Main Stream */}
                      <div className="bg-gradient-to-r from-red-900/30 to-pink-900/30 border border-red-500/30 rounded-lg p-4">
                        <div className="flex items-center gap-2 mb-3">
                          <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
@@ -973,7 +958,6 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
                        </button>
                      </div>
 
-                     {/* Featured Streams */}
                      {liveStreams.slice(1, 6).map((stream) => (
                        <div key={stream.id} className="bg-slate-800/50 rounded-lg p-3 border border-slate-600/50">
                          <div className="flex items-center justify-between mb-2">
@@ -1115,7 +1099,6 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
 
                {activeTab === 'challenges' && (
                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                   {/* Daily Challenges */}
                    <div className="space-y-4">
                      <h3 className="text-xl font-bold text-white flex items-center gap-2">
                        <span>🎯</span> Daily Challenges
@@ -1159,7 +1142,6 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
                      ))}
                    </div>
 
-                   {/* Record Breaks & Forum */}
                    <div className="space-y-4">
                      <h3 className="text-xl font-bold text-white flex items-center gap-2">
                        <span>🏆</span> Recent Records
@@ -1196,7 +1178,6 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
                        ))}
                      </div>
 
-                     {/* Forum Posts */}
                      <h3 className="text-xl font-bold text-white flex items-center gap-2">
                        <span>💬</span> Forum Activity
                      </h3>
@@ -1236,9 +1217,7 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
            </div>
          </div>
 
-         {/* Right Sidebar - Fixed Height with Internal Scrolling */}
          <div className="w-80 flex-shrink-0 bg-slate-900/30 border-l border-slate-700/50 flex flex-col overflow-y-auto">
-           {/* Quick Actions */}
            <div className="p-4 border-b border-slate-700/50 flex-shrink-0">
              <h3 className="text-lg font-bold text-white mb-3">Quick Actions</h3>
              <div className="grid grid-cols-2 gap-2">
@@ -1251,7 +1230,7 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
                </button>
                <button
                  onClick={() => setCurrentSection('leaderboards')}
-                 className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 rounded-lg p-3 text-white text-sm font-bold transition-all duration-200 hover:scale-105"
+                 className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 rounded-lg p-3 text-white text-sm font-bold transition-duration-200 hover:scale-105"
                >
                  <div className="text-lg mb-1">🏆</div>
                  Rankings
@@ -1270,12 +1249,17 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
                  <div className="text-lg mb-1">🎉</div>
                  Party Up
                </button>
+               <button
+                 onClick={() => setCurrentSection('social')}
+                 className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 rounded-lg p-3 text-white text-sm font-bold transition-all duration-200 hover:scale-105"
+               >
+                 <div className="text-lg mb-1">🌐</div>
+                 Social
+               </button>
              </div>
            </div>
 
-           {/* Scrollable Sidebar Content */}
            <div className="flex-1 overflow-y-auto min-h-0">
-             {/* Current Events */}
              <div className="p-4 border-b border-slate-700/50">
                <h3 className="text-lg font-bold text-white mb-3">Happening Now</h3>
                <div className="space-y-3">
@@ -1308,7 +1292,6 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
                </div>
              </div>
 
-             {/* Server Status */}
              <div className="p-4 border-b border-slate-700/50">
                <h3 className="text-lg font-bold text-white mb-3">Server Status</h3>
                <div className="space-y-2">
@@ -1327,7 +1310,7 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
                          server.status === 'good' ? 'bg-yellow-400' : 'bg-orange-400'
                        }`}></div>
                        <div>
-                       <span className="text-white text-sm">{server.region}</span>
+                         <span className="text-white text-sm">{server.region}</span>
                          <div className="text-xs text-gray-400">{server.players} online</div>
                        </div>
                      </div>
@@ -1337,7 +1320,6 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
                </div>
              </div>
 
-             {/* Top Players Today */}
              <div className="p-4 border-b border-slate-700/50">
                <h3 className="text-lg font-bold text-white mb-3">Top Players Today</h3>
                <div className="space-y-2">
@@ -1375,7 +1357,6 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
                </div>
              </div>
 
-             {/* Arena Quick Stats */}
              <div className="p-4 border-b border-slate-700/50">
                <h3 className="text-lg font-bold text-white mb-3">Arena Stats</h3>
                <div className="grid grid-cols-2 gap-3">
@@ -1398,7 +1379,6 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
                </div>
              </div>
 
-             {/* Trending Arenas */}
              <div className="p-4 border-b border-slate-700/50">
                <h3 className="text-lg font-bold text-white mb-3">🔥 Trending Arenas</h3>
                <div className="space-y-2">
@@ -1428,7 +1408,6 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
                </div>
              </div>
 
-             {/* Achievement of the Day */}
              <div className="p-4 border-b border-slate-700/50">
                <h3 className="text-lg font-bold text-white mb-3">🏅 Daily Achievement</h3>
                <div className="bg-gradient-to-r from-yellow-900/30 to-orange-900/30 border border-yellow-600/30 rounded-lg p-3">
@@ -1449,18 +1428,18 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
                </div>
              </div>
 
-             {/* Social Links */}
              <div className="p-4">
                <h3 className="text-lg font-bold text-white mb-3">Community</h3>
                <div className="grid grid-cols-4 gap-2 mb-4">
                  {[
-                   { name: 'Discord', icon: '💬', color: 'bg-indigo-600', members: '89k' },
-                   { name: 'Twitter', icon: '🐦', color: 'bg-blue-500', members: '156k' },
-                   { name: 'YouTube', icon: '📺', color: 'bg-red-600', members: '234k' },
-                   { name: 'Reddit', icon: '🤖', color: 'bg-orange-600', members: '67k' }
+                   { name: 'Discord', icon: '💬', color: 'bg-indigo-600', members: '89k', url: 'https://discord.gg/cv42c32gak' },
+                   { name: 'Twitter', icon: '🐦', color: 'bg-blue-500', members: '156k', url: 'https://x.com/KeyJamGG' },
+                   { name: 'YouTube', icon: '📺', color: 'bg-red-600', members: '234k', url: 'https://youtube.com/@KeyJamGG' },
+                   { name: 'Reddit', icon: '🤖', color: 'bg-orange-600', members: '67k', url: 'https://reddit.com/r/KeyJam' }
                  ].map((social) => (
                    <div key={social.name} className="text-center">
                      <button
+                       onClick={() => window.open(social.url, '_blank', 'noopener,noreferrer')}
                        className={`${social.color} hover:opacity-80 rounded-lg p-2 text-white transition-all duration-200 hover:scale-105 w-full`}
                        title={social.name}
                      >
@@ -1472,7 +1451,6 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
                  ))}
                </div>
                
-               {/* Community Stats */}
                <div className="bg-slate-800/30 rounded p-3 text-center">
                  <h4 className="text-sm font-bold text-white mb-2">Community Activity</h4>
                  <div className="grid grid-cols-2 gap-2 text-xs">
@@ -1494,11 +1472,12 @@ const MainPortal: React.FC<MainPortalProps> = ({ onBack, onStartGame }) => {
    </div>
  );
 
- // Handle other sections (keep existing logic)
  const renderCurrentSection = () => {
    if (!playerData) return <div>Loading...</div>;
 
    switch (currentSection) {
+     case 'social':
+       return <SocialLinksPage onBack={() => setCurrentSection('main')} />;
      case 'arena':
        return selectedArena ? (
          <ArenaPage

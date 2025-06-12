@@ -12,6 +12,7 @@ import { InputSettings } from '@/ui/Settings/InputSettings';
 import { LanguageSettings } from '@/ui/Settings/LanguageSettings';
 import { PrivacySettings } from '@/ui/Settings/PrivacySettings';
 import { DataSettings } from '@/ui/Settings/DataSettings';
+import SocialLinksPage from '@/pages/online/SocialLinks';
 
 const friends = [
   { id: 1, name: 'RhythmGod', avatar: '🤖', status: 'online', messageCount: 2 },
@@ -200,7 +201,7 @@ const SettingsPageRenderer: React.FC<{ page: string; onBack: () => void }> = ({ 
 };
 
 const LeftNav = () => {
-  const [activeSection, setActiveSection] = useState<'main' | 'notifications' | 'settings' | 'chat' | 'search'>('main');
+  const [activeSection, setActiveSection] = useState<'main' | 'notifications' | 'settings' | 'chat' | 'search' | 'social'>('main');
   const [activeChatFriend, setActiveChatFriend] = useState<number | null>(null);
   const [activeSettingsPage, setActiveSettingsPage] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');
@@ -229,6 +230,10 @@ const LeftNav = () => {
     if (activeSection !== 'search') {
       setSearchQuery('');
     }
+  };
+
+  const handleSocialClick = () => {
+    setActiveSection(activeSection === 'social' ? 'main' : 'social');
   };
 
   const handleFriendClick = (friendId: number) => {
@@ -273,7 +278,10 @@ const LeftNav = () => {
     notification.text.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Show settings page if one is selected
+  if (activeSection === 'social') {
+    return <SocialLinksPage onBack={() => setActiveSection('main')} />;
+  }
+
   if (activeSection === 'settings' && activeSettingsPage) {
     return <SettingsPageRenderer page={activeSettingsPage} onBack={() => setActiveSettingsPage(null)} />;
   }
@@ -614,299 +622,312 @@ const LeftNav = () => {
                   <span className="text-xl">←</span>
                   <span className="font-semibold">Back</span>
                 </button>
-<h2 className="text-white font-bold text-lg">Notifications</h2>
-               <div className="w-16"></div>
-             </div>
-           </div>
+                <h2 className="text-white font-bold text-lg">Notifications</h2>
+                <div className="w-16"></div>
+              </div>
+            </div>
 
-           <div className="flex-1 overflow-y-auto leftnav-scrollbar p-2">
-             {mockNotifications.map((notification) => (
-               <div
-                 key={notification.id}
-                 onClick={() => markNotificationAsRead(notification.id)}
-                 className={`p-3 mb-2 rounded-lg cursor-pointer transition-colors ${
-                   notification.read 
-                     ? 'bg-slate-800/30 text-gray-400' 
-                     : 'bg-slate-700/50 text-white hover:bg-slate-600/50'
-                 }`}
-               >
-                 <div className="flex items-start gap-3">
-                   <span className="text-lg flex-shrink-0 mt-0.5">
-                     {getNotificationIcon(notification.type)}
-                   </span>
-                   <div className="flex-1 min-w-0">
-                     <p className={`text-sm leading-relaxed ${notification.read ? 'text-gray-400' : 'text-gray-200'}`}>
-                       {notification.text}
-                     </p>
-                     <span className="text-xs text-gray-500 mt-1 block">
-                       {notification.time}
-                     </span>
-                   </div>
-                   {!notification.read && (
-                     <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2"></div>
-                   )}
-                 </div>
-               </div>
-             ))}
-           </div>
+            <div className="flex-1 overflow-y-auto leftnav-scrollbar p-2">
+              {mockNotifications.map((notification) => (
+                <div
+                  key={notification.id}
+                  onClick={() => markNotificationAsRead(notification.id)}
+                  className={`p-3 mb-2 rounded-lg cursor-pointer transition-colors ${
+                    notification.read 
+                      ? 'bg-slate-800/30 text-gray-400' 
+                      : 'bg-slate-700/50 text-white hover:bg-slate-600/50'
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="text-lg flex-shrink-0 mt-0.5">
+                      {getNotificationIcon(notification.type)}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm leading-relaxed ${notification.read ? 'text-gray-400' : 'text-gray-200'}`}>
+                        {notification.text}
+                      </p>
+                      <span className="text-xs text-gray-500 mt-1 block">
+                        {notification.time}
+                      </span>
+                    </div>
+                    {!notification.read && (
+                      <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2"></div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
 
-           <div className="p-4 border-t border-slate-700/50">
-             <button className="w-full py-2 px-4 bg-slate-700 hover:bg-slate-600 rounded-lg text-white text-sm font-medium transition-colors">
-               Mark All as Read
-             </button>
-           </div>
-         </div>
-       </nav>
-     </>
-   );
- }
+            <div className="p-4 border-t border-slate-700/50">
+              <button className="w-full py-2 px-4 bg-slate-700 hover:bg-slate-600 rounded-lg text-white text-sm font-medium transition-colors">
+                Mark All as Read
+              </button>
+            </div>
+          </div>
+        </nav>
+      </>
+    );
+  }
 
- if (activeSection === 'settings') {
-   return (
-     <>
-       <style>
-         {`
-           .leftnav-scrollbar::-webkit-scrollbar {
-             width: 8px;
-             opacity: 0;
-             transition: opacity 0.2s ease;
-           }
-           
-           .leftnav-scrollbar:hover::-webkit-scrollbar {
-             opacity: 1;
-           }
-           
-           .leftnav-scrollbar::-webkit-scrollbar-track {
-             background: rgba(51, 65, 85, 0.3);
-             border-radius: 4px;
-           }
-           
-           .leftnav-scrollbar::-webkit-scrollbar-thumb {
-             background: rgba(148, 163, 184, 0.5);
-             border-radius: 4px;
-             border: 1px solid rgba(30, 41, 59, 0.8);
-           }
-           
-           .leftnav-scrollbar::-webkit-scrollbar-thumb:hover {
-             background: rgba(148, 163, 184, 0.8);
-           }
+  if (activeSection === 'settings') {
+    return (
+      <>
+        <style>
+          {`
+            .leftnav-scrollbar::-webkit-scrollbar {
+              width: 8px;
+              opacity: 0;
+              transition: opacity 0.2s ease;
+            }
+            
+            .leftnav-scrollbar:hover::-webkit-scrollbar {
+              opacity: 1;
+            }
+            
+            .leftnav-scrollbar::-webkit-scrollbar-track {
+              background: rgba(51, 65, 85, 0.3);
+              border-radius: 4px;
+            }
+            
+            .leftnav-scrollbar::-webkit-scrollbar-thumb {
+              background: rgba(148, 163, 184, 0.5);
+              border-radius: 4px;
+              border: 1px solid rgba(30, 41, 59, 0.8);
+            }
+            
+            .leftnav-scrollbar::-webkit-scrollbar-thumb:hover {
+              background: rgba(148, 163, 184, 0.8);
+            }
 
-           .leftnav-scrollbar {
-             scrollbar-width: thin;
-             scrollbar-color: transparent transparent;
-             transition: scrollbar-color 0.2s ease;
-           }
+            .leftnav-scrollbar {
+              scrollbar-width: thin;
+              scrollbar-color: transparent transparent;
+              transition: scrollbar-color 0.2s ease;
+            }
 
-           .leftnav-scrollbar:hover {
-             scrollbar-color: rgba(148, 163, 184, 0.5) rgba(51, 65, 85, 0.3);
-           }
-         `}
-       </style>
-       <nav className="fixed top-0 left-0 h-screen w-80 bg-slate-900/90 backdrop-blur-md border-r border-slate-700/50 transition-all duration-300 ease-in-out overflow-hidden z-50">
-         <div className="flex flex-col h-full">
-           <div className="p-4 border-b border-slate-700/50">
-             <div className="flex items-center justify-between">
-               <button
-                 onClick={() => setActiveSection('main')}
-                 className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
-               >
-                 <span className="text-xl">←</span>
-                 <span className="font-semibold">Back</span>
-               </button>
-               <h2 className="text-white font-bold text-lg">Settings</h2>
-               <div className="w-16"></div>
-             </div>
-           </div>
+            .leftnav-scrollbar:hover {
+              scrollbar-color: rgba(148, 163, 184, 0.5) rgba(51, 65, 85, 0.3);
+            }
+          `}
+        </style>
+        <nav className="fixed top-0 left-0 h-screen w-80 bg-slate-900/90 backdrop-blur-md border-r border-slate-700/50 transition-all duration-300 ease-in-out overflow-hidden z-50">
+          <div className="flex flex-col h-full">
+            <div className="p-4 border-b border-slate-700/50">
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={() => setActiveSection('main')}
+                  className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
+                >
+                  <span className="text-xl">←</span>
+                  <span className="font-semibold">Back</span>
+                </button>
+                <h2 className="text-white font-bold text-lg">Settings</h2>
+                <div className="w-16"></div>
+              </div>
+            </div>
 
-           <div className="flex-1 overflow-y-auto leftnav-scrollbar p-2">
-             {settingsPages.map((setting) => (
-               <div
-                 key={setting.id}
-                 onClick={() => setActiveSettingsPage(setting.id)}
-                 className="p-3 mb-2 rounded-lg cursor-pointer bg-slate-800/30 hover:bg-slate-700/50 transition-colors group"
-               >
-                 <div className="flex items-center gap-3">
-                   <span className="text-xl">{setting.icon}</span>
-                   <div className="flex-1">
-                     <h3 className="text-white font-medium group-hover:text-cyan-400 transition-colors">
-                       {setting.title}
-                     </h3>
-                     <p className="text-xs text-gray-400">{setting.desc}</p>
-                   </div>
-                   <span className="text-gray-500 group-hover:text-gray-300 transition-colors">
-                     →
-                   </span>
-                 </div>
-               </div>
-             ))}
-           </div>
+            <div className="flex-1 overflow-y-auto leftnav-scrollbar p-2">
+              {settingsPages.map((setting) => (
+                <div
+                  key={setting.id}
+                  onClick={() => setActiveSettingsPage(setting.id)}
+                  className="p-3 mb-2 rounded-lg cursor-pointer bg-slate-800/30 hover:bg-slate-700/50 transition-colors group"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl">{setting.icon}</span>
+                    <div className="flex-1">
+                      <h3 className="text-white font-medium group-hover:text-cyan-400 transition-colors">
+                        {setting.title}
+                      </h3>
+                      <p className="text-xs text-gray-400">{setting.desc}</p>
+                    </div>
+                    <span className="text-gray-500 group-hover:text-gray-300 transition-colors">
+                      →
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-           <div className="p-4 border-t border-slate-700/50">
-             <div className="text-center text-xs text-gray-500">
-               KeyJam v11.8.2
-             </div>
-           </div>
-         </div>
-       </nav>
-     </>
-   );
- }
+            <div className="p-4 border-t border-slate-700/50">
+              <div className="text-center text-xs text-gray-500">
+                KeyJam v11.8.2
+              </div>
+            </div>
+          </div>
+        </nav>
+      </>
+    );
+  }
 
- return (
-   <>
-     <style>
-       {`
-         .leftnav-scrollbar::-webkit-scrollbar {
-           width: 6px;
-           opacity: 0;
-           transition: opacity 0.2s ease;
-         }
-         
-         .leftnav-scrollbar:hover::-webkit-scrollbar {
-           opacity: 1;
-         }
-         
-         .leftnav-scrollbar::-webkit-scrollbar-track {
-           background: rgba(51, 65, 85, 0.2);
-           border-radius: 3px;
-         }
-         
-         .leftnav-scrollbar::-webkit-scrollbar-thumb {
-           background: rgba(148, 163, 184, 0.4);
-           border-radius: 3px;
-           border: 1px solid rgba(30, 41, 59, 0.6);
-         }
-         
-         .leftnav-scrollbar::-webkit-scrollbar-thumb:hover {
-           background: rgba(148, 163, 184, 0.7);
-         }
+  return (
+    <>
+      <style>
+        {`
+          .leftnav-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+          }
+          
+          .leftnav-scrollbar:hover::-webkit-scrollbar {
+            opacity: 1;
+          }
+          
+          .leftnav-scrollbar::-webkit-scrollbar-track {
+            background: rgba(51, 65, 85, 0.2);
+            border-radius: 3px;
+          }
+          
+          .leftnav-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.4);
+            border-radius: 3px;
+            border: 1px solid rgba(30, 41, 59, 0.6);
+          }
+          
+          .leftnav-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.7);
+          }
 
-         .leftnav-scrollbar {
-           scrollbar-width: thin;
-           scrollbar-color: transparent transparent;
-           transition: scrollbar-color 0.2s ease;
-         }
+          .leftnav-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: transparent transparent;
+            transition: scrollbar-color 0.2s ease;
+          }
 
-         .leftnav-main-container:hover .leftnav-scrollbar::-webkit-scrollbar {
-           opacity: 1;
-         }
+          .leftnav-main-container:hover .leftnav-scrollbar::-webkit-scrollbar {
+            opacity: 1;
+          }
 
-         .leftnav-main-container:hover .leftnav-scrollbar {
-           scrollbar-color: rgba(148, 163, 184, 0.4) rgba(51, 65, 85, 0.2);
-         }
-       `}
-     </style>
-     <nav className="leftnav-main-container fixed top-0 left-0 h-screen w-18 hover:w-64 bg-slate-900/80 backdrop-blur-md border-r border-slate-700/50 transition-all duration-300 ease-in-out overflow-x-hidden z-50 group">
-       <div className="flex flex-col h-full">
-         <ul className="flex flex-col items-start mt-2 space-y-0 flex-shrink-0">
-           <li className="w-full">
-             <button
-               onClick={handleSearchClick}
-               className="flex items-center w-full p-4 py-2 text-gray-300 hover:bg-slate-700/50 hover:text-white transition-colors duration-200"
-             >
-               <span className="text-3xl">🔍</span>
-               <span className="ml-4 text-base font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100 whitespace-nowrap">
-                 Search
-               </span>
-             </button>
-           </li>
-           <li className="w-full">
-             <button
-               onClick={handleNotificationsClick}
-               className="flex items-center w-full p-4 py-2 text-gray-300 hover:bg-slate-700/50 hover:text-white transition-colors duration-200 relative"
-             >
-               <div className="relative">
-                 <span className="text-3xl">🔔</span>
-                 <NotificationBadge count={unreadNotifications} />
-               </div>
-               <span className="ml-4 text-base font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100 whitespace-nowrap">
-                 Notifications
-               </span>
-             </button>
-           </li>
-           <li className="w-full">
-            <button
+          .leftnav-main-container:hover .leftnav-scrollbar {
+            scrollbar-color: rgba(148, 163, 184, 0.4) rgba(51, 65, 85, 0.2);
+          }
+        `}
+      </style>
+      <nav className="leftnav-main-container fixed top-0 left-0 h-screen w-18 hover:w-64 bg-slate-900/80 backdrop-blur-md border-r border-slate-700/50 transition-all duration-300 ease-in-out overflow-x-hidden z-50 group">
+        <div className="flex flex-col h-full">
+          <ul className="flex flex-col items-start mt-2 space-y-0 flex-shrink-0">
+            <li className="w-full">
+              <button
+                onClick={handleSearchClick}
+                className="flex items-center w-full p-4 py-2 text-gray-300 hover:bg-slate-700/50 hover:text-white transition-colors duration-200"
+              >
+                <span className="text-3xl">🔍</span>
+                <span className="ml-4 text-base font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100 whitespace-nowrap">
+                  Search
+                </span>
+              </button>
+            </li>
+            <li className="w-full">
+              <button
+                onClick={handleNotificationsClick}
+                className="flex items-center w-full p-4 py-2 text-gray-300 hover:bg-slate-700/50 hover:text-white transition-colors duration-200 relative"
+              >
+                <div className="relative">
+                  <span className="text-3xl">🔔</span>
+                  <NotificationBadge count={unreadNotifications} />
+                </div>
+                <span className="ml-4 text-base font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100 whitespace-nowrap">
+                  Notifications
+                </span>
+              </button>
+            </li>
+            <li className="w-full">
+              <button
                 onClick={handleStoreClick}
                 className="flex items-center w-full p-4 py-2 text-gray-300 hover:bg-slate-700/50 hover:text-white transition-colors duration-200"
-            >
+              >
                 <span className="text-3xl">🛒</span>
                 <span className="ml-4 text-base font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100 whitespace-nowrap">
-                Store
+                  Store
                 </span>
-            </button>
-           </li>
-           <li className="w-full">
-             <button
-               onClick={handleSettingsClick}
-               className="flex items-center w-full p-4 py-2 text-gray-300 hover:bg-slate-700/50 hover:text-white transition-colors duration-200"
-             >
-               <span className="text-3xl">⚙️</span>
-               <span className="ml-4 text-base font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100 whitespace-nowrap">
-                 Settings
-               </span>
-             </button>
-           </li>
-         </ul>
+              </button>
+            </li>
+            <li className="w-full">
+              <button
+                onClick={handleSocialClick}
+                className="flex items-center w-full p-4 py-2 text-gray-300 hover:bg-slate-700/50 hover:text-white transition-colors duration-200"
+              >
+                <span className="text-3xl">🌐</span>
+                <span className="ml-4 text-base font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100 whitespace-nowrap">
+                  Social Links
+                </span>
+              </button>
+            </li>
+            <li className="w-full">
+              <button
+                onClick={handleSettingsClick}
+                className="flex items-center w-full p-4 py-2 text-gray-300 hover:bg-slate-700/50 hover:text-white transition-colors duration-200"
+              >
+                <span className="text-3xl">⚙️</span>
+                <span className="ml-4 text-base font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100 whitespace-nowrap">
+                  Settings
+                </span>
+              </button>
+            </li>
+          </ul>
 
-         <div className="flex-1 flex flex-col min-h-0">
-           <div className="px-4 py-2 border-b border-slate-700/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0"></div>
+          <div className="flex-1 flex flex-col min-h-0">
+            <div className="px-4 py-2 border-b border-slate-700/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0"></div>
 
-           <ul className="flex-1 overflow-y-auto leftnav-scrollbar min-h-0">
-             {friends.map(friend => (
-               <li key={friend.id} className="w-full">
-                 <button 
-                   onClick={() => handleFriendClick(friend.id)}
-                   className="flex items-center w-full p-4 py-3 text-gray-300 hover:bg-slate-700/50 hover:text-white transition-colors duration-200 group/friend"
-                 >
-                   <div className="relative">
-                     <span className="text-3xl">{friend.avatar}</span>
-                     <div className={`absolute bottom-0 right-0 block h-3 w-3 rounded-full border-2 border-slate-900 ${getStatusColor(friend.status)}`}></div>
-                     <MessageBadge count={friend.messageCount} />
-                   </div>
-                   <div className="ml-4 flex-1 min-w-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100">
-                     <div className="flex items-center justify-between">
-                       <span className="text-base font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
-                         {friend.name}
-                       </span>
-                       {friend.messageCount > 0 && (
-                         <div className="ml-2 bg-red-500 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center font-bold">
-                           {friend.messageCount > 9 ? '9+' : friend.messageCount}
-                         </div>
-                       )}
-                     </div>
-                     <div className="text-xs text-gray-500 capitalize text-left">
-                       {friend.status === 'in-game' ? 'Playing KeyJam' : friend.status}
-                     </div>
-                   </div>
-                 </button>
-               </li>
-             ))}
-           </ul>
+            <ul className="flex-1 overflow-y-auto leftnav-scrollbar min-h-0">
+              {friends.map(friend => (
+                <li key={friend.id} className="w-full">
+                  <button 
+                    onClick={() => handleFriendClick(friend.id)}
+                    className="flex items-center w-full p-4 py-3 text-gray-300 hover:bg-slate-700/50 hover:text-white transition-colors duration-200 group/friend"
+                  >
+                    <div className="relative">
+                      <span className="text-3xl">{friend.avatar}</span>
+                      <div className={`absolute bottom-0 right-0 block h-3 w-3 rounded-full border-2 border-slate-900 ${getStatusColor(friend.status)}`}></div>
+                      <MessageBadge count={friend.messageCount} />
+                    </div>
+                    <div className="ml-4 flex-1 min-w-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100">
+                      <div className="flex items-center justify-between">
+                        <span className="text-base font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
+                          {friend.name}
+                        </span>
+                        {friend.messageCount > 0 && (
+                          <div className="ml-2 bg-red-500 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center font-bold">
+                            {friend.messageCount > 9 ? '9+' : friend.messageCount}
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-500 capitalize text-left">
+                        {friend.status === 'in-game' ? 'Playing KeyJam' : friend.status}
+                      </div>
+                    </div>
+                  </button>
+                </li>
+              ))}
+            </ul>
+            
             <div className="p-4 mt-auto border-t border-slate-700/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0">
-                <h3 className="text-gray-400 text-xs font-bold uppercase">Follow our social media</h3>
-                <div className="grid grid-cols-4 gap-2">
-                    {[
-                        { name: 'Discord', icon: '💬'},
-                        { name: 'Twitter', icon: '🐦'},
-                        { name: 'YouTube', icon: '📺'},
-                        { name: 'Reddit', icon: '🤖'}
-                    ].map((social) => (
-                        <div key={social.name} className="text-center">
-                            <button
-                                className="p-2 text-white transition-all duration-200 hover:scale-110 hover:text-cyan-400 w-full"
-                                title={social.name}
-                            >
-                                <div className="text-2xl">{social.icon}</div>
-                            </button>
-                        </div>
-                    ))}
-                </div>
+              <h3 className="text-gray-400 text-xs font-bold uppercase mb-2">Follow our social media</h3>
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  { name: 'Discord', icon: '💬', url: 'https://discord.gg/cv42c32gak' },
+                  { name: 'Twitter', icon: '🐦', url: 'https://x.com/KeyJamGG' },
+                  { name: 'YouTube', icon: '📺', url: 'https://youtube.com/@KeyJamGG' },
+                  { name: 'Reddit', icon: '🤖', url: 'https://reddit.com/r/KeyJam' }
+                ].map((social) => (
+                  <div key={social.name} className="text-center">
+                    <button
+                      onClick={() => window.open(social.url, '_blank', 'noopener,noreferrer')}
+                      className="p-2 text-white transition-all duration-200 hover:scale-110 hover:text-cyan-400 w-full"
+                      title={social.name}
+                    >
+                      <div className="text-2xl">{social.icon}</div>
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
-         </div>
-       </div>
-     </nav>
-   </>
- );
+          </div>
+        </div>
+      </nav>
+    </>
+  );
 };
 
 export default LeftNav;
