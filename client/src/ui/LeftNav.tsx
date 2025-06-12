@@ -1,5 +1,5 @@
+// client/src/ui/LeftNav.tsx
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { AppearanceSettings } from '@/ui/Settings/AppearanceSettings';
 import { AudioSettings } from '@/ui/Settings/AudioSettings';
 import { ControlsSettings } from '@/ui/Settings/ControlsSettings';
@@ -206,14 +206,9 @@ const LeftNav = () => {
   const [newMessage, setNewMessage] = useState('');
   const [messages, setMessages] = useState(mockMessages);
   const [searchQuery, setSearchQuery] = useState('');
-  const navigate = useNavigate();
   
   const unreadNotifications = mockNotifications.filter(n => !n.read).length;
   const totalMessages = friends.reduce((sum, friend) => sum + friend.messageCount, 0);
-
-  const handleStoreClick = () => {
-    navigate('/store');
-  };
 
   const handleNotificationsClick = () => {
     setActiveSection(activeSection === 'notifications' ? 'main' : 'notifications');
@@ -787,6 +782,10 @@ const LeftNav = () => {
            transition: scrollbar-color 0.2s ease;
          }
 
+         .leftnav-scrollbar:hover {
+           scrollbar-color: rgba(148, 163, 184, 0.4) rgba(51, 65, 85, 0.2);
+         }
+
          .leftnav-main-container:hover .leftnav-scrollbar::-webkit-scrollbar {
            opacity: 1;
          }
@@ -797,8 +796,8 @@ const LeftNav = () => {
        `}
      </style>
      <nav className="leftnav-main-container fixed top-0 left-0 h-screen w-18 hover:w-64 bg-slate-900/80 backdrop-blur-md border-r border-slate-700/50 transition-all duration-300 ease-in-out overflow-x-hidden z-50 group">
-       <div className="flex flex-col h-full">
-         <ul className="flex flex-col items-start mt-2 space-y-0 flex-shrink-0">
+       <div className="flex flex-col justify-between h-full">
+         <ul className="flex flex-col items-start mt-2 space-y-0">
            <li className="w-full">
              <button
                onClick={handleSearchClick}
@@ -823,17 +822,6 @@ const LeftNav = () => {
                  Notifications
                </span>
              </button>
-           </li>
-           <li className="w-full">
-            <button
-                onClick={handleStoreClick}
-                className="flex items-center w-full p-4 py-2 text-gray-300 hover:bg-slate-700/50 hover:text-white transition-colors duration-200"
-            >
-                <span className="text-3xl">🛒</span>
-                <span className="ml-4 text-base font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-100 whitespace-nowrap">
-                Store
-                </span>
-            </button>
            </li>
            <li className="w-full">
              <button
@@ -891,26 +879,6 @@ const LeftNav = () => {
                </li>
              ))}
            </ul>
-            <div className="p-4 mt-auto border-t border-slate-700/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0">
-                <h3 className="text-gray-400 text-xs font-bold uppercase mb-2">Community</h3>
-                <div className="grid grid-cols-4 gap-2">
-                    {[
-                        { name: 'Discord', icon: '💬'},
-                        { name: 'Twitter', icon: '🐦'},
-                        { name: 'YouTube', icon: '📺'},
-                        { name: 'Reddit', icon: '🤖'}
-                    ].map((social) => (
-                        <div key={social.name} className="text-center">
-                            <button
-                                className="p-2 text-white transition-all duration-200 hover:scale-110 hover:text-cyan-400 w-full"
-                                title={social.name}
-                            >
-                                <div className="text-2xl">{social.icon}</div>
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            </div>
          </div>
        </div>
      </nav>
