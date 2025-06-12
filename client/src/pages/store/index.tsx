@@ -321,9 +321,9 @@ const Store: React.FC<StoreProps> = ({ onBack }) => {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <CenteredContainer maxWidth="xl" accountForLeftNav={true}>
-        <div className="flex h-screen">
+        <div className="flex flex-1 min-h-0">
           {/* Sidebar */}
           <div className="w-64 bg-slate-800 border-r border-slate-700 flex flex-col">
             {/* Store Header */}
@@ -408,10 +408,10 @@ const Store: React.FC<StoreProps> = ({ onBack }) => {
           </div>
 
           {/* Main Content */}
-          <div className="flex-1">
+          <div className="flex-1 flex flex-col min-h-0">
             {/* Featured Banner */}
             {activeCategory === 'featured' && featuredItems.length > 0 && (
-              <div className="relative h-80 bg-gradient-to-r from-blue-900 to-purple-900 overflow-hidden">
+              <div className="relative h-80 bg-gradient-to-r from-blue-900 to-purple-900 overflow-hidden flex-shrink-0">
                 <img
                   src={featuredItems[0].image}
                   alt={featuredItems[0].name}
@@ -450,7 +450,7 @@ const Store: React.FC<StoreProps> = ({ onBack }) => {
             )}
 
             {/* Content Header */}
-            <div className="p-6 border-b border-slate-700">
+            <div className="p-6 border-b border-slate-700 flex-shrink-0">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-bold text-white mb-2">
@@ -478,128 +478,130 @@ const Store: React.FC<StoreProps> = ({ onBack }) => {
               </div>
             </div>
 
-            {/* Items Grid - Changed to 4 columns and removed overflow-y-auto */}
-            <div className="p-6">
-              <div className="grid grid-cols-4 gap-6">
-                {getFilteredItems().map((item) => (
-                  <div
-                    key={item.id}
-                    className="bg-slate-800 rounded-lg overflow-hidden hover:bg-slate-750 transition-all duration-200 group cursor-pointer"
-                  >
-                    {/* Item Image */}
-                    <div className="relative aspect-video overflow-hidden">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                      />
-                      
-                      {/* Overlay Badges */}
-                      <div className="absolute top-3 left-3 flex gap-2">
-                        {item.discount && (
-                          <span className="bg-red-600 text-white text-xs px-2 py-1 rounded font-bold">
-                            -{item.discount}%
-                          </span>
-                        )}
-                        {item.new && (
-                          <span className="bg-green-600 text-white text-xs px-2 py-1 rounded font-bold">
-                            NEW
-                          </span>
-                        )}
-                        {item.owned && (
-                          <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded font-bold">
-                            OWNED
-                          </span>
-                        )}
+            {/* Items Grid - This is now properly scrollable */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="p-6">
+                <div className="grid grid-cols-4 gap-6">
+                  {getFilteredItems().map((item) => (
+                    <div
+                      key={item.id}
+                      className="bg-slate-800 rounded-lg overflow-hidden hover:bg-slate-750 transition-all duration-200 group cursor-pointer"
+                    >
+                      {/* Item Image */}
+                      <div className="relative aspect-video overflow-hidden">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                        />
+                        
+                        {/* Overlay Badges */}
+                        <div className="absolute top-3 left-3 flex gap-2">
+                          {item.discount && (
+                            <span className="bg-red-600 text-white text-xs px-2 py-1 rounded font-bold">
+                              -{item.discount}%
+                            </span>
+                          )}
+                          {item.new && (
+                            <span className="bg-green-600 text-white text-xs px-2 py-1 rounded font-bold">
+                              NEW
+                            </span>
+                          )}
+                          {item.owned && (
+                            <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded font-bold">
+                              OWNED
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Quick Action Overlay */}
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                          <div className="flex gap-2">
+                            <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm font-medium transition-colors">
+                              View Details
+                            </button>
+                            {!item.owned && (
+                              <button className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded text-sm font-medium transition-colors">
+                                Add to Cart
+                              </button>
+                            )}
+                          </div>
+                        </div>
                       </div>
 
-                      {/* Quick Action Overlay */}
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-                        <div className="flex gap-2">
-                          <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm font-medium transition-colors">
-                            View Details
-                          </button>
-                          {!item.owned && (
-                            <button className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded text-sm font-medium transition-colors">
+                      {/* Item Details */}
+                      <div className="p-4">
+                        <h3 className="text-white font-bold text-base mb-2 group-hover:text-blue-400 transition-colors truncate">
+                          {item.name}
+                        </h3>
+                        
+                        {/* Tags */}
+                        {item.popularTags && (
+                          <div className="flex flex-wrap gap-1 mb-3">
+                            {item.popularTags.slice(0, 2).map((tag) => (
+                              <span
+                                key={tag}
+                                className="bg-slate-700 text-gray-300 text-xs px-2 py-1 rounded"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        <p className="text-gray-400 text-sm mb-3 line-clamp-2 leading-relaxed">
+                          {item.description}
+                        </p>
+
+                        {/* Rating */}
+                        {item.rating && (
+                          <div className="flex items-center gap-2 mb-3">
+                            <div className="flex text-sm">
+                              {renderStars(item.rating)}
+                            </div>
+                            <span className="text-gray-400 text-xs">
+                              ({item.reviews?.toLocaleString()})
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Price and Action */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-green-400 font-bold text-lg">
+                              {getCurrencyIcon(item.currency)}{item.price}
+                            </span>
+                            {item.discount && (
+                              <span className="text-gray-500 text-sm line-through">
+                                {getCurrencyIcon(item.currency)}{Math.round(item.price / (1 - item.discount / 100))}
+                              </span>
+                            )}
+                          </div>
+                          
+                          {item.owned ? (
+                            <span className="text-blue-400 text-xs font-medium">✓ Owned</span>
+                          ) : (
+                            <button className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded text-xs font-medium transition-colors">
                               Add to Cart
                             </button>
                           )}
                         </div>
                       </div>
                     </div>
-
-                    {/* Item Details */}
-                    <div className="p-4">
-                      <h3 className="text-white font-bold text-base mb-2 group-hover:text-blue-400 transition-colors truncate">
-                        {item.name}
-                      </h3>
-                      
-                      {/* Tags */}
-                      {item.popularTags && (
-                        <div className="flex flex-wrap gap-1 mb-3">
-                          {item.popularTags.slice(0, 2).map((tag) => (
-                            <span
-                              key={tag}
-                              className="bg-slate-700 text-gray-300 text-xs px-2 py-1 rounded"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-
-                      <p className="text-gray-400 text-sm mb-3 line-clamp-2 leading-relaxed">
-                        {item.description}
-                      </p>
-
-                      {/* Rating */}
-                      {item.rating && (
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="flex text-sm">
-                            {renderStars(item.rating)}
-                          </div>
-                          <span className="text-gray-400 text-xs">
-                            ({item.reviews?.toLocaleString()})
-                          </span>
-                        </div>
-                      )}
-
-                      {/* Price and Action */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-green-400 font-bold text-lg">
-                            {getCurrencyIcon(item.currency)}{item.price}
-                          </span>
-                          {item.discount && (
-                            <span className="text-gray-500 text-sm line-through">
-                              {getCurrencyIcon(item.currency)}{Math.round(item.price / (1 - item.discount / 100))}
-                            </span>
-                          )}
-                        </div>
-                        
-                        {item.owned ? (
-                          <span className="text-blue-400 text-xs font-medium">✓ Owned</span>
-                        ) : (
-                          <button className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded text-xs font-medium transition-colors">
-                            Add to Cart
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Empty State */}
-              {getFilteredItems().length === 0 && (
-                <div className="text-center py-16">
-                  <div className="text-6xl mb-4">🔍</div>
-                  <h3 className="text-xl font-bold text-white mb-2">No items found</h3>
-                  <p className="text-gray-400">
-                    {searchQuery ? 'Try adjusting your search terms' : 'No items in this category yet'}
-                  </p>
+                  ))}
                 </div>
-              )}
+
+                {/* Empty State */}
+                {getFilteredItems().length === 0 && (
+                  <div className="text-center py-16">
+                    <div className="text-6xl mb-4">🔍</div>
+                    <h3 className="text-xl font-bold text-white mb-2">No items found</h3>
+                    <p className="text-gray-400">
+                      {searchQuery ? 'Try adjusting your search terms' : 'No items in this category yet'}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

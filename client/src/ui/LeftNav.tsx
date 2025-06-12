@@ -849,16 +849,7 @@ const LeftNav = () => {
          </ul>
 
          <div className="flex-1 flex flex-col min-h-0">
-           <div className="px-4 py-2 border-b border-slate-700/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0">
-             <div className="flex items-center justify-between">
-               <span className="text-gray-500 text-xs font-bold uppercase">Direct Messages</span>
-               {totalMessages > 0 && (
-                 <span className="bg-red-500 text-white text-xs rounded-full px-2 py-0.5 font-bold">
-                   {totalMessages}
-                 </span>
-               )}
-             </div>
-           </div>
+           <div className="px-4 py-2 border-b border-slate-700/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0"></div>
 
            <ul className="flex-1 overflow-y-auto leftnav-scrollbar min-h-0">
              {friends.map(friend => (
@@ -892,7 +883,7 @@ const LeftNav = () => {
              ))}
            </ul>
             <div className="p-4 mt-auto border-t border-slate-700/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0">
-                <h3 className="text-gray-400 text-xs font-bold uppercase mb-2">Community</h3>
+                <h3 className="text-gray-400 text-xs font-bold uppercase">Follow our social media</h3>
                 <div className="grid grid-cols-4 gap-2">
                     {[
                         { name: 'Discord', icon: '💬'},

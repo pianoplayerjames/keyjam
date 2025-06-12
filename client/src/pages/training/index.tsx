@@ -876,7 +876,7 @@ const TrainingHub: React.FC<TrainingHubProps> = ({ onBack, onStartGame }) => {
 
  return (
    <div>
-     <CenteredContainer maxWidth="2xl" accountForLeftNav={true}>
+     <CenteredContainer maxWidth="xl" accountForLeftNav={true}>
        <div className="flex flex-col h-full">
          {/* Header */}
          <div className="flex items-center justify-between py-6 border-b border-slate-700/50 flex-shrink-0">

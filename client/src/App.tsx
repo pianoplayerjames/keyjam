@@ -12,6 +12,7 @@ import QuickMatch from '@/pages/online/QuickMatch';
 import ReplayPlayer from '@/pages/replay/components/ReplayPlayer';
 import { TopBar } from '@/ui/TopBar';
 import { Navigation } from '@/ui/Navigation';
+import { Footer } from '@/ui/Footer';
 import CareerMenu from '@/pages/career';
 import OnlinePortal from '@/pages/online/Multiplayer';
 import Training from '@/pages/training';
@@ -44,6 +45,23 @@ bestScore: number;
 bestAccuracy: number;
 totalPlayTime: number;
 }
+
+// Page Wrapper Component
+interface PageWrapperProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+const PageWrapper: React.FC<PageWrapperProps> = ({ children, className = '' }) => {
+  return (
+    <div className={`min-h-full flex flex-col ${className}`}>
+      <div className="flex-1">
+        {children}
+      </div>
+      <Footer />
+    </div>
+  );
+};
 
 function App() {
 const { gameState, gameConfig, setGameConfig, setGameState } = useGameStore();
@@ -180,12 +198,19 @@ const renderMainMenu = () => {
           </Suspense>
         </Canvas>
         <div className="absolute inset-0 z-10 pb-16">
-          {menuState === 'time-selection' && <TimeSelectionMenu onBack={() => setMenuState('main')} onSelectTime={(timeLimit) => {
-            setLocalGameConfig(prev => ({ ...prev, timeLimit }));
-            setMenuState('difficulty');
-          }} />}
-          {menuState === 'score-selection' && <ScoreSelectionMenu onBack={() => setMenuState('main')} />}
-          {menuState === 'difficulty' && <DifficultyMenu onBack={() => setMenuState(localGameConfig.subMode === 'time' ? 'time-selection' : 'score-selection')} />}
+          <div className="h-full overflow-y-auto">
+            <div className="min-h-full flex flex-col">
+              <div className="flex-1">
+                {menuState === 'time-selection' && <TimeSelectionMenu onBack={() => setMenuState('main')} onSelectTime={(timeLimit) => {
+                  setLocalGameConfig(prev => ({ ...prev, timeLimit }));
+                  setMenuState('difficulty');
+                }} />}
+                {menuState === 'score-selection' && <ScoreSelectionMenu onBack={() => setMenuState('main')} />}
+                {menuState === 'difficulty' && <DifficultyMenu onBack={() => setMenuState(localGameConfig.subMode === 'time' ? 'time-selection' : 'score-selection')} />}
+              </div>
+              <Footer />
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -198,24 +223,80 @@ const renderMainMenu = () => {
         <TopBar playerData={playerData} playerStats={playerStats} />
         <Navigation />
         <div className="flex-grow relative overflow-y-auto">
-          <Routes>
-              <Route path="/" element={<OnlinePortal onBack={() => navigate('/')} onStartGame={(config) => handleStartGameWithConfig(config)} />} />
-              <Route path="/career" element={<CareerMenu onBack={() => navigate('/')} />} />
-              <Route path="/arcade" element={<ArcadeMenu onBack={() => navigate('/')} onSelectSong={handleSelectSong} />} />
-              <Route path="/training" element={<Training onBack={() => navigate('/')} onSelectMode={(mode) => {
-                setLocalGameConfig(prev => ({ ...prev, mode: 'practise', subMode: mode }));
-                setMenuState(mode === 'time' ? 'time-selection' : 'score-selection');
-              }} />} />
-              <Route path="/replays" element={<div className="h-full"><ReplayBrowser isVisible={true} onClose={() => navigate('/')} /></div>} />
-              <Route path="/arena/:id" element={<ArenaPage />} />
-              <Route path="/online/quick" element={<QuickMatch onBack={() => navigate('/')} onStartGame={(config) => handleStartGameWithConfig(config)} />} />
-              <Route path="/social/forums" element={<CommunityForums onBack={() => navigate('/')} />} />
-             <Route path="/online/leaderboards" element={<Leaderboards onBack={() => navigate('/')} />} />
-             <Route path="/training/tutorials" element={<Tutorials onBack={() => navigate('/')} />} />
-             <Route path="/training/analysis" element={<Analysis onBack={() => navigate('/')} />} />
-              <Route path="/store" element={<Store onBack={() => navigate('/')} />} />
-             <Route path="/profile/:username?" element={<ProfilePage />} />
-          </Routes>
+          <div className="min-h-full flex flex-col">
+            <div className="flex-1">
+              <Routes>
+                <Route path="/" element={
+                  <PageWrapper>
+                    <OnlinePortal onBack={() => navigate('/')} onStartGame={(config) => handleStartGameWithConfig(config)} />
+                  </PageWrapper>
+                } />
+                <Route path="/career" element={
+                  <PageWrapper>
+                    <CareerMenu onBack={() => navigate('/')} />
+                  </PageWrapper>
+                } />
+                <Route path="/arcade" element={
+                  <PageWrapper>
+                    <ArcadeMenu onBack={() => navigate('/')} onSelectSong={handleSelectSong} />
+                  </PageWrapper>
+                } />
+                <Route path="/training" element={
+                  <PageWrapper>
+                    <Training onBack={() => navigate('/')} onSelectMode={(mode) => {
+                      setLocalGameConfig(prev => ({ ...prev, mode: 'practise', subMode: mode }));
+                      setMenuState(mode === 'time' ? 'time-selection' : 'score-selection');
+                    }} />
+                  </PageWrapper>
+                } />
+                <Route path="/replays" element={
+                  <PageWrapper>
+                    <ReplayBrowser isVisible={true} onClose={() => navigate('/')} />
+                  </PageWrapper>
+                } />
+                <Route path="/arena/:id" element={
+                  <PageWrapper>
+                    <ArenaPage />
+                  </PageWrapper>
+                } />
+                <Route path="/online/quick" element={
+                  <PageWrapper>
+                    <QuickMatch onBack={() => navigate('/')} onStartGame={(config) => handleStartGameWithConfig(config)} />
+                  </PageWrapper>
+                } />
+                <Route path="/social/forums" element={
+                  <PageWrapper>
+                    <CommunityForums onBack={() => navigate('/')} />
+                  </PageWrapper>
+                } />
+                <Route path="/online/leaderboards" element={
+                  <PageWrapper>
+                    <Leaderboards onBack={() => navigate('/')} />
+                  </PageWrapper>
+                } />
+                <Route path="/training/tutorials" element={
+                  <PageWrapper>
+                    <Tutorials onBack={() => navigate('/')} />
+                  </PageWrapper>
+                } />
+                <Route path="/training/analysis" element={
+                  <PageWrapper>
+                    <Analysis onBack={() => navigate('/')} />
+                  </PageWrapper>
+                } />
+                <Route path="/store" element={
+                  <PageWrapper>
+                    <Store onBack={() => navigate('/')} />
+                  </PageWrapper>
+                } />
+                <Route path="/profile/:username?" element={
+                  <PageWrapper>
+                    <ProfilePage />
+                  </PageWrapper>
+                } />
+              </Routes>
+            </div>
+          </div>
         </div>
       </div>
     </div>
