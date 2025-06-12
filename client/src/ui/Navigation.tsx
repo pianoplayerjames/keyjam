@@ -127,7 +127,7 @@ export const Navigation: React.FC = () => {
   };
 
   return (
-    <div className="flex-shrink-0 bg-slate-900/50 border-0 border-b border-black/50 shadow-2xl relative z-40">
+    <div className="flex-shrink-0 bg-slate-900/50 border-0 border-b border-black/50 shadow-2xl relative z-30">
       <CenteredContainer maxWidth="2xl" accountForLeftNav={true}>
         <div className="flex justify-center items-center w-full">
           <div className="flex flex-wrap justify-center gap-x-0">
